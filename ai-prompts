@@ -1,0 +1,99 @@
+# AI Prompts Tracker
+
+This file tracks all prompts used in the development of the Task Management Utility.
+
+---
+
+## PROMPT #1 - CODE TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | CODE         |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> We are writing project in plain javascript, no fancy stuff.
+> Keep css in separate file.
+> Create file ai_prompts.txt and store all prompts in there, keep track if it is code, ask or other type of prompt.
+
+### Objective
+
+Build a browser-based task management utility.
+
+### Requirements
+
+- CRUD operations for tasks (stored in browser storage - localStorage or IndexedDB)
+- Task properties: `id`, `title`, `description`, `status`, `priority`, `dueDate`, `tags[]`
+- Commands: `add`, `list`, `update`, `delete`, `filter`, `search`
+- Async operations with proper error handling
+- Input validation
+
+---
+
+## PROMPT #2 - ASK TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | ASK          |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> i want to log all my ai prompts to 'ai_prompts.txt' how to configure kilo code extension so that in this project such logging would work without manually specifying it in each prompt
+
+---
+
+## PROMPT #3 - ASK TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | ASK          |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> '.kilocode' (see below for file content) file does not work. My last prompt did not get automatically added to ai_prompts.txt
+
+---
+
+## PROMPT #4 - CODE TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | CODE         |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> rename .kilocode to .logai
+> rename ai_prompts.txt to ai-prompts. fix references in .logai
+> log per .logai
+
+---
+
+## PROMPT #5 - ASK TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | ASK          |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> could we use markdown to better format ai-prompts
+
+---
+
+## PROMPT #6 - CODE TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | CODE         |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> lets use markdown. implement it. also update .logai and log prompts used
+
+---
