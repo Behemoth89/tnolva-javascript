@@ -190,6 +190,28 @@ section h2 {
     background: #c0392b;
 }
 
+/* Add Task Button in Filter Section */
+.filter-section .add-task-btn {
+    padding: 8px 20px;
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+    margin-left: auto;
+}
+
+.filter-section .add-task-btn:hover {
+    background: #219a52;
+}
+
+/* Hidden class for form section */
+.form-section.hidden {
+    display: none;
+}
+
 /* Task List Section */
 .task-list {
     display: grid;

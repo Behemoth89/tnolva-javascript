@@ -13,8 +13,39 @@
         </header>
 
         <main>
+            <!-- Filter Section -->
+            <section class="filter-section">
+                <h2>Filter & Search</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filterStatus">Status:</label>
+                        <select id="filterStatus">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterPriority">Priority:</label>
+                        <select id="filterPriority">
+                            <option value="">All</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchInput">Search:</label>
+                        <input type="text" id="searchInput" placeholder="Search tasks...">
+                    </div>
+                    <button id="clearFiltersBtn">Clear Filters</button>
+                    <button id="addTaskBtn" class="add-task-btn">+ Add Task</button>
+                </div>
+            </section>
+
             <!-- Task Form Section -->
-            <section class="form-section">
+            <section class="form-section hidden">
                 <h2>Add/Edit Task</h2>
                 <form id="taskForm">
                     <input type="hidden" id="taskId">
@@ -55,39 +86,9 @@
                     </div>
                     <div class="form-actions">
                         <button type="submit" id="submitBtn">Add Task</button>
-                        <button type="button" id="cancelBtn" style="display: none;">Cancel</button>
+                        <button type="button" id="cancelBtn">Cancel</button>
                     </div>
                 </form>
-            </section>
-
-            <!-- Filter Section -->
-            <section class="filter-section">
-                <h2>Filter & Search</h2>
-                <div class="filter-controls">
-                    <div class="filter-group">
-                        <label for="filterStatus">Status:</label>
-                        <select id="filterStatus">
-                            <option value="">All</option>
-                            <option value="pending">Pending</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filterPriority">Priority:</label>
-                        <select id="filterPriority">
-                            <option value="">All</option>
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="searchInput">Search:</label>
-                        <input type="text" id="searchInput" placeholder="Search tasks...">
-                    </div>
-                    <button id="clearFiltersBtn">Clear Filters</button>
-                </div>
             </section>
 
             <!-- Task List Section -->

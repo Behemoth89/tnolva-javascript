@@ -110,3 +110,16 @@ Build a browser-based task management utility.
 > remove command-section. i dont need command line functionality in the browser. log per .logai
 
 ---
+
+## PROMPT #8 - CODE TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | CODE         |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> make Add/Edit Task section appear after clicking add task button that should be added to right side in filter section. add task should then appear under filter section and hide after task is successfully added. log per .logai
+
+---

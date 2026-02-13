@@ -534,6 +534,7 @@ const UIController = {
     // DOM Elements
     elements: {
         taskForm: null,
+        formSection: null,
         taskId: null,
         title: null,
         description: null,
@@ -543,6 +544,7 @@ const UIController = {
         tags: null,
         submitBtn: null,
         cancelBtn: null,
+        addTaskBtn: null,
         filterStatus: null,
         filterPriority: null,
         searchInput: null,
@@ -559,6 +561,7 @@ const UIController = {
     init: function() {
         // Cache DOM elements
         this.elements.taskForm = document.getElementById('taskForm');
+        this.elements.formSection = document.querySelector('.form-section');
         this.elements.taskId = document.getElementById('taskId');
         this.elements.title = document.getElementById('title');
         this.elements.description = document.getElementById('description');
@@ -568,6 +571,7 @@ const UIController = {
         this.elements.tags = document.getElementById('tags');
         this.elements.submitBtn = document.getElementById('submitBtn');
         this.elements.cancelBtn = document.getElementById('cancelBtn');
+        this.elements.addTaskBtn = document.getElementById('addTaskBtn');
         this.elements.filterStatus = document.getElementById('filterStatus');
         this.elements.filterPriority = document.getElementById('filterPriority');
         this.elements.searchInput = document.getElementById('searchInput');
@@ -708,6 +712,7 @@ const UIController = {
         this.elements.tags.value = task.tags.join(', ');
         this.elements.submitBtn.textContent = 'Update Task';
         this.elements.cancelBtn.style.display = 'inline-block';
+        this.elements.formSection.querySelector('h2').textContent = 'Edit Task';
     },
 
     /**
@@ -719,6 +724,26 @@ const UIController = {
         this.elements.submitBtn.textContent = 'Add Task';
         this.elements.cancelBtn.style.display = 'none';
         this.elements.titleError.textContent = '';
+        this.elements.formSection.querySelector('h2').textContent = 'Add/Edit Task';
+    },
+
+    /**
+     * Show the form section
+     */
+    showFormSection: function() {
+        this.elements.formSection.classList.remove('hidden');
+        if (!this.elements.taskId.value) {
+            this.elements.formSection.querySelector('h2').textContent = 'Add Task';
+        }
+        this.elements.title.focus();
+    },
+
+    /**
+     * Hide the form section
+     */
+    hideFormSection: function() {
+        this.elements.formSection.classList.add('hidden');
+        this.resetForm();
     },
 
     /**
@@ -778,6 +803,11 @@ const App = {
     setupEventListeners: function() {
         const self = this;
 
+        // Add Task button
+        UIController.elements.addTaskBtn.addEventListener('click', function() {
+            UIController.showFormSection();
+        });
+
         // Form submission
         UIController.elements.taskForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -786,7 +816,7 @@ const App = {
 
         // Cancel button
         UIController.elements.cancelBtn.addEventListener('click', function() {
-            UIController.resetForm();
+            UIController.hideFormSection();
         });
 
         // Filter controls
@@ -878,7 +908,7 @@ const App = {
                 UIController.showNotification('Task added successfully!', 'success');
             }
 
-            UIController.resetForm();
+            UIController.hideFormSection();
             await this.loadTasks();
         } catch (error) {
             UIController.showNotification(error.message, 'error');
@@ -894,7 +924,7 @@ const App = {
             const task = await this.taskManager.getTask(id);
             if (task) {
                 UIController.setFormData(task);
-                UIController.elements.title.focus();
+                UIController.showFormSection();
             } else {
                 UIController.showNotification('Task not found', 'error');
             }
