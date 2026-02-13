@@ -97,3 +97,16 @@ Build a browser-based task management utility.
 > lets use markdown. implement it. also update .logai and log prompts used
 
 ---
+
+## PROMPT #7 - CODE TYPE
+
+| Field    | Value        |
+|----------|--------------|
+| Type     | CODE         |
+| Date     | 2026-02-13   |
+
+### Prompt
+
+> remove command-section. i dont need command line functionality in the browser. log per .logai
+
+---

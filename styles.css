@@ -54,68 +54,6 @@ section h2 {
     border-bottom: 1px solid #e1e5eb;
 }
 
-/* Command Section */
-.command-section .command-input {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.command-section input[type="text"] {
-    flex: 1;
-    padding: 12px 15px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: 'Courier New', monospace;
-}
-
-.command-section input[type="text"]:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.command-section button {
-    padding: 12px 25px;
-    background: #3498db;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.command-section button:hover {
-    background: #2980b9;
-}
-
-.command-help {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 6px;
-    font-size: 13px;
-}
-
-.command-help ul {
-    margin-top: 10px;
-    padding-left: 20px;
-}
-
-.command-help li {
-    margin-bottom: 5px;
-}
-
-.command-help code {
-    background: #e9ecef;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-}
-
 /* Form Section */
 .form-group {
     margin-bottom: 15px;
@@ -456,10 +394,6 @@ section h2 {
 
     header h1 {
         font-size: 1.8rem;
-    }
-
-    .command-section .command-input {
-        flex-direction: column;
     }
 
     .form-row {

@@ -533,8 +533,6 @@ class TaskManager {
 const UIController = {
     // DOM Elements
     elements: {
-        commandInput: null,
-        executeBtn: null,
         taskForm: null,
         taskId: null,
         title: null,
@@ -560,8 +558,6 @@ const UIController = {
      */
     init: function() {
         // Cache DOM elements
-        this.elements.commandInput = document.getElementById('commandInput');
-        this.elements.executeBtn = document.getElementById('executeBtn');
         this.elements.taskForm = document.getElementById('taskForm');
         this.elements.taskId = document.getElementById('taskId');
         this.elements.title = document.getElementById('title');
@@ -745,57 +741,6 @@ const UIController = {
 };
 
 // ============================================================================
-// COMMAND PARSER
-// ============================================================================
-
-const CommandParser = {
-    /**
-     * Parse command string
-     * @param {string} input - Command input string
-     * @returns {Object} - { command: string, args: Array }
-     */
-    parse: function(input) {
-        const trimmed = input.trim();
-        if (!trimmed) {
-            return { command: null, args: [] };
-        }
-
-        // Split by spaces but preserve quoted strings
-        const parts = [];
-        let current = '';
-        let inQuotes = false;
-        let quoteChar = '';
-
-        for (let i = 0; i < trimmed.length; i++) {
-            const char = trimmed[i];
-
-            if ((char === '"' || char === "'") && !inQuotes) {
-                inQuotes = true;
-                quoteChar = char;
-            } else if (char === quoteChar && inQuotes) {
-                inQuotes = false;
-                quoteChar = '';
-            } else if (char === ' ' && !inQuotes) {
-                if (current) {
-                    parts.push(current);
-                    current = '';
-                }
-            } else {
-                current += char;
-            }
-        }
-        if (current) {
-            parts.push(current);
-        }
-
-        const command = parts[0] ? parts[0].toLowerCase() : null;
-        const args = parts.slice(1);
-
-        return { command: command, args: args };
-    }
-};
-
-// ============================================================================
 // APPLICATION CONTROLLER
 // ============================================================================
 
@@ -842,17 +787,6 @@ const App = {
         // Cancel button
         UIController.elements.cancelBtn.addEventListener('click', function() {
             UIController.resetForm();
-        });
-
-        // Command execution
-        UIController.elements.executeBtn.addEventListener('click', function() {
-            self.handleCommand(UIController.elements.commandInput.value);
-        });
-
-        UIController.elements.commandInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                self.handleCommand(UIController.elements.commandInput.value);
-            }
         });
 
         // Filter controls
@@ -1027,169 +961,6 @@ const App = {
         } catch (error) {
             UIController.showNotification('Failed to filter tasks: ' + error.message, 'error');
         }
-    },
-
-    /**
-     * Handle command input
-     * @param {string} input - Command string
-     */
-    handleCommand: async function(input) {
-        const self = this;
-        const parsed = CommandParser.parse(input);
-
-        if (!parsed.command) {
-            UIController.showNotification('Please enter a command', 'error');
-            return;
-        }
-
-        UIController.elements.commandInput.value = '';
-
-        try {
-            switch (parsed.command) {
-                case 'add':
-                    await this.handleAddCommand(parsed.args);
-                    break;
-
-                case 'list':
-                    await this.loadTasks();
-                    UIController.showNotification('Tasks loaded', 'info');
-                    break;
-
-                case 'update':
-                    await this.handleUpdateCommand(parsed.args);
-                    break;
-
-                case 'delete':
-                    await this.handleDeleteCommand(parsed.args);
-                    break;
-
-                case 'filter':
-                    await this.handleFilterCommand(parsed.args);
-                    break;
-
-                case 'search':
-                    await this.handleSearchCommand(parsed.args);
-                    break;
-
-                case 'help':
-                    this.showHelp();
-                    break;
-
-                default:
-                    UIController.showNotification('Unknown command: ' + parsed.command, 'error');
-            }
-        } catch (error) {
-            UIController.showNotification(error.message, 'error');
-        }
-    },
-
-    /**
-     * Handle add command
-     * @param {Array} args - Command arguments
-     */
-    handleAddCommand: async function(args) {
-        if (args.length < 1) {
-            throw new Error('Usage: add "title" "description" priority dueDate tags');
-        }
-
-        const title = args[0];
-        const description = args[1] || '';
-        const priority = args[2] || 'medium';
-        const dueDate = args[3] || null;
-        const tags = args[4] ? args[4].split(',').map(function(t) { return t.trim(); }) : [];
-
-        await this.taskManager.addTask({
-            title: title,
-            description: description,
-            status: 'pending',
-            priority: priority,
-            dueDate: dueDate,
-            tags: tags
-        });
-
-        UIController.showNotification('Task added successfully!', 'success');
-        await this.loadTasks();
-    },
-
-    /**
-     * Handle update command
-     * @param {Array} args - Command arguments
-     */
-    handleUpdateCommand: async function(args) {
-        if (args.length < 3) {
-            throw new Error('Usage: update id field value');
-        }
-
-        const id = args[0];
-        const field = args[1];
-        const value = args.slice(2).join(' ');
-
-        const validFields = ['title', 'description', 'status', 'priority', 'dueDate', 'tags'];
-        if (!validFields.includes(field)) {
-            throw new Error('Invalid field. Valid fields: ' + validFields.join(', '));
-        }
-
-        let updateValue = value;
-        if (field === 'tags') {
-            updateValue = value.split(',').map(function(t) { return t.trim(); });
-        }
-
-        await this.taskManager.updateTask(id, { [field]: updateValue });
-        UIController.showNotification('Task updated successfully!', 'success');
-        await this.loadTasks();
-    },
-
-    /**
-     * Handle delete command
-     * @param {Array} args - Command arguments
-     */
-    handleDeleteCommand: async function(args) {
-        if (args.length < 1) {
-            throw new Error('Usage: delete id');
-        }
-
-        await this.taskManager.deleteTask(args[0]);
-        UIController.showNotification('Task deleted successfully!', 'success');
-        await this.loadTasks();
-    },
-
-    /**
-     * Handle filter command
-     * @param {Array} args - Command arguments
-     */
-    handleFilterCommand: async function(args) {
-        if (args.length < 2) {
-            throw new Error('Usage: filter status|priority value');
-        }
-
-        const field = args[0];
-        const value = args[1];
-
-        const tasks = await this.taskManager.filterTasks(field, value);
-        UIController.renderTasks(tasks);
-        UIController.showNotification('Filtered ' + tasks.length + ' tasks', 'info');
-    },
-
-    /**
-     * Handle search command
-     * @param {Array} args - Command arguments
-     */
-    handleSearchCommand: async function(args) {
-        if (args.length < 1) {
-            throw new Error('Usage: search query');
-        }
-
-        const query = args.join(' ');
-        const tasks = await this.taskManager.searchTasks(query);
-        UIController.renderTasks(tasks);
-        UIController.showNotification('Found ' + tasks.length + ' tasks', 'info');
-    },
-
-    /**
-     * Show help information
-     */
-    showHelp: function() {
-        UIController.showNotification('Commands: add, list, update, delete, filter, search', 'info');
     }
 };
 
