@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Task Manager</h1>
+        </header>
+
+        <main>
+            <!-- Command Input Section -->
+            <section class="command-section">
+                <h2>Command Console</h2>
+                <div class="command-input">
+                    <input type="text" id="commandInput" placeholder="Enter command (add, list, update, delete, filter, search)" autocomplete="off">
+                    <button id="executeBtn">Execute</button>
+                </div>
+                <div class="command-help">
+                    <p><strong>Available Commands:</strong></p>
+                    <ul>
+                        <li><code>add "title" "description" priority dueDate tags</code> - Add a new task</li>
+                        <li><code>list</code> - List all tasks</li>
+                        <li><code>update id field value</code> - Update a task</li>
+                        <li><code>delete id</code> - Delete a task</li>
+                        <li><code>filter status|priority value</code> - Filter tasks</li>
+                        <li><code>search query</code> - Search tasks</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Task Form Section -->
+            <section class="form-section">
+                <h2>Add/Edit Task</h2>
+                <form id="taskForm">
+                    <input type="hidden" id="taskId">
+                    <div class="form-group">
+                        <label for="title">Title *</label>
+                        <input type="text" id="title" required placeholder="Task title">
+                        <span class="error-message" id="titleError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" placeholder="Task description"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status">
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="tags">Tags (comma-separated)</label>
+                        <input type="text" id="tags" placeholder="work, urgent, project">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn">Add Task</button>
+                        <button type="button" id="cancelBtn" style="display: none;">Cancel</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Filter Section -->
+            <section class="filter-section">
+                <h2>Filter & Search</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filterStatus">Status:</label>
+                        <select id="filterStatus">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterPriority">Priority:</label>
+                        <select id="filterPriority">
+                            <option value="">All</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchInput">Search:</label>
+                        <input type="text" id="searchInput" placeholder="Search tasks...">
+                    </div>
+                    <button id="clearFiltersBtn">Clear Filters</button>
+                </div>
+            </section>
+
+            <!-- Task List Section -->
+            <section class="task-list-section">
+                <h2>Tasks <span id="taskCount">(0)</span></h2>
+                <div id="taskList" class="task-list">
+                    <p class="no-tasks">No tasks found. Add a task to get started!</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Notification/Message Area -->
+        <div id="notification" class="notification hidden"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

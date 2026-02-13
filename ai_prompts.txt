@@ -1,0 +1,26 @@
+AI Prompts Tracker
+==================
+
+This file tracks all prompts used in the development of the Task Management Utility.
+
+--------------------------------------------------------------------------------
+PROMPT #1 - CODE TYPE
+--------------------------------------------------------------------------------
+Type: CODE
+Date: 2026-02-13
+
+Prompt:
+We are writing project in plain javascript, no fancy stuff.
+Keep css in separate file.
+Create file ai_prompts.txt and store all prompts in there, keep track if it is code, ask or other type of prompt.
+
+Objective: Build a browser-based task management utility.
+
+Requirements:
+- CRUD operations for tasks (stored in browser storage - localStorage or IndexedDB)
+- Task properties: id, title, description, status, priority, dueDate, tags[]
+- Commands: add, list, update, delete, filter, search
+- Async operations with proper error handling
+- Input validation
+
+--------------------------------------------------------------------------------
