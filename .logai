@@ -19,7 +19,7 @@ This is a mandatory action - do not skip it. Before doing anything else in your 
 | Type     | [CODE/ASK/DEBUG/ARCHITECT/REVIEW] |
 | Date     | [YYYY-MM-DD] |
 
-### Prompt
+### Prompt #[NEXT_NUMBER]
 
 > [The full user prompt text - copy it exactly]
 
@@ -30,9 +30,9 @@ This is a mandatory action - do not skip it. Before doing anything else in your 
 
 ## Quick Reference
 
-| Item      | Value                    |
-|-----------|--------------------------|
-| File to update | `ai-prompts`        |
-| Action    | Append new prompt entry  |
-| When      | At the START of your FIRST response to each new prompt |
-| Format    | Use the Markdown format shown above |
+| Item           | Value                                                       |
+|----------------|-------------------------------------------------------------|
+| File to update | `ai-prompts`                                                |
+| Action         | Append new prompt entry                                     |
+| When           | At the START of your FIRST response to each new prompt      |
+| Format         | Use the Markdown format shown above                         |
