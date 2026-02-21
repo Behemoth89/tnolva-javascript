@@ -11,9 +11,7 @@ context: |
   - Use clear and descriptive names for variables, functions, and classes.
   - Avoid deep nesting of code blocks to improve readability.
   - Write modular code by breaking down complex functions into smaller, reusable ones.
-  logging: 
-  - log all prompts and responses to a file named `ai_interactions.log` for auditing and debugging purposes.
-
+ 
   
 # Project context (optional)
 # This is shown to AI when creating artifacts.
