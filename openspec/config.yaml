@@ -1,0 +1,35 @@
+schema: spec-driven
+
+context: |
+  Project name: Task Management Utility
+  Tech stack: Typescript
+  Code style: Clean code principles
+  Code rules: 
+    - All interfaces **MUST** be prefixed with  capital `I`.
+    - All enums **MUST** be prefixed with  capital `E`.
+  rules for all artifacts:
+  - Use clear and descriptive names for variables, functions, and classes.
+  - Avoid deep nesting of code blocks to improve readability.
+  - Write modular code by breaking down complex functions into smaller, reusable ones.
+  logging: 
+  - log all prompts and responses to a file named `ai_interactions.log` for auditing and debugging purposes.
+
+  
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

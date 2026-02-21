@@ -1,23 +1,15 @@
 {
-  "name": "tnolva-javascript",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "task-management",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "ssh://git@gitlab.proxy.itcollege.ee:222/2025-2026-spring/tnolva-javascript.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
-    "eslint": "^10.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
-    "prettier": "^3.8.1"
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1"
   }
 }
