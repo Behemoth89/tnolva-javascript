@@ -6,3 +6,15 @@
 
 ***
 
+/opsx-archive.md task-management-utility
+
+***
+
+/opsx-new.md design DAL layer. use repository pattern with uow. use existing domain interfaces. use localstorage. plan full crud with search and filter and use async
+
+***
+
+Update specs to add explicit migration path documentation
+
+***
+
