@@ -232,3 +232,25 @@ should i constrain IRepository so it implements IBaseEntity
 ***
 
 i like type safe, it makes it easier to test and maintain code. make prompt to go over all interfaces in the project and make sure they are type safe.
+
+***
+
+/opsx-new.md i need to add recurring task functionality. use how it is typically handled in similar applications. implement typical recurrances but also let user to have custom out of the ordinary recurrances. smallest part is one day, we do not deal with time in this application
+
+***
+
+think of an case, if user wants to have recurrence of 3 months and 5 days, can it be done with this plan or should the functionality be extended
+
+***
+
+why we need custom recurrence, and why we use enums at all. user should be able to save compound recurrence to system with custom name to be easily used next time.
+
+***
+
+how would user create custom template for "First Monday of month" in current plan
+
+***
+
+Option A - Add occurrenceInMonth and weekday fields to templates. This would allow users to create templates like "First Monday of month" by setting occurrenceInMonth to 1 and weekday to Monday.
+
+***
