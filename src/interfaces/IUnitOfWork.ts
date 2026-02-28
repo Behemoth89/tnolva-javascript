@@ -1,6 +1,7 @@
 import type { ITaskRepository } from './ITaskRepository.js';
 import type { ICategoryRepository } from './ICategoryRepository.js';
 import type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
+import type { IEntityId } from './IEntityId.js';
 
 /**
  * IUnitOfWork Interface
@@ -35,21 +36,21 @@ export interface IUnitOfWork {
 
   /**
    * Register a new entity for insertion on commit
-   * @param entity - Entity to register
+   * @param entity - Entity to register (must extend IEntityId)
    */
-  registerNew(entity: unknown): void;
+  registerNew<T extends IEntityId>(entity: T): void;
 
   /**
    * Register a modified entity for update on commit
-   * @param entity - Entity to register
+   * @param entity - Entity to register (must extend IEntityId)
    */
-  registerModified(entity: unknown): void;
+  registerModified<T extends IEntityId>(entity: T): void;
 
   /**
    * Register a deleted entity for deletion on commit
-   * @param entity - Entity to register
+   * @param entity - Entity to register (must extend IEntityId)
    */
-  registerDeleted(entity: unknown): void;
+  registerDeleted<T extends IEntityId>(entity: T): void;
 
   /**
    * Commit all registered changes to storage atomically

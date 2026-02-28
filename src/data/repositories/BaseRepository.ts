@@ -1,3 +1,4 @@
+import type { IEntityId } from '../../interfaces/IEntityId.js';
 import type { IStorageAdapter } from '../adapters/IStorageAdapter.js';
 import type { IRepository } from '../../interfaces/IRepository.js';
 import type { IBaseEntity } from '../../interfaces/IBaseEntity.js';
@@ -8,8 +9,9 @@ import { generateGuid } from '../../utils/index.js';
 /**
  * BaseRepository<T> Abstract Class
  * Provides common CRUD logic for all entity types
+ * T is constrained to IEntityId to ensure all entities have an id property
  */
-export abstract class BaseRepository<T> implements IRepository<T> {
+export abstract class BaseRepository<T extends IEntityId> implements IRepository<T> {
   protected storage: IStorageAdapter;
   protected storageKey: string;
 

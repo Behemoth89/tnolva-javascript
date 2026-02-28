@@ -227,3 +227,8 @@ remove ITaskWithRelations. This is part of business logic and will be added late
 
 ***
 
+should i constrain IRepository so it implements IBaseEntity
+
+***
+
+i like type safe, it makes it easier to test and maintain code. make prompt to go over all interfaces in the project and make sure they are type safe.

@@ -1,10 +1,12 @@
+import type { IEntityId } from './IEntityId.js';
 import type { IQueryBuilder } from '../data/query/IQueryBuilder.ts';
 
 /**
  * IRepository<T> Interface
  * Generic interface for data access operations on any entity type
+ * T is constrained to IEntityId to ensure all entities have an id property
  */
-export interface IRepository<T> {
+export interface IRepository<T extends IEntityId> {
   /**
    * Get all entities
    * @returns Array of all entities
