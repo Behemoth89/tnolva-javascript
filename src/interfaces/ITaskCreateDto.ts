@@ -21,4 +21,8 @@ export interface ITaskCreateDto {
   dueDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
+  /** Creation timestamp in ISO 8601 format (optional, set by repository if not provided) */
+  createdAt?: string;
+  /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */
+  updatedAt?: string;
 }

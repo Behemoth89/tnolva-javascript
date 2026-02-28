@@ -1,7 +1,9 @@
 import type { IStorageAdapter } from '../adapters/IStorageAdapter.js';
 import type { IRepository } from '../../interfaces/IRepository.js';
+import type { IBaseEntity } from '../../interfaces/IBaseEntity.js';
 import type { IQueryBuilder } from '../query/IQueryBuilder.js';
 import { QueryBuilder } from '../query/QueryBuilder.js';
+import { generateGuid } from '../../utils/index.js';
 
 /**
  * BaseRepository<T> Abstract Class
@@ -97,6 +99,8 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     const existingId = this.getEntityId(entity);
     const id = existingId || this.generateId();
     this.setEntityId(entity, id);
+    // Set timestamps for IBaseEntity entities
+    this.setTimestamps(entity, false);
     items.push(entity);
     await this.storage.setItemAsync(this.storageKey, items);
     return entity;
@@ -114,7 +118,10 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     }
 
     const existing = items[index];
+    // Merge updates with existing entity
     const updated = { ...existing, ...updates } as T;
+    // Set updatedAt timestamp for IBaseEntity entities
+    this.setTimestamps(updated, true);
     items[index] = updated;
     await this.storage.setItemAsync(this.storageKey, items);
     return updated;
@@ -179,9 +186,46 @@ export abstract class BaseRepository<T> implements IRepository<T> {
   }
 
   /**
-   * Generate a unique ID
+   * Generate a unique ID using GUID
    */
   protected generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return generateGuid();
+  }
+
+  /**
+   * Check if an entity implements IBaseEntity
+   */
+  protected isBaseEntity(entity: unknown): entity is IBaseEntity {
+    return (
+      typeof entity === 'object' &&
+      entity !== null &&
+      'createdAt' in entity &&
+      'updatedAt' in entity
+    );
+  }
+
+  /**
+   * Get current UTC timestamp in ISO 8601 format
+   */
+  protected getCurrentTimestamp(): string {
+    return new Date().toISOString();
+  }
+
+  /**
+   * Set timestamps on an entity (used for create operations)
+   */
+  protected setTimestamps(entity: unknown, isUpdate: boolean = false): void {
+    if (!this.isBaseEntity(entity)) {
+      return;
+    }
+    
+    const now = this.getCurrentTimestamp();
+    
+    if (!isUpdate) {
+      // On create, set both createdAt and updatedAt
+      (entity as IBaseEntity).createdAt = now;
+    }
+    // On both create and update, set updatedAt
+    (entity as IBaseEntity).updatedAt = now;
   }
 }

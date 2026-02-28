@@ -172,14 +172,19 @@ describe('Task toObject', () => {
     });
 
     const obj = task.toObject();
-    expect(obj).toEqual({
-      id: '1',
-      title: 'Test',
-      description: 'Desc',
-      status: EStatus.TODO,
-      priority: EPriority.HIGH,
-      dueDate: undefined,
-      tags: ['tag1'],
-    });
+    expect(obj.id).toBe('1');
+    expect(obj.title).toBe('Test');
+    expect(obj.description).toBe('Desc');
+    expect(obj.status).toBe(EStatus.TODO);
+    expect(obj.priority).toBe(EPriority.HIGH);
+    expect(obj.dueDate).toBeUndefined();
+    expect(obj.tags).toEqual(['tag1']);
+    // Timestamps should be ISO 8601 strings
+    expect(obj.createdAt).toBeDefined();
+    expect(typeof obj.createdAt).toBe('string');
+    expect(obj.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+    expect(obj.updatedAt).toBeDefined();
+    expect(typeof obj.updatedAt).toBe('string');
+    expect(obj.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
   });
 });

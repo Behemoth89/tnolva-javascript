@@ -1,7 +1,10 @@
 import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
 import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
+import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
+import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { TaskRepository } from '../repositories/TaskRepository.js';
+import { CategoryRepository } from '../repositories/CategoryRepository.js';
 
 /**
  * Change tracking entry
@@ -16,8 +19,8 @@ interface ChangeEntry {
  * Coordinates multiple repository changes within a transaction scope
  */
 export class UnitOfWork implements IUnitOfWork {
-  private readonly storage: ILocalStorageAdapter;
   private readonly taskRepository: TaskRepository;
+  private readonly categoryRepository: CategoryRepository;
   private changes: ChangeEntry[] = [];
   private committed = false;
 
@@ -26,8 +29,8 @@ export class UnitOfWork implements IUnitOfWork {
    * @param storage - Storage adapter
    */
   constructor(storage: ILocalStorageAdapter) {
-    this.storage = storage;
     this.taskRepository = new TaskRepository(storage);
+    this.categoryRepository = new CategoryRepository(storage);
   }
 
   /**
@@ -35,6 +38,27 @@ export class UnitOfWork implements IUnitOfWork {
    */
   getTaskRepository(): ITaskRepository {
     return this.taskRepository;
+  }
+
+  /**
+   * Get the Category repository
+   */
+  getCategoryRepository(): ICategoryRepository {
+    return this.categoryRepository;
+  }
+
+  /**
+   * Assign a task to a category
+   */
+  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null> {
+    return this.categoryRepository.assignTaskToCategory(taskId, categoryId);
+  }
+
+  /**
+   * Remove a task from a category
+   */
+  async removeTaskFromCategory(taskId: string, categoryId: string): Promise<boolean> {
+    return this.categoryRepository.removeTaskFromCategory(taskId, categoryId);
   }
 
   /**

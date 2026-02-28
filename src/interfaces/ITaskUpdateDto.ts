@@ -21,4 +21,6 @@ export interface ITaskUpdateDto {
   dueDate?: Date;
   /** Tags associated with the task */
   tags?: string[];
+  /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */
+  updatedAt?: string;
 }

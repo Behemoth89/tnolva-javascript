@@ -7,6 +7,7 @@ import type { ITaskUpdateDto } from '../interfaces/ITaskUpdateDto.js';
 /**
  * Task Entity Class
  * Implements ITask and provides domain logic for task management
+ * Implements IBaseEntity for timestamp support
  */
 export class Task implements ITask {
   id: string;
@@ -16,6 +17,8 @@ export class Task implements ITask {
   priority: EPriority;
   dueDate?: Date;
   tags: string[];
+  createdAt: string;
+  updatedAt: string;
 
   /**
    * Creates a new Task instance
@@ -38,6 +41,9 @@ export class Task implements ITask {
     this.priority = dto.priority ?? EPriority.MEDIUM;
     this.dueDate = dto.dueDate;
     this.tags = dto.tags ? [...dto.tags] : [];
+    // Handle timestamps - use provided or set to now
+    this.createdAt = dto.createdAt ?? new Date().toISOString();
+    this.updatedAt = dto.updatedAt ?? new Date().toISOString();
   }
 
   /**
@@ -146,6 +152,8 @@ export class Task implements ITask {
       priority: this.priority,
       dueDate: this.dueDate,
       tags: [...this.tags],
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     };
   }
 }

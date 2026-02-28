@@ -195,3 +195,35 @@ This change implements a complete Data Access Layer (DAL) with Repository patter
 
 ***
 
+/opsx-new.md extend the interface system, make id separate interface and use utility to generate and use guid as id. i also need to timestamp tasks. make all current and future entitys use that. refactor repositorys to adapt timestamping. add custom task categories in separate entity and use relationships
+
+***
+
+can you add mermaid to visualise database structure that would be after this change?
+
+***
+
+use in between table, task may have many categories and category may have many tasks
+
+***
+
+always use guid as id, also in in between tables.
+
+***
+
+/opsx-apply.md entity-id-guid-timestamp-categories
+
+***
+
+make me mermaid about my interface hierarchy
+
+***
+
+why i need ITaskWithRelations
+
+***
+
+remove ITaskWithRelations. This is part of business logic and will be added later if neccesary
+
+***
+

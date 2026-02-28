@@ -1,13 +1,13 @@
 import type { EStatus } from '../enums/EStatus.js';
 import type { EPriority } from '../enums/EPriority.js';
+import type { IBaseEntity } from './IBaseEntity.js';
 
 /**
  * ITask Interface
  * Defines the structure for task objects
+ * Extends IBaseEntity for timestamp support
  */
-export interface ITask {
-  /** Unique identifier for the task */
-  id: string;
+export interface ITask extends IBaseEntity {
   /** Title of the task (required, non-empty) */
   title: string;
   /** Detailed description of the task (optional) */

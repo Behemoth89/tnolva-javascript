@@ -1,4 +1,4 @@
-import type { IQueryFilter, FilterOperator } from './IQueryFilter.js';
+import type { FilterOperator } from './IQueryFilter.js';
 
 /**
  * Sort direction
