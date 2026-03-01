@@ -12,6 +12,8 @@ export type { ITaskCategoryCreateDto } from './ITaskCategoryCreateDto.js';
 export type { ITaskCategoryUpdateDto } from './ITaskCategoryUpdateDto.js';
 export type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
 export type { ICategoryRepository } from './ICategoryRepository.js';
+export type { IInterval } from './IInterval.js';
+export type { IRecurrenceTemplate } from './IRecurrenceTemplate.js';
 
 // DAL Interfaces
 export type { IRepository } from './IRepository.js';

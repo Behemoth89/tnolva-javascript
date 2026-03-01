@@ -4,7 +4,7 @@
  */
 
 /** Namespace prefix for all storage keys */
-export const STORAGE_NAMESPACE = 'tnolva_';
+export const STORAGE_NAMESPACE = 'tasky_';
 
 /** Storage key for tasks collection */
 export const STORAGE_KEY_TASKS = `${STORAGE_NAMESPACE}tasks`;
@@ -17,6 +17,9 @@ export const STORAGE_KEY_CATEGORIES = `${STORAGE_NAMESPACE}categories`;
 
 /** Storage key for task-category assignments (junction table) */
 export const STORAGE_KEY_CATEGORY_ASSIGNMENTS = `${STORAGE_NAMESPACE}category_assignments`;
+
+/** Storage key for recurrence templates */
+export const STORAGE_KEY_RECURRENCE_TEMPLATES = `${STORAGE_NAMESPACE}recurrence_templates`;
 
 /** Get namespaced key */
 export function getNamespacedKey(key: string): string {

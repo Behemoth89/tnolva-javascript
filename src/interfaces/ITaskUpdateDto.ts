@@ -21,6 +21,8 @@ export interface ITaskUpdateDto {
   dueDate?: Date;
   /** Tags associated with the task */
   tags?: string[];
+  /** Reference to a recurrence template for repeating tasks */
+  recurrenceTemplateId?: string;
   /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */
   updatedAt?: string;
 }

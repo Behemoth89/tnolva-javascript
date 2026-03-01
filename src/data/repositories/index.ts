@@ -8,3 +8,4 @@ export type { ICategoryRepository } from '../../interfaces/ICategoryRepository.j
 export { BaseRepository } from './BaseRepository.js';
 export { TaskRepository } from './TaskRepository.js';
 export { CategoryRepository } from './CategoryRepository.js';
+export { RecurrenceTemplateRepository } from './RecurrenceTemplateRepository.js';

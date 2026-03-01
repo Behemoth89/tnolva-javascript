@@ -17,6 +17,8 @@ export class Task implements ITask {
   priority: EPriority;
   dueDate?: Date;
   tags: string[];
+  /** Reference to a recurrence template for repeating tasks */
+  recurrenceTemplateId?: string;
   createdAt: string;
   updatedAt: string;
 
@@ -41,6 +43,7 @@ export class Task implements ITask {
     this.priority = dto.priority ?? EPriority.MEDIUM;
     this.dueDate = dto.dueDate;
     this.tags = dto.tags ? [...dto.tags] : [];
+    this.recurrenceTemplateId = dto.recurrenceTemplateId;
     // Handle timestamps - use provided or set to now
     this.createdAt = dto.createdAt ?? new Date().toISOString();
     this.updatedAt = dto.updatedAt ?? new Date().toISOString();
@@ -137,6 +140,9 @@ export class Task implements ITask {
     if (dto.tags !== undefined) {
       this.tags = [...dto.tags];
     }
+    if (dto.recurrenceTemplateId !== undefined) {
+      this.recurrenceTemplateId = dto.recurrenceTemplateId;
+    }
   }
 
   /**
@@ -152,6 +158,7 @@ export class Task implements ITask {
       priority: this.priority,
       dueDate: this.dueDate,
       tags: [...this.tags],
+      recurrenceTemplateId: this.recurrenceTemplateId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

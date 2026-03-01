@@ -20,4 +20,6 @@ export interface ITask extends IBaseEntity {
   dueDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
+  /** Reference to a recurrence template for repeating tasks (optional) */
+  recurrenceTemplateId?: string;
 }

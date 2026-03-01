@@ -2,6 +2,7 @@ import type { ITaskRepository } from './ITaskRepository.js';
 import type { ICategoryRepository } from './ICategoryRepository.js';
 import type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
 import type { IEntityId } from './IEntityId.js';
+import type { ITask } from './ITask.js';
 
 /**
  * IUnitOfWork Interface
@@ -17,6 +18,18 @@ export interface IUnitOfWork {
    * Get the Category repository
    */
   getCategoryRepository(): ICategoryRepository;
+
+  /**
+   * Initialize the UnitOfWork, including loading default data
+   */
+  initialize(): Promise<void>;
+
+  /**
+   * Complete a task with optional recurrence generation
+   * @param taskId - ID of the task to complete
+   * @returns The newly generated task if recurrence was created, null otherwise
+   */
+  completeTaskWithRecurrence(taskId: string): Promise<ITask | null>;
 
   /**
    * Assign a task to a category

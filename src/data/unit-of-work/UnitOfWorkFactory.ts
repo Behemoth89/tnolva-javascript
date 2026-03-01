@@ -22,6 +22,11 @@ export class UnitOfWorkFactory implements IUnitOfWorkFactory {
    * Create a new UnitOfWork instance
    */
   create(): IUnitOfWork {
-    return new UnitOfWork(this.storage);
+    const uow = new UnitOfWork(this.storage);
+    // Initialize recurrence templates with error handling (fire-and-forget for backward compatibility)
+    uow.initialize().catch((err) => {
+      console.error('UnitOfWork initialization failed:', err);
+    });
+    return uow;
   }
 }

@@ -21,6 +21,8 @@ export interface ITaskCreateDto {
   dueDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
+  /** Reference to a recurrence template for repeating tasks (optional) */
+  recurrenceTemplateId?: string;
   /** Creation timestamp in ISO 8601 format (optional, set by repository if not provided) */
   createdAt?: string;
   /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */

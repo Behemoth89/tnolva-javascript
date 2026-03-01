@@ -2,9 +2,13 @@ import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
 import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
 import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
 import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
+import type { ITask } from '../../interfaces/ITask.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { TaskRepository } from '../repositories/TaskRepository.js';
 import { CategoryRepository } from '../repositories/CategoryRepository.js';
+import { RecurrenceTemplateRepository } from '../repositories/RecurrenceTemplateRepository.js';
+import { RecurringTaskGenerator } from '../../domain/RecurringTaskGenerator.js';
+import { Task } from '../../domain/Task.js';
 
 /**
  * Change tracking entry
@@ -21,6 +25,8 @@ interface ChangeEntry {
 export class UnitOfWork implements IUnitOfWork {
   private readonly taskRepository: TaskRepository;
   private readonly categoryRepository: CategoryRepository;
+  private readonly recurrenceTemplateRepository: RecurrenceTemplateRepository;
+  private readonly recurringTaskGenerator: RecurringTaskGenerator;
   private changes: ChangeEntry[] = [];
   private committed = false;
 
@@ -31,6 +37,15 @@ export class UnitOfWork implements IUnitOfWork {
   constructor(storage: ILocalStorageAdapter) {
     this.taskRepository = new TaskRepository(storage);
     this.categoryRepository = new CategoryRepository(storage);
+    this.recurrenceTemplateRepository = new RecurrenceTemplateRepository(storage);
+    this.recurringTaskGenerator = new RecurringTaskGenerator();
+  }
+
+  /**
+   * Initialize the UnitOfWork, including loading default recurrence templates
+   */
+  async initialize(): Promise<void> {
+    await this.recurrenceTemplateRepository.initialize();
   }
 
   /**
@@ -59,6 +74,53 @@ export class UnitOfWork implements IUnitOfWork {
    */
   async removeTaskFromCategory(taskId: string, categoryId: string): Promise<boolean> {
     return this.categoryRepository.removeTaskFromCategory(taskId, categoryId);
+  }
+
+  /**
+   * Complete a task with optional recurrence generation
+   * When a task with a recurrenceTemplateId is completed, a new task instance is automatically generated
+   * @param taskId - ID of the task to complete
+   * @returns The newly generated task if recurrence was created, null otherwise
+   */
+  async completeTaskWithRecurrence(taskId: string): Promise<ITask | null> {
+    // Get the task
+    const taskData = await this.taskRepository.getByIdAsync(taskId);
+    if (!taskData) {
+      return null;
+    }
+
+    // Create a Task entity to use its methods
+    const task = new Task(taskData);
+
+    // Mark task as completed
+    task.complete();
+    task.updatedAt = new Date().toISOString();
+    await this.taskRepository.updateAsync(task.id, task.toObject());
+
+    // Check if task has a recurrence template
+    if (!task.recurrenceTemplateId) {
+      return null;
+    }
+
+    // Get the recurrence template
+    const template = await this.recurrenceTemplateRepository.getByIdAsync(task.recurrenceTemplateId);
+    if (!template) {
+      return null;
+    }
+
+    // Generate the next task instance
+    const nextTaskData = this.recurringTaskGenerator.generateNextInstance(
+      task.toObject(),
+      template.toObject()
+    );
+
+    // Create a Task entity from the generated data
+    const nextTask = new Task(nextTaskData);
+
+    // Create the new task
+    await this.taskRepository.createAsync(nextTask);
+
+    return nextTask;
   }
 
   /**
