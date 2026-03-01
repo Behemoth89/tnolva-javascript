@@ -24,7 +24,7 @@ describe('UnitOfWork', () => {
         priority: EPriority.MEDIUM,
       });
 
-      uow.registerNew(task);
+      uow.registerNew(task, 'task');
       await uow.commit();
 
       const repo = uow.getTaskRepository();
@@ -51,7 +51,7 @@ describe('UnitOfWork', () => {
       const existing = await repo.getByIdAsync('task-1');
       if (!existing) throw new Error('Task not found');
       existing.title = 'Modified Title';
-      uow.registerModified(existing);
+      uow.registerModified(existing, 'task');
       await uow.commit();
 
       const updated = await repo.getByIdAsync('task-1');
@@ -75,7 +75,7 @@ describe('UnitOfWork', () => {
 
       // Register for deletion
       const existing = await repo.getByIdAsync('task-1');
-      uow.registerDeleted(existing);
+      uow.registerDeleted(existing, 'task');
       await uow.commit();
 
       const exists = await repo.existsAsync('task-1');
@@ -92,7 +92,7 @@ describe('UnitOfWork', () => {
         priority: EPriority.MEDIUM,
       });
 
-      uow.registerNew(task);
+      uow.registerNew(task, 'task');
       uow.rollback();
 
       const repo = uow.getTaskRepository();
@@ -108,7 +108,7 @@ describe('UnitOfWork', () => {
         priority: EPriority.MEDIUM,
       });
 
-      uow.registerNew(task);
+      uow.registerNew(task, 'task');
       uow.rollback();
 
       // After rollback, should be able to register new changes and commit
@@ -118,7 +118,7 @@ describe('UnitOfWork', () => {
         status: EStatus.TODO,
         priority: EPriority.MEDIUM,
       });
-      uow.registerNew(newTask);
+      uow.registerNew(newTask, 'task');
       await uow.commit();
 
       const repo = uow.getTaskRepository();
@@ -130,11 +130,11 @@ describe('UnitOfWork', () => {
 
   describe('multiple changes', () => {
     it('should commit multiple changes atomically', async () => {
-      const task1 = new Task({ id: 'task-1', title: 'Task 1', status: EStatus.TODO });
-      const task2 = new Task({ id: 'task-2', title: 'Task 2', status: EStatus.TODO });
+      const task1 = new Task({ id: 'task-1', title: 'Task 1', status: EStatus.TODO, priority: EPriority.MEDIUM });
+      const task2 = new Task({ id: 'task-2', title: 'Task 2', status: EStatus.TODO, priority: EPriority.MEDIUM });
 
-      uow.registerNew(task1);
-      uow.registerNew(task2);
+      uow.registerNew(task1, 'task');
+      uow.registerNew(task2, 'task');
       await uow.commit();
 
       const repo = uow.getTaskRepository();

@@ -19,7 +19,7 @@ const createMockUnitOfWork = (taskRepo: Partial<ITaskRepository>): IUnitOfWork =
     registerNew: vi.fn(),
     registerModified: vi.fn(),
     registerDeleted: vi.fn(),
-    commit: vi.fn(),
+    commit: vi.fn().mockResolvedValue(undefined),
     rollback: vi.fn(),
   };
 };
@@ -28,6 +28,7 @@ describe('TaskService', () => {
   let mockTasks: ITask[];
   let taskRepository: ITaskRepository;
   let taskService: TaskService;
+  let mockUnitOfWork: IUnitOfWork;
 
   beforeEach(() => {
     mockTasks = [
@@ -98,8 +99,8 @@ describe('TaskService', () => {
       }),
     } as unknown as ITaskRepository;
 
-    const unitOfWork = createMockUnitOfWork(taskRepository);
-    taskService = new TaskService(unitOfWork);
+    mockUnitOfWork = createMockUnitOfWork(taskRepository);
+    taskService = new TaskService(mockUnitOfWork);
   });
 
   describe('createAsync', () => {
@@ -120,7 +121,9 @@ describe('TaskService', () => {
       expect(result.status).toBe(EStatus.TODO);
       expect(result.priority).toBe(EPriority.HIGH);
       expect(result.tags).toContain('new-tag');
-      expect(taskRepository.createAsync).toHaveBeenCalled();
+      // Verify UOW change tracking is used
+      expect(mockUnitOfWork.registerNew).toHaveBeenCalled();
+      expect(mockUnitOfWork.commit).toHaveBeenCalled();
     });
 
     it('should create task with default values', async () => {
@@ -176,7 +179,9 @@ describe('TaskService', () => {
       const result = await taskService.deleteAsync('task-1');
 
       expect(result).toBe(true);
-      expect(taskRepository.deleteAsync).toHaveBeenCalledWith('task-1');
+      // Verify UOW change tracking is used
+      expect(mockUnitOfWork.registerDeleted).toHaveBeenCalled();
+      expect(mockUnitOfWork.commit).toHaveBeenCalled();
     });
 
     it('should return false for non-existent task', async () => {

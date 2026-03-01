@@ -78,11 +78,15 @@ describe('RecurrenceService', () => {
       getTaskRepository: vi.fn().mockReturnValue(mockTaskRepository),
       getCategoryRepository: vi.fn(),
       getRecurrenceTemplateRepository: vi.fn().mockReturnValue(mockRecurrenceTemplateRepository),
-      getRecurrenceCalculator: vi.fn(),
-      beginTransaction: vi.fn().mockResolvedValue(undefined),
+      initialize: vi.fn().mockResolvedValue(undefined),
+      completeTaskWithRecurrence: vi.fn(),
+      assignTaskToCategory: vi.fn(),
+      removeTaskFromCategory: vi.fn(),
+      registerNew: vi.fn(),
+      registerModified: vi.fn(),
+      registerDeleted: vi.fn(),
       commit: vi.fn().mockResolvedValue(undefined),
-      rollback: vi.fn().mockResolvedValue(undefined),
-      rollbackAsync: vi.fn().mockResolvedValue(undefined),
+      rollback: vi.fn(),
     } as unknown as IUnitOfWork;
 
     recurrenceService = new RecurrenceService(mockUnitOfWork);

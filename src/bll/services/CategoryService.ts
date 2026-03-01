@@ -53,7 +53,10 @@ export class CategoryService implements ICategoryService {
       updatedAt: dto.updatedAt ?? now,
     };
 
-    await this.categoryRepository.createAsync(category);
+    // Register with UOW change tracking
+    this.unitOfWork.registerNew(category, 'category');
+    await this.unitOfWork.commit();
+    
     return category;
   }
 
@@ -81,7 +84,10 @@ export class CategoryService implements ICategoryService {
       updatedAt: now,
     };
 
-    await this.categoryRepository.updateAsync(id, updatedCategory);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedCategory, 'category');
+    await this.unitOfWork.commit();
+    
     return updatedCategory;
   }
 
@@ -89,7 +95,19 @@ export class CategoryService implements ICategoryService {
    * Delete a category
    */
   async deleteAsync(id: string): Promise<boolean> {
-    return this.categoryRepository.deleteAsync(id);
+    const category = await this.categoryRepository.getByIdAsync(id);
+    if (!category) {
+      return false;
+    }
+
+    // Register with UOW change tracking
+    this.unitOfWork.registerDeleted(category, 'category');
+    try {
+      await this.unitOfWork.commit();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

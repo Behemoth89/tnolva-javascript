@@ -2,7 +2,6 @@ import type { IRecurrenceService } from '../interfaces/IRecurrenceService.js';
 import type { ITask } from '../../interfaces/ITask.js';
 import type { IRecurrenceTemplate } from '../../interfaces/IRecurrenceTemplate.js';
 import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
 import type { IRecurrenceTemplateRepository } from '../../interfaces/IRecurrenceTemplateRepository.js';
 import type { IInterval } from '../../interfaces/IInterval.js';
 import { generateGuid } from '../../utils/index.js';
@@ -13,7 +12,7 @@ import { generateGuid } from '../../utils/index.js';
  * Moved from domain/RecurrenceCalculator and domain/RecurringTaskGenerator
  */
 export class RecurrenceService implements IRecurrenceService {
-  private readonly taskRepository: ITaskRepository;
+  private readonly unitOfWork: IUnitOfWork;
   private readonly recurrenceTemplateRepository: IRecurrenceTemplateRepository;
 
   /**
@@ -21,7 +20,7 @@ export class RecurrenceService implements IRecurrenceService {
    * @param unitOfWork - The UnitOfWork for data access
    */
   constructor(unitOfWork: IUnitOfWork) {
-    this.taskRepository = unitOfWork.getTaskRepository();
+    this.unitOfWork = unitOfWork;
     this.recurrenceTemplateRepository = unitOfWork.getRecurrenceTemplateRepository();
   }
 
@@ -207,6 +206,7 @@ export class RecurrenceService implements IRecurrenceService {
 
   /**
    * Generate the next task instance from a completed recurring task
+   * Uses UOW change tracking for transactional consistency
    */
   async generateNextTaskAsync(completedTask: ITask): Promise<ITask | null> {
     if (!completedTask.recurrenceTemplateId) {
@@ -236,7 +236,10 @@ export class RecurrenceService implements IRecurrenceService {
       updatedAt: new Date().toISOString(),
     };
 
-    await this.taskRepository.createAsync(newTask);
+    // Use UOW change tracking
+    this.unitOfWork.registerNew(newTask, 'task');
+    await this.unitOfWork.commit();
+    
     return newTask;
   }
 

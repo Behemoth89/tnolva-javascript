@@ -8,15 +8,20 @@ import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { TaskRepository } from '../repositories/TaskRepository.js';
 import { CategoryRepository } from '../repositories/CategoryRepository.js';
 import { RecurrenceTemplateRepository } from '../repositories/RecurrenceTemplateRepository.js';
-import { RecurrenceService } from '../../bll/services/RecurrenceService.js';
 import { EStatus } from '../../enums/EStatus.js';
 
 /**
- * Change tracking entry
+ * Entity type for routing changes to the correct repository
+ */
+export type EntityType = 'task' | 'category' | 'recurrenceTemplate';
+
+/**
+ * Change tracking entry with type metadata
  */
 interface ChangeEntry {
   entity: unknown;
   type: 'new' | 'modified' | 'deleted';
+  entityType: EntityType;
 }
 
 /**
@@ -95,38 +100,134 @@ export class UnitOfWork implements IUnitOfWork {
       return null;
     }
 
-    // Mark task as completed
+    // Mark task as completed - use change tracking
     taskData.status = EStatus.DONE;
     taskData.updatedAt = new Date().toISOString();
-    await this.taskRepository.updateAsync(taskData.id, taskData);
+    this.registerModified(taskData, 'task');
 
-    // Delegate recurrence task generation to RecurrenceService
-    const recurrenceService = new RecurrenceService(this);
-    return recurrenceService.generateNextTaskAsync(taskData);
+    // Check if we need to generate a recurrence
+    let newRecurringTask: ITask | null = null;
+    if (taskData.recurrenceTemplateId) {
+      newRecurringTask = await this.generateNextRecurringTask(taskData);
+      if (newRecurringTask) {
+        this.registerNew(newRecurringTask, 'task');
+      }
+    }
+
+    // Commit all changes atomically
+    await this.commit();
+
+    return newRecurringTask;
+  }
+
+  /**
+   * Generate the next recurring task instance
+   * This is inlined here to avoid circular dependency between DAL and BLL layers
+   */
+  private async generateNextRecurringTask(completedTask: ITask): Promise<ITask | null> {
+    if (!completedTask.recurrenceTemplateId) {
+      return null;
+    }
+
+    const template = await this.recurrenceTemplateRepository.getByIdAsync(completedTask.recurrenceTemplateId);
+    if (!template) {
+      return null;
+    }
+
+    // Calculate next due date
+    const currentDueDate = completedTask.dueDate ? new Date(completedTask.dueDate) : new Date();
+    const nextDueDate = this.calculateNextOccurrence(template, currentDueDate);
+
+    // Generate new task instance
+    const { generateGuid } = await import('../../utils/index.js');
+    const newTask: ITask = {
+      id: generateGuid(),
+      title: completedTask.title,
+      description: completedTask.description,
+      status: 'TODO' as EStatus,
+      priority: completedTask.priority,
+      dueDate: nextDueDate,
+      tags: completedTask.tags ? [...completedTask.tags] : [],
+      recurrenceTemplateId: completedTask.recurrenceTemplateId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    return newTask;
+  }
+
+  /**
+   * Calculate the next occurrence date based on a recurrence template
+   * Simplified version of RecurrenceService.calculateNextOccurrenceAsync
+   */
+  private calculateNextOccurrence(template: { intervals: { unit: string; value: number }[]; dayOfMonth?: number }, currentDate: Date): Date {
+    let resultDate = new Date(currentDate);
+
+    for (const interval of template.intervals) {
+      switch (interval.unit) {
+        case 'days':
+          resultDate.setDate(resultDate.getDate() + interval.value);
+          break;
+        case 'weeks':
+          resultDate.setDate(resultDate.getDate() + interval.value * 7);
+          break;
+        case 'months':
+          this.addMonths(resultDate, interval.value, template.dayOfMonth);
+          break;
+        case 'years':
+          resultDate.setFullYear(resultDate.getFullYear() + interval.value);
+          break;
+      }
+    }
+
+    return resultDate;
+  }
+
+  /**
+   * Add months to a date, handling edge cases
+   */
+  private addMonths(date: Date, months: number, preferredDay?: number): void {
+    const currentDay = date.getDate();
+    const yearIncrease = Math.floor((date.getMonth() + months) / 12);
+    const monthMod = (date.getMonth() + months) % 12;
+
+    date.setDate(1);
+    date.setMonth(monthMod);
+    date.setFullYear(date.getFullYear() + yearIncrease);
+
+    const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const targetDay = preferredDay ?? currentDay;
+    date.setDate(Math.min(targetDay, lastDayOfMonth));
   }
 
   /**
    * Register a new entity for insertion on commit
+   * @param entity - Entity to register (must have id property)
+   * @param entityType - Type of entity for routing to correct repository
    */
-  registerNew(entity: unknown): void {
+  registerNew(entity: unknown, entityType: EntityType): void {
     this.assertNotCommitted();
-    this.changes.push({ entity, type: 'new' });
+    this.changes.push({ entity, type: 'new', entityType });
   }
 
   /**
    * Register a modified entity for update on commit
+   * @param entity - Entity to register (must have id property)
+   * @param entityType - Type of entity for routing to correct repository
    */
-  registerModified(entity: unknown): void {
+  registerModified(entity: unknown, entityType: EntityType): void {
     this.assertNotCommitted();
-    this.changes.push({ entity, type: 'modified' });
+    this.changes.push({ entity, type: 'modified', entityType });
   }
 
   /**
    * Register a deleted entity for deletion on commit
+   * @param entity - Entity to register (must have id property)
+   * @param entityType - Type of entity for routing to correct repository
    */
-  registerDeleted(entity: unknown): void {
+  registerDeleted(entity: unknown, entityType: EntityType): void {
     this.assertNotCommitted();
-    this.changes.push({ entity, type: 'deleted' });
+    this.changes.push({ entity, type: 'deleted', entityType });
   }
 
   /**
@@ -139,17 +240,17 @@ export class UnitOfWork implements IUnitOfWork {
       // For LocalStorage, we commit each change individually
       // In a real database, this would be a single transaction
       for (const change of this.changes) {
-        const task = change.entity as { id: string };
+        const entityWithId = change.entity as { id: string };
 
-        switch (change.type) {
-          case 'new':
-            await this.taskRepository.createAsync(task as never);
+        switch (change.entityType) {
+          case 'task':
+            await this.commitTaskChange(change.type, entityWithId);
             break;
-          case 'modified':
-            await this.taskRepository.updateAsync(task.id, task as never);
+          case 'category':
+            await this.commitCategoryChange(change.type, entityWithId);
             break;
-          case 'deleted':
-            await this.taskRepository.deleteAsync(task.id);
+          case 'recurrenceTemplate':
+            await this.commitRecurrenceTemplateChange(change.type, entityWithId);
             break;
         }
       }
@@ -163,6 +264,57 @@ export class UnitOfWork implements IUnitOfWork {
       // to allow caller to handle recovery (retry or rollback).
       this.changes = [];
       throw error;
+    }
+  }
+
+  /**
+   * Commit a task change to the repository
+   */
+  private async commitTaskChange(type: 'new' | 'modified' | 'deleted', entity: { id: string }): Promise<void> {
+    switch (type) {
+      case 'new':
+        await this.taskRepository.createAsync(entity as never);
+        break;
+      case 'modified':
+        await this.taskRepository.updateAsync(entity.id, entity as never);
+        break;
+      case 'deleted':
+        await this.taskRepository.deleteAsync(entity.id);
+        break;
+    }
+  }
+
+  /**
+   * Commit a category change to the repository
+   */
+  private async commitCategoryChange(type: 'new' | 'modified' | 'deleted', entity: { id: string }): Promise<void> {
+    switch (type) {
+      case 'new':
+        await this.categoryRepository.createAsync(entity as never);
+        break;
+      case 'modified':
+        await this.categoryRepository.updateAsync(entity.id, entity as never);
+        break;
+      case 'deleted':
+        await this.categoryRepository.deleteAsync(entity.id);
+        break;
+    }
+  }
+
+  /**
+   * Commit a recurrence template change to the repository
+   */
+  private async commitRecurrenceTemplateChange(type: 'new' | 'modified' | 'deleted', entity: { id: string }): Promise<void> {
+    switch (type) {
+      case 'new':
+        await this.recurrenceTemplateRepository.createAsync(entity as never);
+        break;
+      case 'modified':
+        await this.recurrenceTemplateRepository.updateAsync(entity.id, entity as never);
+        break;
+      case 'deleted':
+        await this.recurrenceTemplateRepository.deleteAsync(entity.id);
+        break;
     }
   }
 

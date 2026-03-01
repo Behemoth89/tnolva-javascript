@@ -6,6 +6,11 @@ import type { ITask } from './ITask.js';
 import type { IRecurrenceTemplateRepository } from './IRecurrenceTemplateRepository.js';
 
 /**
+ * Entity type for routing changes to the correct repository
+ */
+export type EntityType = 'task' | 'category' | 'recurrenceTemplate';
+
+/**
  * IUnitOfWork Interface
  * Coordinates multiple repository operations within a single transaction scope
  */
@@ -56,20 +61,23 @@ export interface IUnitOfWork {
   /**
    * Register a new entity for insertion on commit
    * @param entity - Entity to register (must extend IEntityId)
+   * @param entityType - Type of entity for routing to correct repository
    */
-  registerNew<T extends IEntityId>(entity: T): void;
+  registerNew<T extends IEntityId>(entity: T, entityType: EntityType): void;
 
   /**
    * Register a modified entity for update on commit
    * @param entity - Entity to register (must extend IEntityId)
+   * @param entityType - Type of entity for routing to correct repository
    */
-  registerModified<T extends IEntityId>(entity: T): void;
+  registerModified<T extends IEntityId>(entity: T, entityType: EntityType): void;
 
   /**
    * Register a deleted entity for deletion on commit
    * @param entity - Entity to register (must extend IEntityId)
+   * @param entityType - Type of entity for routing to correct repository
    */
-  registerDeleted<T extends IEntityId>(entity: T): void;
+  registerDeleted<T extends IEntityId>(entity: T, entityType: EntityType): void;
 
   /**
    * Commit all registered changes to storage atomically

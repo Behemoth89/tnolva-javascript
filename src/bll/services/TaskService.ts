@@ -13,6 +13,7 @@ import { generateGuid } from '../../utils/index.js';
  * Implements business logic for task operations
  */
 export class TaskService implements ITaskService {
+  private readonly unitOfWork: IUnitOfWork;
   private readonly taskRepository: ITaskRepository;
 
   /**
@@ -20,6 +21,7 @@ export class TaskService implements ITaskService {
    * @param unitOfWork - The UnitOfWork for data access
    */
   constructor(unitOfWork: IUnitOfWork) {
+    this.unitOfWork = unitOfWork;
     this.taskRepository = unitOfWork.getTaskRepository();
   }
 
@@ -49,7 +51,10 @@ export class TaskService implements ITaskService {
       updatedAt: dto.updatedAt ?? now,
     };
 
-    await this.taskRepository.createAsync(task);
+    // Register with UOW change tracking
+    this.unitOfWork.registerNew(task, 'task');
+    await this.unitOfWork.commit();
+    
     return task;
   }
 
@@ -83,7 +88,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
@@ -91,7 +99,19 @@ export class TaskService implements ITaskService {
    * Delete a task
    */
   async deleteAsync(id: string): Promise<boolean> {
-    return this.taskRepository.deleteAsync(id);
+    const task = await this.taskRepository.getByIdAsync(id);
+    if (!task) {
+      return false;
+    }
+
+    // Register with UOW change tracking
+    this.unitOfWork.registerDeleted(task, 'task');
+    try {
+      await this.unitOfWork.commit();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -124,7 +144,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
@@ -144,7 +167,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
@@ -164,7 +190,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
@@ -196,7 +225,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
@@ -223,7 +255,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
@@ -243,7 +278,10 @@ export class TaskService implements ITaskService {
       updatedAt: now,
     };
 
-    await this.taskRepository.updateAsync(id, updatedTask);
+    // Register with UOW change tracking
+    this.unitOfWork.registerModified(updatedTask, 'task');
+    await this.unitOfWork.commit();
+    
     return updatedTask;
   }
 
