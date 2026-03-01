@@ -18,5 +18,6 @@ export type { IRecurrenceTemplate } from './IRecurrenceTemplate.js';
 // DAL Interfaces
 export type { IRepository } from './IRepository.js';
 export type { ITaskRepository } from './ITaskRepository.js';
+export type { IRecurrenceTemplateRepository } from './IRecurrenceTemplateRepository.js';
 export type { IUnitOfWork } from './IUnitOfWork.js';
 export type { IUnitOfWorkFactory } from './IUnitOfWorkFactory.js';

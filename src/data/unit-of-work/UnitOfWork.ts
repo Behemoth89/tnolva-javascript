@@ -1,14 +1,15 @@
 import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
 import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
 import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
+import type { IRecurrenceTemplateRepository } from '../../interfaces/IRecurrenceTemplateRepository.js';
 import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
 import type { ITask } from '../../interfaces/ITask.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { TaskRepository } from '../repositories/TaskRepository.js';
 import { CategoryRepository } from '../repositories/CategoryRepository.js';
 import { RecurrenceTemplateRepository } from '../repositories/RecurrenceTemplateRepository.js';
-import { RecurringTaskGenerator } from '../../domain/RecurringTaskGenerator.js';
-import { Task } from '../../domain/Task.js';
+import { RecurrenceService } from '../../bll/services/RecurrenceService.js';
+import { EStatus } from '../../enums/EStatus.js';
 
 /**
  * Change tracking entry
@@ -26,7 +27,6 @@ export class UnitOfWork implements IUnitOfWork {
   private readonly taskRepository: TaskRepository;
   private readonly categoryRepository: CategoryRepository;
   private readonly recurrenceTemplateRepository: RecurrenceTemplateRepository;
-  private readonly recurringTaskGenerator: RecurringTaskGenerator;
   private changes: ChangeEntry[] = [];
   private committed = false;
 
@@ -38,7 +38,6 @@ export class UnitOfWork implements IUnitOfWork {
     this.taskRepository = new TaskRepository(storage);
     this.categoryRepository = new CategoryRepository(storage);
     this.recurrenceTemplateRepository = new RecurrenceTemplateRepository(storage);
-    this.recurringTaskGenerator = new RecurringTaskGenerator();
   }
 
   /**
@@ -60,6 +59,13 @@ export class UnitOfWork implements IUnitOfWork {
    */
   getCategoryRepository(): ICategoryRepository {
     return this.categoryRepository;
+  }
+
+  /**
+   * Get the RecurrenceTemplate repository
+   */
+  getRecurrenceTemplateRepository(): IRecurrenceTemplateRepository {
+    return this.recurrenceTemplateRepository;
   }
 
   /**
@@ -89,38 +95,14 @@ export class UnitOfWork implements IUnitOfWork {
       return null;
     }
 
-    // Create a Task entity to use its methods
-    const task = new Task(taskData);
-
     // Mark task as completed
-    task.complete();
-    task.updatedAt = new Date().toISOString();
-    await this.taskRepository.updateAsync(task.id, task.toObject());
+    taskData.status = EStatus.DONE;
+    taskData.updatedAt = new Date().toISOString();
+    await this.taskRepository.updateAsync(taskData.id, taskData);
 
-    // Check if task has a recurrence template
-    if (!task.recurrenceTemplateId) {
-      return null;
-    }
-
-    // Get the recurrence template
-    const template = await this.recurrenceTemplateRepository.getByIdAsync(task.recurrenceTemplateId);
-    if (!template) {
-      return null;
-    }
-
-    // Generate the next task instance
-    const nextTaskData = this.recurringTaskGenerator.generateNextInstance(
-      task.toObject(),
-      template.toObject()
-    );
-
-    // Create a Task entity from the generated data
-    const nextTask = new Task(nextTaskData);
-
-    // Create the new task
-    await this.taskRepository.createAsync(nextTask);
-
-    return nextTask;
+    // Delegate recurrence task generation to RecurrenceService
+    const recurrenceService = new RecurrenceService(this);
+    return recurrenceService.generateNextTaskAsync(taskData);
   }
 
   /**

@@ -3,6 +3,7 @@ import type { ICategoryRepository } from './ICategoryRepository.js';
 import type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
 import type { IEntityId } from './IEntityId.js';
 import type { ITask } from './ITask.js';
+import type { IRecurrenceTemplateRepository } from './IRecurrenceTemplateRepository.js';
 
 /**
  * IUnitOfWork Interface
@@ -18,6 +19,11 @@ export interface IUnitOfWork {
    * Get the Category repository
    */
   getCategoryRepository(): ICategoryRepository;
+
+  /**
+   * Get the RecurrenceTemplate repository
+   */
+  getRecurrenceTemplateRepository(): IRecurrenceTemplateRepository;
 
   /**
    * Initialize the UnitOfWork, including loading default data
