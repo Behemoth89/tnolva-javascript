@@ -12,6 +12,8 @@ const createMockUnitOfWork = (taskRepo: Partial<ITaskRepository>): IUnitOfWork =
     getTaskRepository: () => taskRepo as ITaskRepository,
     getCategoryRepository: vi.fn(),
     getRecurrenceTemplateRepository: vi.fn() as any,
+    getRecurringTaskRepository: vi.fn() as any,
+    getTaskRecurringLinkRepository: vi.fn() as any,
     initialize: vi.fn(),
     completeTaskWithRecurrence: vi.fn(),
     assignTaskToCategory: vi.fn(),

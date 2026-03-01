@@ -2,18 +2,22 @@ import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
 import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
 import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
 import type { IRecurrenceTemplateRepository } from '../../interfaces/IRecurrenceTemplateRepository.js';
+import type { IRecurringTaskRepository } from '../../interfaces/IRecurringTaskRepository.js';
+import type { ITaskRecurringLinkRepository } from '../../interfaces/ITaskRecurringLinkRepository.js';
 import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
 import type { ITask } from '../../interfaces/ITask.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { TaskRepository } from '../repositories/TaskRepository.js';
 import { CategoryRepository } from '../repositories/CategoryRepository.js';
 import { RecurrenceTemplateRepository } from '../repositories/RecurrenceTemplateRepository.js';
+import { RecurringTaskRepository } from '../repositories/RecurringTaskRepository.js';
+import { TaskRecurringLinkRepository } from '../repositories/TaskRecurringLinkRepository.js';
 import { EStatus } from '../../enums/EStatus.js';
 
 /**
  * Entity type for routing changes to the correct repository
  */
-export type EntityType = 'task' | 'category' | 'recurrenceTemplate';
+export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurringTask' | 'taskRecurringLink';
 
 /**
  * Change tracking entry with type metadata
@@ -32,6 +36,8 @@ export class UnitOfWork implements IUnitOfWork {
   private readonly taskRepository: TaskRepository;
   private readonly categoryRepository: CategoryRepository;
   private readonly recurrenceTemplateRepository: RecurrenceTemplateRepository;
+  private readonly recurringTaskRepository: RecurringTaskRepository;
+  private readonly taskRecurringLinkRepository: TaskRecurringLinkRepository;
   private changes: ChangeEntry[] = [];
   private committed = false;
 
@@ -43,6 +49,8 @@ export class UnitOfWork implements IUnitOfWork {
     this.taskRepository = new TaskRepository(storage);
     this.categoryRepository = new CategoryRepository(storage);
     this.recurrenceTemplateRepository = new RecurrenceTemplateRepository(storage);
+    this.recurringTaskRepository = new RecurringTaskRepository(storage);
+    this.taskRecurringLinkRepository = new TaskRecurringLinkRepository(storage);
   }
 
   /**
@@ -71,6 +79,20 @@ export class UnitOfWork implements IUnitOfWork {
    */
   getRecurrenceTemplateRepository(): IRecurrenceTemplateRepository {
     return this.recurrenceTemplateRepository;
+  }
+
+  /**
+   * Get the RecurringTask repository
+   */
+  getRecurringTaskRepository(): IRecurringTaskRepository {
+    return this.recurringTaskRepository;
+  }
+
+  /**
+   * Get the TaskRecurringLink repository
+   */
+  getTaskRecurringLinkRepository(): ITaskRecurringLinkRepository {
+    return this.taskRecurringLinkRepository;
   }
 
   /**
@@ -252,6 +274,12 @@ export class UnitOfWork implements IUnitOfWork {
           case 'recurrenceTemplate':
             await this.commitRecurrenceTemplateChange(change.type, entityWithId);
             break;
+          case 'recurringTask':
+            await this.commitRecurringTaskChange(change.type, entityWithId);
+            break;
+          case 'taskRecurringLink':
+            await this.commitTaskRecurringLinkChange(change.type, entityWithId);
+            break;
         }
       }
 
@@ -314,6 +342,40 @@ export class UnitOfWork implements IUnitOfWork {
         break;
       case 'deleted':
         await this.recurrenceTemplateRepository.deleteAsync(entity.id);
+        break;
+    }
+  }
+
+  /**
+   * Commit a recurring task change to the repository
+   */
+  private async commitRecurringTaskChange(type: 'new' | 'modified' | 'deleted', entity: { id: string }): Promise<void> {
+    switch (type) {
+      case 'new':
+        await this.recurringTaskRepository.createAsync(entity as never);
+        break;
+      case 'modified':
+        await this.recurringTaskRepository.updateAsync(entity.id, entity as never);
+        break;
+      case 'deleted':
+        await this.recurringTaskRepository.deleteAsync(entity.id);
+        break;
+    }
+  }
+
+  /**
+   * Commit a task-recurring link change to the repository
+   */
+  private async commitTaskRecurringLinkChange(type: 'new' | 'modified' | 'deleted', entity: { id: string }): Promise<void> {
+    switch (type) {
+      case 'new':
+        await this.taskRecurringLinkRepository.createAsync(entity as never);
+        break;
+      case 'modified':
+        await this.taskRecurringLinkRepository.updateAsync(entity.id, entity as never);
+        break;
+      case 'deleted':
+        await this.taskRecurringLinkRepository.deleteAsync(entity.id);
         break;
     }
   }

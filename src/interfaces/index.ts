@@ -14,10 +14,15 @@ export type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
 export type { ICategoryRepository } from './ICategoryRepository.js';
 export type { IInterval } from './IInterval.js';
 export type { IRecurrenceTemplate } from './IRecurrenceTemplate.js';
+export type { IRecurringTask, IRecurringTaskCreateDto, IRecurringTaskUpdateDto } from './IRecurringTask.js';
+export type { ERecurringTaskStatus } from '../enums/ERecurringTaskStatus.js';
+export type { ITaskRecurringLink } from './ITaskRecurringLink.js';
+export type { ITaskRecurringLinkRepository } from './ITaskRecurringLinkRepository.js';
 
 // DAL Interfaces
 export type { IRepository } from './IRepository.js';
 export type { ITaskRepository } from './ITaskRepository.js';
 export type { IRecurrenceTemplateRepository } from './IRecurrenceTemplateRepository.js';
+export type { IRecurringTaskRepository } from './IRecurringTaskRepository.js';
 export type { IUnitOfWork } from './IUnitOfWork.js';
 export type { IUnitOfWorkFactory } from './IUnitOfWorkFactory.js';

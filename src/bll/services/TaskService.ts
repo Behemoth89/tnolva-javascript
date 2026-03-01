@@ -60,11 +60,17 @@ export class TaskService implements ITaskService {
 
   /**
    * Update an existing task
+   * @throws Error if task is completed (done lock)
    */
   async updateAsync(id: string, dto: ITaskUpdateDto): Promise<ITask | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return null;
+    }
+
+    // Check done lock - cannot modify completed tasks
+    if (task.status === EStatus.DONE) {
+      throw new Error('Cannot modify completed task');
     }
 
     // Validate title if provided
@@ -97,11 +103,17 @@ export class TaskService implements ITaskService {
 
   /**
    * Delete a task
+   * @throws Error if task is completed (done lock)
    */
   async deleteAsync(id: string): Promise<boolean> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return false;
+    }
+
+    // Check done lock - cannot delete completed tasks
+    if (task.status === EStatus.DONE) {
+      throw new Error('Cannot delete completed task');
     }
 
     // Register with UOW change tracking
@@ -297,5 +309,27 @@ export class TaskService implements ITaskService {
    */
   async getByPriorityAsync(priority: EPriority): Promise<ITask[]> {
     return this.taskRepository.getByPriorityAsync(priority);
+  }
+
+  /**
+   * Check if a task is linked to a recurring task
+   * @param taskId - The task ID to check
+   * @returns true if the task has a recurring task source
+   */
+  async isLinkedToRecurringTask(taskId: string): Promise<boolean> {
+    const linkRepo = this.unitOfWork.getTaskRecurringLinkRepository();
+    const links = await linkRepo.getByTaskIdAsync(taskId);
+    return links.length > 0;
+  }
+
+  /**
+   * Get the recurring task ID linked to a task
+   * @param taskId - The task ID
+   * @returns The recurring task ID if linked, null otherwise
+   */
+  async getLinkedRecurringTaskId(taskId: string): Promise<string | null> {
+    const linkRepo = this.unitOfWork.getTaskRecurringLinkRepository();
+    const links = await linkRepo.getByTaskIdAsync(taskId);
+    return links.length > 0 ? links[0].recurringTaskId : null;
   }
 }

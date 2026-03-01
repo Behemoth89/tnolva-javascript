@@ -4,11 +4,13 @@ import type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
 import type { IEntityId } from './IEntityId.js';
 import type { ITask } from './ITask.js';
 import type { IRecurrenceTemplateRepository } from './IRecurrenceTemplateRepository.js';
+import type { IRecurringTaskRepository } from './IRecurringTaskRepository.js';
+import type { ITaskRecurringLinkRepository } from './ITaskRecurringLinkRepository.js';
 
 /**
  * Entity type for routing changes to the correct repository
  */
-export type EntityType = 'task' | 'category' | 'recurrenceTemplate';
+export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurringTask' | 'taskRecurringLink';
 
 /**
  * IUnitOfWork Interface
@@ -29,6 +31,16 @@ export interface IUnitOfWork {
    * Get the RecurrenceTemplate repository
    */
   getRecurrenceTemplateRepository(): IRecurrenceTemplateRepository;
+
+  /**
+   * Get the RecurringTask repository
+   */
+  getRecurringTaskRepository(): IRecurringTaskRepository;
+
+  /**
+   * Get the TaskRecurringLink repository
+   */
+  getTaskRecurringLinkRepository(): ITaskRecurringLinkRepository;
 
   /**
    * Initialize the UnitOfWork, including loading default data

@@ -21,6 +21,12 @@ export const STORAGE_KEY_CATEGORY_ASSIGNMENTS = `${STORAGE_NAMESPACE}category_as
 /** Storage key for recurrence templates */
 export const STORAGE_KEY_RECURRENCE_TEMPLATES = `${STORAGE_NAMESPACE}recurrence_templates`;
 
+/** Storage key for recurring tasks */
+export const STORAGE_KEY_RECURRING_TASKS = `${STORAGE_NAMESPACE}recurring_tasks`;
+
+/** Storage key for task-recurring link junction table */
+export const STORAGE_KEY_TASK_RECURRING_LINKS = `${STORAGE_NAMESPACE}task_recurring_links`;
+
 /** Get namespaced key */
 export function getNamespacedKey(key: string): string {
   return `${STORAGE_NAMESPACE}${key}`;

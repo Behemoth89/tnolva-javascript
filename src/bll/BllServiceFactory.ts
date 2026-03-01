@@ -2,10 +2,12 @@ import type { IBllServiceFactory } from './interfaces/IBllServiceFactory.js';
 import type { ITaskService } from './interfaces/ITaskService.js';
 import type { ICategoryService } from './interfaces/ICategoryService.js';
 import type { IRecurrenceService } from './interfaces/IRecurrenceService.js';
+import type { IRecurringTaskService } from './interfaces/IRecurringTaskService.js';
 import type { IUnitOfWork } from '../interfaces/IUnitOfWork.js';
 import { TaskService } from './services/TaskService.js';
 import { CategoryService } from './services/CategoryService.js';
 import { RecurrenceService } from './services/RecurrenceService.js';
+import { RecurringTaskService } from './services/RecurringTaskService.js';
 
 /**
  * BllServiceFactory Class
@@ -37,6 +39,15 @@ export class BllServiceFactory implements IBllServiceFactory {
    */
   createRecurrenceService(unitOfWork: IUnitOfWork): IRecurrenceService {
     return new RecurrenceService(unitOfWork);
+  }
+
+  /**
+   * Create a RecurringTaskService instance
+   * @param unitOfWork - The UnitOfWork for data access
+   * @returns A new RecurringTaskService instance
+   */
+  createRecurringTaskService(unitOfWork: IUnitOfWork): IRecurringTaskService {
+    return new RecurringTaskService(unitOfWork);
   }
 }
 
