@@ -1,4 +1,5 @@
-import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto, ITaskEntity, ERecurringTaskStatus } from '../../interfaces/index.js';
+import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto, ITaskEntity } from '../../interfaces/index.js';
+import type { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
 
 /**
  * IRecurringTaskService Interface

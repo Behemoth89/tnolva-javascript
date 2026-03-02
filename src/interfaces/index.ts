@@ -1,6 +1,6 @@
 /**
  * Interfaces Index
- * Exports all interfaces from a single file
+ * Exports all interfaces and types from a single file
  */
 
 // Entity Interfaces
@@ -38,6 +38,3 @@ export type { ITaskRecurringLinkRepository } from './repositories/ITaskRecurring
 // Unit of Work Interfaces
 export type { IUnitOfWork, EntityType } from './IUnitOfWork.js';
 export type { IUnitOfWorkFactory } from './IUnitOfWorkFactory.js';
-
-// Enums
-export type { ERecurringTaskStatus } from '../enums/ERecurringTaskStatus.js';
