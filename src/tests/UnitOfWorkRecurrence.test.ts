@@ -22,7 +22,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
 
   describe('completeTaskWithRecurrence', () => {
     it('should return null when task does not exist', async () => {
-      const result = await uow.completeTaskWithRecurrence('non-existent');
+      const result = await uow.completeTaskWithRecurrenceAsync('non-existent');
       expect(result).toBeNull();
     });
 
@@ -41,7 +41,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
       await taskRepo.createAsync(task);
 
       // Complete task
-      const result = await uow.completeTaskWithRecurrence('task-1');
+      const result = await uow.completeTaskWithRecurrenceAsync('task-1');
 
       // Verify null is returned (no new task created)
       expect(result).toBeNull();
@@ -75,7 +75,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
       await taskRepo.createAsync(task);
 
       // Complete task with recurrence
-      const newTask = await uow.completeTaskWithRecurrence('task-1');
+      const newTask = await uow.completeTaskWithRecurrenceAsync('task-1');
 
       // Verify new task was created
       expect(newTask).not.toBeNull();
@@ -121,7 +121,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
       await taskRepo.createAsync(task);
 
       // Complete task with recurrence
-      const newTask = await uow.completeTaskWithRecurrence('task-1');
+      const newTask = await uow.completeTaskWithRecurrenceAsync('task-1');
 
       // Verify tags are preserved
       expect(newTask?.tags).toEqual(['work', 'important']);
@@ -152,7 +152,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
       await taskRepo.createAsync(task);
 
       // Complete task with recurrence
-      const newTask = await uow.completeTaskWithRecurrence('task-1');
+      const newTask = await uow.completeTaskWithRecurrenceAsync('task-1');
 
       // Verify next due date is 1 week later
       expect(newTask?.dueDate?.getDate()).toBe(22);
@@ -184,7 +184,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
       await taskRepo.createAsync(task);
 
       // Complete task with recurrence
-      const newTask = await uow.completeTaskWithRecurrence('task-1');
+      const newTask = await uow.completeTaskWithRecurrenceAsync('task-1');
 
       // Verify next due date is 1 month later
       expect(newTask?.dueDate?.getMonth()).toBe(1); // February
@@ -206,7 +206,7 @@ describe('UnitOfWork completeTaskWithRecurrence', () => {
       await taskRepo.createAsync(task);
 
       // Complete task - should return null since template doesn't exist
-      const result = await uow.completeTaskWithRecurrence('task-1');
+      const result = await uow.completeTaskWithRecurrenceAsync('task-1');
 
       // Verify null is returned (no new task created)
       expect(result).toBeNull();

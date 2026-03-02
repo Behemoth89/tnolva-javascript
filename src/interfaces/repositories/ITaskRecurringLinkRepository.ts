@@ -55,12 +55,12 @@ export interface ITaskRecurringLinkRepository extends IRepository<ITaskRecurring
    * @param recurringTaskId - The recurring task ID
    * @returns Number of deleted links
    */
-  deleteByRecurringTaskId(recurringTaskId: string): Promise<number>;
+  deleteByRecurringTaskIdAsync(recurringTaskId: string): Promise<number>;
 
   /**
    * Delete links by task ID
    * @param taskId - The task ID
    * @returns Number of deleted links
    */
-  deleteByTaskId(taskId: string): Promise<number>;
+  deleteByTaskIdAsync(taskId: string): Promise<number>;
 }

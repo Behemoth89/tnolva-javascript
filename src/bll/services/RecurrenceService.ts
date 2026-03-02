@@ -24,7 +24,7 @@ export class RecurrenceService implements IRecurrenceService {
    * Initialize the recurrence service, loading default templates
    */
   async initializeAsync(): Promise<void> {
-    await this.recurrenceTemplateRepository.initialize();
+    await this.recurrenceTemplateRepository.initializeAsync();
   }
 
   /**

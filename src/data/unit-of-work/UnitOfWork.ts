@@ -48,8 +48,8 @@ export class UnitOfWork implements IUnitOfWork {
   /**
    * Initialize the UnitOfWork, including loading default recurrence templates
    */
-  async initialize(): Promise<void> {
-    await this.recurrenceTemplateRepository.initialize();
+  async initializeAsync(): Promise<void> {
+    await this.recurrenceTemplateRepository.initializeAsync();
   }
 
   /**
@@ -97,15 +97,15 @@ export class UnitOfWork implements IUnitOfWork {
   /**
    * Assign a task to a category
    */
-  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
-    return this.categoryRepository.assignTaskToCategory(taskId, categoryId);
+  async assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
+    return this.categoryRepository.assignTaskToCategoryAsync(taskId, categoryId);
   }
 
   /**
    * Remove a task from a category
    */
-  async removeTaskFromCategory(taskId: string, categoryId: string): Promise<boolean> {
-    return this.categoryRepository.removeTaskFromCategory(taskId, categoryId);
+  async removeTaskFromCategoryAsync(taskId: string, categoryId: string): Promise<boolean> {
+    return this.categoryRepository.removeTaskFromCategoryAsync(taskId, categoryId);
   }
 
   /**
@@ -114,7 +114,7 @@ export class UnitOfWork implements IUnitOfWork {
    * @param taskId - ID of the task to complete
    * @returns The newly generated task if recurrence was created, null otherwise
    */
-  async completeTaskWithRecurrence(taskId: string): Promise<ITaskEntity | null> {
+  async completeTaskWithRecurrenceAsync(taskId: string): Promise<ITaskEntity | null> {
     // Get the task
     const taskData = await this.taskRepository.getByIdAsync(taskId);
     if (!taskData) {

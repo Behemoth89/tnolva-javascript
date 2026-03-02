@@ -33,8 +33,8 @@ describe('TaskService - Done Lock Behavior', () => {
     const mockTaskDependencyRepo = {
       getDependenciesForTaskAsync: vi.fn().mockResolvedValue([]),
       getDependentsAsync: vi.fn().mockResolvedValue([]),
-      deleteByTaskId: vi.fn().mockResolvedValue(0),
-      deleteByDependsOnTaskId: vi.fn().mockResolvedValue(0),
+      deleteByTaskIdAsync: vi.fn().mockResolvedValue(0),
+      deleteByDependsOnTaskIdAsync: vi.fn().mockResolvedValue(0),
     };
 
     mockUnitOfWork = {

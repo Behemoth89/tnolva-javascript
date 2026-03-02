@@ -257,8 +257,8 @@ export class TaskDependencyService implements ITaskDependencyService {
    */
   async deleteDependenciesForTaskAsync(taskId: string): Promise<void> {
     // Delete dependencies where task is the subtask
-    await this.taskDependencyRepository.deleteByTaskId(taskId);
+    await this.taskDependencyRepository.deleteByTaskIdAsync(taskId);
     // Delete dependencies where task is the parent
-    await this.taskDependencyRepository.deleteByDependsOnTaskId(taskId);
+    await this.taskDependencyRepository.deleteByDependsOnTaskIdAsync(taskId);
   }
 }

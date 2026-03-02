@@ -238,7 +238,7 @@ export class RecurringTaskService implements IRecurringTaskService {
     }
 
     // Delete junction links
-    await this.taskRecurringLinkRepository.deleteByRecurringTaskId(id);
+    await this.taskRecurringLinkRepository.deleteByRecurringTaskIdAsync(id);
 
     // Delete the recurring task
     this.unitOfWork.registerDeleted(existing, 'recurringTask');
@@ -259,7 +259,7 @@ export class RecurringTaskService implements IRecurringTaskService {
       const task = await this.taskRepository.getByIdAsync(link.taskId);
       if (task && task.status !== EStatus.DONE) {
         this.unitOfWork.registerDeleted(task, 'task');
-        await this.taskRecurringLinkRepository.deleteByTaskId(task.id);
+        await this.taskRecurringLinkRepository.deleteByTaskIdAsync(task.id);
       }
     }
 

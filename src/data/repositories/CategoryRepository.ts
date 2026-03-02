@@ -39,7 +39,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Get category by name
    */
-  async getByName(name: string): Promise<ITaskCategoryEntity | null> {
+  async getByNameAsync(name: string): Promise<ITaskCategoryEntity | null> {
     const items = await this.getAllAsync();
     return items.find((category) => category.name.toLowerCase() === name.toLowerCase()) || null;
   }
@@ -62,7 +62,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Assign a task to a category
    */
-  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
+  async assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
     // Check if category exists
     const category = await this.getByIdAsync(categoryId);
     if (!category) {
@@ -99,7 +99,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Remove a task from a category
    */
-  async removeTaskFromCategory(taskId: string, categoryId: string): Promise<boolean> {
+  async removeTaskFromCategoryAsync(taskId: string, categoryId: string): Promise<boolean> {
     const assignments = await this.getAssignmentsAsync();
     const index = assignments.findIndex(
       (a) => a.taskId === taskId && a.categoryId === categoryId
@@ -117,7 +117,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Get all categories for a task
    */
-  async getCategoriesForTask(taskId: string): Promise<ITaskCategoryEntity[]> {
+  async getCategoriesForTaskAsync(taskId: string): Promise<ITaskCategoryEntity[]> {
     const assignments = await this.getAssignmentsAsync();
     const categoryIds = assignments
       .filter((a) => a.taskId === taskId)
@@ -134,7 +134,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Get all tasks for a category
    */
-  async getTasksForCategory(categoryId: string): Promise<string[]> {
+  async getTasksForCategoryAsync(categoryId: string): Promise<string[]> {
     const assignments = await this.getAssignmentsAsync();
     return assignments
       .filter((a) => a.categoryId === categoryId)

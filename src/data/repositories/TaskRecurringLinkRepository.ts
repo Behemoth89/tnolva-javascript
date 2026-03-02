@@ -81,7 +81,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Delete links by recurring task ID
    */
-  async deleteByRecurringTaskId(recurringTaskId: string): Promise<number> {
+  async deleteByRecurringTaskIdAsync(recurringTaskId: string): Promise<number> {
     const items = await this.getAllAsync();
     const toKeep = items.filter((link) => link.recurringTaskId !== recurringTaskId);
     const deletedCount = items.length - toKeep.length;
@@ -92,7 +92,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Delete links by task ID
    */
-  async deleteByTaskId(taskId: string): Promise<number> {
+  async deleteByTaskIdAsync(taskId: string): Promise<number> {
     const items = await this.getAllAsync();
     const toKeep = items.filter((link) => link.taskId !== taskId);
     const deletedCount = items.length - toKeep.length;

@@ -161,7 +161,7 @@ describe('TaskDependencyRepository', () => {
       await repository.createAsync(dep2);
       await repository.createAsync(dep3);
 
-      await repository.deleteByTaskId('task-1');
+      await repository.deleteByTaskIdAsync('task-1');
 
       const allDeps = await repository.getAllAsync();
       expect(allDeps).toHaveLength(1);

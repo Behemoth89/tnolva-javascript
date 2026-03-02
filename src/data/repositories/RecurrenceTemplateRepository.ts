@@ -87,7 +87,7 @@ export class RecurrenceTemplateRepository extends BaseRepository<RecurrenceTempl
   /**
    * Initialize repository with default templates if empty
    */
-  async initialize(): Promise<void> {
+  async initializeAsync(): Promise<void> {
     if (this.initialized) {
       return;
     }

@@ -91,7 +91,7 @@ describe('RecurrenceService', () => {
   describe('initializeAsync', () => {
     it('should initialize the recurrence service', async () => {
       await recurrenceService.initializeAsync();
-      expect(mockRecurrenceTemplateRepository.initialize).toHaveBeenCalled();
+      expect(mockRecurrenceTemplateRepository.initializeAsync).toHaveBeenCalled();
     });
   });
 

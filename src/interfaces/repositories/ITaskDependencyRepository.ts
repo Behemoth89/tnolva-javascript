@@ -82,11 +82,11 @@ export interface ITaskDependencyRepository {
    * Delete all dependencies for a task (as task_id)
    * @param taskId - The task ID
    */
-  deleteByTaskId(taskId: string): Promise<number>;
+  deleteByTaskIdAsync(taskId: string): Promise<number>;
 
   /**
    * Delete all dependencies where the task is the depended-on task (as depends_on_task_id)
    * @param taskId - The task ID
    */
-  deleteByDependsOnTaskId(taskId: string): Promise<number>;
+  deleteByDependsOnTaskIdAsync(taskId: string): Promise<number>;
 }

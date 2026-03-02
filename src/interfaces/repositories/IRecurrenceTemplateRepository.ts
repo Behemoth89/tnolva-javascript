@@ -9,7 +9,7 @@ export interface IRecurrenceTemplateRepository extends IRepository<IRecurrenceTe
   /**
    * Initialize repository with default templates if empty
    */
-  initialize(): Promise<void>;
+  initializeAsync(): Promise<void>;
 
   /**
    * Get all templates asynchronously

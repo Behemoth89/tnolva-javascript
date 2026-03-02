@@ -30,7 +30,7 @@ export class CategoryService implements ICategoryService {
     }
 
     // Check for duplicate name (case-insensitive)
-    const existing = await this.categoryRepository.getByName(dto.name.trim());
+    const existing = await this.categoryRepository.getByNameAsync(dto.name.trim());
     if (existing) {
       return existing;
     }
@@ -128,7 +128,7 @@ export class CategoryService implements ICategoryService {
    * Get category by name (case-insensitive)
    */
   async getByNameAsync(name: string): Promise<ITaskCategoryEntity | null> {
-    return this.categoryRepository.getByName(name);
+    return this.categoryRepository.getByNameAsync(name);
   }
 
   /**
@@ -148,27 +148,27 @@ export class CategoryService implements ICategoryService {
       return null;
     }
 
-    return this.categoryRepository.assignTaskToCategory(taskId, categoryId);
+    return this.categoryRepository.assignTaskToCategoryAsync(taskId, categoryId);
   }
 
   /**
    * Remove a task from a category
    */
   async removeTaskFromCategoryAsync(taskId: string, categoryId: string): Promise<boolean> {
-    return this.categoryRepository.removeTaskFromCategory(taskId, categoryId);
+    return this.categoryRepository.removeTaskFromCategoryAsync(taskId, categoryId);
   }
 
   /**
    * Get all categories for a task
    */
   async getCategoriesForTaskAsync(taskId: string): Promise<ITaskCategoryEntity[]> {
-    return this.categoryRepository.getCategoriesForTask(taskId);
+    return this.categoryRepository.getCategoriesForTaskAsync(taskId);
   }
 
   /**
    * Get all task IDs for a category
    */
   async getTasksForCategoryAsync(categoryId: string): Promise<string[]> {
-    return this.categoryRepository.getTasksForCategory(categoryId);
+    return this.categoryRepository.getTasksForCategoryAsync(categoryId);
   }
 }

@@ -81,7 +81,7 @@ export class TaskDependencyRepository extends BaseRepository<ITaskDependencyEnti
   /**
    * Delete all dependencies for a task (as task_id)
    */
-  async deleteByTaskId(taskId: string): Promise<number> {
+  async deleteByTaskIdAsync(taskId: string): Promise<number> {
     const items = await this.getAllAsync();
     const toKeep = items.filter((dep) => dep.taskId !== taskId);
     const deletedCount = items.length - toKeep.length;
@@ -92,7 +92,7 @@ export class TaskDependencyRepository extends BaseRepository<ITaskDependencyEnti
   /**
    * Delete all dependencies where the task is the depended-on task (as depends_on_task_id)
    */
-  async deleteByDependsOnTaskId(taskId: string): Promise<number> {
+  async deleteByDependsOnTaskIdAsync(taskId: string): Promise<number> {
     const items = await this.getAllAsync();
     const toKeep = items.filter((dep) => dep.dependsOnTaskId !== taskId);
     const deletedCount = items.length - toKeep.length;

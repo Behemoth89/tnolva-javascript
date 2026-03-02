@@ -45,14 +45,14 @@ export interface IUnitOfWork {
   /**
    * Initialize the UnitOfWork, including loading default data
    */
-  initialize(): Promise<void>;
+  initializeAsync(): Promise<void>;
 
   /**
    * Complete a task with optional recurrence generation
    * @param taskId - ID of the task to complete
    * @returns The newly generated task if recurrence was created, null otherwise
    */
-  completeTaskWithRecurrence(taskId: string): Promise<ITaskEntity | null>;
+  completeTaskWithRecurrenceAsync(taskId: string): Promise<ITaskEntity | null>;
 
   /**
    * Assign a task to a category
@@ -60,7 +60,7 @@ export interface IUnitOfWork {
    * @param categoryId - ID of the category
    * @returns The created assignment, or null if failed
    */
-  assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null>;
+  assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null>;
 
   /**
    * Remove a task from a category
@@ -68,7 +68,7 @@ export interface IUnitOfWork {
    * @param categoryId - ID of the category
    * @returns True if removed, false if not found
    */
-  removeTaskFromCategory(taskId: string, categoryId: string): Promise<boolean>;
+  removeTaskFromCategoryAsync(taskId: string, categoryId: string): Promise<boolean>;
 
   /**
    * Register a new entity for insertion on commit
