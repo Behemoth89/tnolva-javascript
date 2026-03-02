@@ -1,4 +1,4 @@
-import type { IBaseEntity } from './IBaseEntity.js';
+import type { IBaseEntity } from '../index.js';
 import type { EDependencyType } from '../../enums/EDependencyType.js';
 
 /**

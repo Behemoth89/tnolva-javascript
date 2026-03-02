@@ -1,10 +1,11 @@
+import type { IEntityId } from '../index.js';
 import type { EPriority } from '../../enums/EPriority.js';
 
 /**
  * ISubtaskTemplate Interface
  * Defines the structure for subtask templates in recurring tasks
  */
-export interface ISubtaskTemplate {
+export interface ISubtaskTemplate extends IEntityId {
   /** Unique identifier for the subtask template */
   id: string;
   /** Title of the subtask (required) */

@@ -1,6 +1,6 @@
 import type { EStatus } from '../../enums/EStatus.js';
 import type { EPriority } from '../../enums/EPriority.js';
-import type { IBaseEntity } from './IBaseEntity.js';
+import type { IBaseEntity } from '../index.js';
 
 /**
  * ITaskEntity Interface

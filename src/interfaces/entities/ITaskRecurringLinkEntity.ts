@@ -1,4 +1,4 @@
-import type { IEntityId } from './IEntityId.js';
+import type { IEntityId } from '../index.js';
 
 /**
  * ITaskRecurringLinkEntity Interface

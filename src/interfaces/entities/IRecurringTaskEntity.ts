@@ -1,5 +1,4 @@
-import type { IBaseEntity } from './IBaseEntity.js';
-import type { IInterval } from './IInterval.js';
+import type { IBaseEntity, IInterval } from '../index.js';
 import type { EPriority } from '../../enums/EPriority.js';
 import type { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
 

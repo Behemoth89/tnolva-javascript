@@ -1,4 +1,4 @@
-import type { IBaseEntity } from './IBaseEntity.js';
+import type { IBaseEntity } from '../index.js';
 
 /**
  * ITaskCategoryAssignmentEntity Interface
