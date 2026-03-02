@@ -7,6 +7,8 @@ import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
 import { EStatus } from '../../enums/EStatus.js';
 import { EPriority } from '../../enums/EPriority.js';
 import { generateGuid } from '../../utils/index.js';
+import type { ITaskDependencyRepository } from '../../interfaces/ITaskDependencyRepository.js';
+import { TaskDependencyService } from './TaskDependencyService.js';
 
 /**
  * TaskService Class
@@ -15,6 +17,8 @@ import { generateGuid } from '../../utils/index.js';
 export class TaskService implements ITaskService {
   private readonly unitOfWork: IUnitOfWork;
   private readonly taskRepository: ITaskRepository;
+  private readonly taskDependencyService: TaskDependencyService;
+  private readonly taskDependencyRepository: ITaskDependencyRepository;
 
   /**
    * Creates a new TaskService instance
@@ -23,6 +27,8 @@ export class TaskService implements ITaskService {
   constructor(unitOfWork: IUnitOfWork) {
     this.unitOfWork = unitOfWork;
     this.taskRepository = unitOfWork.getTaskRepository();
+    this.taskDependencyRepository = unitOfWork.getTaskDependencyRepository();
+    this.taskDependencyService = new TaskDependencyService(unitOfWork);
   }
 
   /**
@@ -32,6 +38,15 @@ export class TaskService implements ITaskService {
     // Validate title
     if (!dto.title || dto.title.trim() === '') {
       throw new Error('Task title is required');
+    }
+
+    // Validate startDate is not after dueDate
+    if (dto.startDate && dto.dueDate) {
+      const startDate = new Date(dto.startDate);
+      const dueDate = new Date(dto.dueDate);
+      if (startDate > dueDate) {
+        throw new Error('Start date cannot be after due date');
+      }
     }
 
     // Generate ID if not provided
@@ -44,6 +59,8 @@ export class TaskService implements ITaskService {
       description: dto.description?.trim(),
       status: dto.status ?? EStatus.TODO,
       priority: dto.priority ?? EPriority.MEDIUM,
+      // startDate defaults to current timestamp if not specified
+      startDate: dto.startDate ?? new Date(),
       dueDate: dto.dueDate,
       tags: dto.tags ? [...dto.tags] : [],
       recurrenceTemplateId: dto.recurrenceTemplateId,
@@ -53,6 +70,18 @@ export class TaskService implements ITaskService {
 
     // Register with UOW change tracking
     this.unitOfWork.registerNew(task, 'task');
+
+    // If parentTaskId is provided, create the dependency relationship
+    if (dto.parentTaskId) {
+      try {
+        await this.taskDependencyService.addSubtaskAsync(id, dto.parentTaskId);
+      } catch (error) {
+        // If dependency creation fails, rollback and rethrow
+        this.unitOfWork.rollback();
+        throw error;
+      }
+    }
+    
     await this.unitOfWork.commit();
     
     return task;
@@ -78,6 +107,32 @@ export class TaskService implements ITaskService {
       throw new Error('Task title cannot be empty');
     }
 
+    // Determine new startDate and dueDate for validation
+    const newStartDate = dto.startDate !== undefined ? dto.startDate : task.startDate;
+    const newDueDate = dto.dueDate !== undefined ? dto.dueDate : task.dueDate;
+
+    // Validate startDate is not after dueDate
+    if (newStartDate && newDueDate) {
+      const startDate = new Date(newStartDate);
+      const dueDate = new Date(newDueDate);
+      if (startDate > dueDate) {
+        throw new Error('Start date cannot be after due date');
+      }
+    }
+
+    // Check dependency validation if status is being set to DONE
+    if (dto.status !== undefined && dto.status === EStatus.DONE) {
+      const canComplete = await this.taskDependencyService.canCompleteMainTaskAsync(id);
+      if (!canComplete) {
+        const subtasks = await this.taskDependencyService.getSubtasksAsync(id);
+        const incompleteSubtasks = subtasks
+          .filter(s => s.status !== EStatus.DONE)
+          .map(s => s.title)
+          .join(', ');
+        throw new Error(`Cannot complete main task: incomplete subtasks - ${incompleteSubtasks}`);
+      }
+    }
+
     const now = new Date().toISOString();
 
     const updatedTask: ITask = {
@@ -86,6 +141,7 @@ export class TaskService implements ITaskService {
       description: dto.description !== undefined ? dto.description?.trim() : task.description,
       status: dto.status !== undefined ? dto.status : task.status,
       priority: dto.priority !== undefined ? dto.priority : task.priority,
+      startDate: dto.startDate !== undefined ? dto.startDate : task.startDate,
       dueDate: dto.dueDate !== undefined ? dto.dueDate : task.dueDate,
       tags: dto.tags !== undefined ? [...dto.tags] : task.tags,
       recurrenceTemplateId: dto.recurrenceTemplateId !== undefined 
@@ -116,8 +172,19 @@ export class TaskService implements ITaskService {
       throw new Error('Cannot delete completed task');
     }
 
-    // Register with UOW change tracking
+    // Get dependencies to delete (both as subtask and as parent)
+    const dependenciesAsSubtask = await this.taskDependencyRepository.getDependenciesForTaskAsync(id);
+    const dependenciesAsParent = await this.taskDependencyRepository.getDependentsAsync(id);
+    const allDependencies = [...dependenciesAsSubtask, ...dependenciesAsParent];
+
+    // Register task deletion with UOW
     this.unitOfWork.registerDeleted(task, 'task');
+
+    // Register dependency deletions with UOW (cascade delete)
+    for (const dependency of allDependencies) {
+      this.unitOfWork.registerDeleted(dependency, 'taskDependency');
+    }
+
     try {
       await this.unitOfWork.commit();
       return true;
@@ -170,6 +237,17 @@ export class TaskService implements ITaskService {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task || task.status !== EStatus.IN_PROGRESS) {
       return null;
+    }
+
+    // Check if all subtasks are done before completing main task
+    const canComplete = await this.taskDependencyService.canCompleteMainTaskAsync(id);
+    if (!canComplete) {
+      const subtasks = await this.taskDependencyService.getSubtasksAsync(id);
+      const incompleteSubtasks = subtasks
+        .filter(s => s.status !== EStatus.DONE)
+        .map(s => s.title)
+        .join(', ');
+      throw new Error(`Cannot complete main task: incomplete subtasks - ${incompleteSubtasks}`);
     }
 
     const now = new Date().toISOString();

@@ -44,6 +44,7 @@ export class RecurringTaskGenerator {
       description: task.description,
       status: task.status === 'DONE' ? 'TODO' : task.status, // Reset status for new instance
       priority: task.priority,
+      startDate: task.startDate ? new Date(task.startDate) : new Date(),
       dueDate: nextDueDate,
       tags: task.tags ? [...task.tags] : [],
       recurrenceTemplateId: task.recurrenceTemplateId,
@@ -161,6 +162,7 @@ export class RecurringTaskGenerator {
       description: recurringTask.description,
       status: 'TODO',
       priority: recurringTask.priority,
+      startDate: new Date(),
       dueDate: dueDate,
       tags: recurringTask.tags ? [...recurringTask.tags] : [],
       createdAt: now,

@@ -8,12 +8,25 @@ import { EPriority } from '../enums/EPriority.js';
 
 // Mock UnitOfWork
 const createMockUnitOfWork = (taskRepo: Partial<ITaskRepository>): IUnitOfWork => {
+  const mockTaskDependencyRepo = {
+    getAllAsync: vi.fn().mockResolvedValue([]),
+    getByIdAsync: vi.fn().mockResolvedValue(null),
+    getDependenciesForTaskAsync: vi.fn().mockResolvedValue([]),
+    getDependentsAsync: vi.fn().mockResolvedValue([]),
+    hasDependencyAsync: vi.fn().mockResolvedValue(false),
+    createAsync: vi.fn(),
+    updateAsync: vi.fn(),
+    deleteAsync: vi.fn(),
+    deleteByTaskId: vi.fn().mockResolvedValue(0),
+    deleteByDependsOnTaskId: vi.fn().mockResolvedValue(0),
+  };
   return {
     getTaskRepository: () => taskRepo as ITaskRepository,
     getCategoryRepository: vi.fn(),
     getRecurrenceTemplateRepository: vi.fn() as any,
     getRecurringTaskRepository: vi.fn() as any,
     getTaskRecurringLinkRepository: vi.fn() as any,
+    getTaskDependencyRepository: vi.fn().mockReturnValue(mockTaskDependencyRepo),
     initialize: vi.fn(),
     completeTaskWithRecurrence: vi.fn(),
     assignTaskToCategory: vi.fn(),
@@ -41,6 +54,7 @@ describe('TaskService', () => {
         status: EStatus.TODO,
         priority: EPriority.MEDIUM,
         tags: ['tag1'],
+        startDate: new Date(),
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       },
@@ -50,6 +64,7 @@ describe('TaskService', () => {
         status: EStatus.IN_PROGRESS,
         priority: EPriority.HIGH,
         tags: [],
+        startDate: new Date(),
         createdAt: '2024-01-02T00:00:00.000Z',
         updatedAt: '2024-01-02T00:00:00.000Z',
       },

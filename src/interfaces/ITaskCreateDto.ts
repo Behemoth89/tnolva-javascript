@@ -17,12 +17,16 @@ export interface ITaskCreateDto {
   status?: EStatus;
   /** Priority level of the task (optional, defaults to MEDIUM) */
   priority?: EPriority;
+  /** Start date for the task (optional, defaults to creation timestamp) */
+  startDate?: Date;
   /** Due date for the task (optional) */
   dueDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
   /** Reference to a recurrence template for repeating tasks (optional) */
   recurrenceTemplateId?: string;
+  /** Parent task ID - if set, this task becomes a subtask of the parent (optional) */
+  parentTaskId?: string;
   /** Creation timestamp in ISO 8601 format (optional, set by repository if not provided) */
   createdAt?: string;
   /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */

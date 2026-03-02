@@ -14,6 +14,7 @@ describe('TaskService - Done Lock Behavior', () => {
     title: 'Test Task',
     status: EStatus.TODO,
     priority: 'MEDIUM' as any,
+    startDate: new Date(),
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     ...overrides,
@@ -30,6 +31,13 @@ describe('TaskService - Done Lock Behavior', () => {
       deleteAsync: vi.fn(),
     };
 
+    const mockTaskDependencyRepo = {
+      getDependenciesForTaskAsync: vi.fn().mockResolvedValue([]),
+      getDependentsAsync: vi.fn().mockResolvedValue([]),
+      deleteByTaskId: vi.fn().mockResolvedValue(0),
+      deleteByDependsOnTaskId: vi.fn().mockResolvedValue(0),
+    };
+
     mockUnitOfWork = {
       getTaskRepository: () => mockTaskRepository,
       getRecurringTaskRepository: vi.fn().mockReturnValue({
@@ -39,6 +47,7 @@ describe('TaskService - Done Lock Behavior', () => {
       getTaskRecurringLinkRepository: vi.fn().mockReturnValue({
         getByTaskIdAsync: vi.fn().mockResolvedValue([]),
       }),
+      getTaskDependencyRepository: vi.fn().mockReturnValue(mockTaskDependencyRepo),
       registerNew: vi.fn(),
       registerModified: vi.fn(),
       registerDeleted: vi.fn(),

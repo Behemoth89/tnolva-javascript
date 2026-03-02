@@ -322,6 +322,7 @@ describe('RecurringTaskGenerator', () => {
         status: EStatus.TODO,
         priority: EPriority.MEDIUM,
         recurrenceTemplateId: '',
+        startDate: new Date(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

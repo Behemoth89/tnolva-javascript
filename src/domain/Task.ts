@@ -13,6 +13,7 @@ export class Task implements ITask {
   description?: string;
   status: EStatus;
   priority: EPriority;
+  startDate: Date;
   dueDate?: Date;
   tags: string[];
   /** Reference to a recurrence template for repeating tasks */
@@ -31,6 +32,8 @@ export class Task implements ITask {
     this.description = dto.description?.trim();
     this.status = dto.status ?? EStatus.TODO;
     this.priority = dto.priority ?? EPriority.MEDIUM;
+    // startDate defaults to creation timestamp if not specified
+    this.startDate = dto.startDate ?? new Date();
     this.dueDate = dto.dueDate;
     this.tags = dto.tags ? [...dto.tags] : [];
     this.recurrenceTemplateId = dto.recurrenceTemplateId;
@@ -50,6 +53,7 @@ export class Task implements ITask {
       description: this.description,
       status: this.status,
       priority: this.priority,
+      startDate: this.startDate,
       dueDate: this.dueDate,
       tags: [...this.tags],
       recurrenceTemplateId: this.recurrenceTemplateId,

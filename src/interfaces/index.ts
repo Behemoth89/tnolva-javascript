@@ -18,6 +18,9 @@ export type { IRecurringTask, IRecurringTaskCreateDto, IRecurringTaskUpdateDto }
 export type { ERecurringTaskStatus } from '../enums/ERecurringTaskStatus.js';
 export type { ITaskRecurringLink } from './ITaskRecurringLink.js';
 export type { ITaskRecurringLinkRepository } from './ITaskRecurringLinkRepository.js';
+export type { ITaskDependency, ITaskDependencyCreateDto } from './ITaskDependency.js';
+export type { ITaskDependencyRepository } from './ITaskDependencyRepository.js';
+export type { ISubtaskTemplate, ISubtaskTemplateCreateDto } from './ISubtaskTemplate.js';
 
 // DAL Interfaces
 export type { IRepository } from './IRepository.js';

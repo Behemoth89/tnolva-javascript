@@ -1,5 +1,6 @@
 import type { IRecurrenceTemplate } from '../interfaces/IRecurrenceTemplate.js';
 import type { IInterval } from '../interfaces/IInterval.js';
+import type { ISubtaskTemplate } from '../interfaces/ISubtaskTemplate.js';
 
 /**
  * RecurrenceTemplate Entity Class
@@ -12,6 +13,10 @@ export class RecurrenceTemplate implements IRecurrenceTemplate {
   dayOfMonth?: number;
   weekday?: number;
   occurrenceInMonth?: number;
+  /** Duration of the task in days (used to calculate dueDate from startDate) */
+  duration?: number;
+  /** Subtask templates - generated when recurring task is created */
+  subtaskTemplates?: ISubtaskTemplate[];
 
   /**
    * Creates a new RecurrenceTemplate instance
@@ -43,6 +48,8 @@ export class RecurrenceTemplate implements IRecurrenceTemplate {
     this.dayOfMonth = template.dayOfMonth;
     this.weekday = template.weekday;
     this.occurrenceInMonth = template.occurrenceInMonth;
+    this.duration = template.duration;
+    this.subtaskTemplates = template.subtaskTemplates ? [...template.subtaskTemplates] : undefined;
   }
 
   /**
@@ -80,6 +87,8 @@ export class RecurrenceTemplate implements IRecurrenceTemplate {
       dayOfMonth: this.dayOfMonth,
       weekday: this.weekday,
       occurrenceInMonth: this.occurrenceInMonth,
+      duration: this.duration,
+      subtaskTemplates: this.subtaskTemplates ? [...this.subtaskTemplates] : undefined,
     };
   }
 }

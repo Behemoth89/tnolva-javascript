@@ -229,6 +229,7 @@ export class RecurrenceService implements IRecurrenceService {
       description: completedTask.description,
       status: 'TODO', // Reset status for new instance
       priority: completedTask.priority,
+      startDate: completedTask.startDate ? new Date(completedTask.startDate) : new Date(),
       dueDate: nextDueDate,
       tags: completedTask.tags ? [...completedTask.tags] : [],
       recurrenceTemplateId: completedTask.recurrenceTemplateId,

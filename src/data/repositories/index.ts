@@ -11,3 +11,4 @@ export { CategoryRepository } from './CategoryRepository.js';
 export { RecurrenceTemplateRepository } from './RecurrenceTemplateRepository.js';
 export { RecurringTaskRepository } from './RecurringTaskRepository.js';
 export { TaskRecurringLinkRepository } from './TaskRecurringLinkRepository.js';
+export { TaskDependencyRepository } from './TaskDependencyRepository.js';

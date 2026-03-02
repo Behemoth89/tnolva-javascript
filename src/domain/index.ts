@@ -8,5 +8,6 @@ export { RecurrenceTemplate } from './RecurrenceTemplate.js';
 export { RecurrenceCalculator } from './RecurrenceCalculator.js';
 export { RecurringTask } from './RecurringTask.js';
 export { TaskRecurringLink } from './TaskRecurringLink.js';
+export { TaskDependency } from './TaskDependency.js';
 export { generateAllPendingTasks, type BatchGenerationResult } from './batchGeneration.js';
 export { RecurringTaskGenerator } from './RecurringTaskGenerator.js';

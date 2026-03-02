@@ -27,6 +27,9 @@ export const STORAGE_KEY_RECURRING_TASKS = `${STORAGE_NAMESPACE}recurring_tasks`
 /** Storage key for task-recurring link junction table */
 export const STORAGE_KEY_TASK_RECURRING_LINKS = `${STORAGE_NAMESPACE}task_recurring_links`;
 
+/** Storage key for task dependencies junction table */
+export const STORAGE_KEY_TASK_DEPENDENCIES = `${STORAGE_NAMESPACE}task_dependencies`;
+
 /** Get namespaced key */
 export function getNamespacedKey(key: string): string {
   return `${STORAGE_NAMESPACE}${key}`;

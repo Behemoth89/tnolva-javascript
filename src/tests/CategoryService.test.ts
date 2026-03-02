@@ -10,12 +10,25 @@ const createMockUnitOfWork = (
   categoryRepo: Partial<ICategoryRepository>,
   taskRepo: Partial<ITaskRepository> = {}
 ): IUnitOfWork => {
+  const mockTaskDependencyRepo = {
+    getAllAsync: vi.fn().mockResolvedValue([]),
+    getByIdAsync: vi.fn().mockResolvedValue(null),
+    getDependenciesForTaskAsync: vi.fn().mockResolvedValue([]),
+    getDependentsAsync: vi.fn().mockResolvedValue([]),
+    hasDependencyAsync: vi.fn().mockResolvedValue(false),
+    createAsync: vi.fn(),
+    updateAsync: vi.fn(),
+    deleteAsync: vi.fn(),
+    deleteByTaskId: vi.fn().mockResolvedValue(0),
+    deleteByDependsOnTaskId: vi.fn().mockResolvedValue(0),
+  };
   return {
     getTaskRepository: () => taskRepo as ITaskRepository,
     getCategoryRepository: () => categoryRepo as ICategoryRepository,
     getRecurrenceTemplateRepository: vi.fn() as any,
     getRecurringTaskRepository: vi.fn() as any,
     getTaskRecurringLinkRepository: vi.fn() as any,
+    getTaskDependencyRepository: vi.fn().mockReturnValue(mockTaskDependencyRepo),
     initialize: vi.fn(),
     completeTaskWithRecurrence: vi.fn(),
     assignTaskToCategory: vi.fn(),

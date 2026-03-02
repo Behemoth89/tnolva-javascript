@@ -16,6 +16,8 @@ export interface ITask extends IBaseEntity {
   status: EStatus;
   /** Priority level of the task */
   priority: EPriority;
+  /** Start date for the task (required, defaults to creation timestamp) */
+  startDate: Date;
   /** Due date for the task (optional) */
   dueDate?: Date;
   /** Tags associated with the task (optional) */

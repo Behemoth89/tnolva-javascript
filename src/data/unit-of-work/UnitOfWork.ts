@@ -4,6 +4,7 @@ import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.j
 import type { IRecurrenceTemplateRepository } from '../../interfaces/IRecurrenceTemplateRepository.js';
 import type { IRecurringTaskRepository } from '../../interfaces/IRecurringTaskRepository.js';
 import type { ITaskRecurringLinkRepository } from '../../interfaces/ITaskRecurringLinkRepository.js';
+import type { ITaskDependencyRepository } from '../../interfaces/ITaskDependencyRepository.js';
 import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
 import type { ITask } from '../../interfaces/ITask.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
@@ -12,12 +13,13 @@ import { CategoryRepository } from '../repositories/CategoryRepository.js';
 import { RecurrenceTemplateRepository } from '../repositories/RecurrenceTemplateRepository.js';
 import { RecurringTaskRepository } from '../repositories/RecurringTaskRepository.js';
 import { TaskRecurringLinkRepository } from '../repositories/TaskRecurringLinkRepository.js';
+import { TaskDependencyRepository } from '../repositories/TaskDependencyRepository.js';
 import { EStatus } from '../../enums/EStatus.js';
 
 /**
  * Entity type for routing changes to the correct repository
  */
-export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurringTask' | 'taskRecurringLink';
+export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurringTask' | 'taskRecurringLink' | 'taskDependency';
 
 /**
  * Change tracking entry with type metadata
@@ -38,6 +40,7 @@ export class UnitOfWork implements IUnitOfWork {
   private readonly recurrenceTemplateRepository: RecurrenceTemplateRepository;
   private readonly recurringTaskRepository: RecurringTaskRepository;
   private readonly taskRecurringLinkRepository: TaskRecurringLinkRepository;
+  private readonly taskDependencyRepository: TaskDependencyRepository;
   private changes: ChangeEntry[] = [];
   private committed = false;
 
@@ -51,6 +54,7 @@ export class UnitOfWork implements IUnitOfWork {
     this.recurrenceTemplateRepository = new RecurrenceTemplateRepository(storage);
     this.recurringTaskRepository = new RecurringTaskRepository(storage);
     this.taskRecurringLinkRepository = new TaskRecurringLinkRepository(storage);
+    this.taskDependencyRepository = new TaskDependencyRepository(storage);
   }
 
   /**
@@ -96,6 +100,13 @@ export class UnitOfWork implements IUnitOfWork {
   }
 
   /**
+   * Get the TaskDependency repository
+   */
+  getTaskDependencyRepository(): ITaskDependencyRepository {
+    return this.taskDependencyRepository;
+  }
+
+  /**
    * Assign a task to a category
    */
   async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null> {
@@ -132,7 +143,30 @@ export class UnitOfWork implements IUnitOfWork {
     if (taskData.recurrenceTemplateId) {
       newRecurringTask = await this.generateNextRecurringTask(taskData);
       if (newRecurringTask) {
+        // Register main task
         this.registerNew(newRecurringTask, 'task');
+
+        // Register subtasks if any
+        const subtasks = (newRecurringTask as any)._subtasks as ITask[] | undefined;
+        if (subtasks && subtasks.length > 0) {
+          const { generateGuid } = await import('../../utils/index.js');
+          const { EDependencyType } = await import('../../enums/EDependencyType.js');
+
+          for (const subtask of subtasks) {
+            this.registerNew(subtask, 'task');
+
+            // Create TaskDependency linking subtask to parent
+            const dependency = {
+              id: generateGuid(),
+              taskId: subtask.id,
+              dependsOnTaskId: newRecurringTask.id,
+              dependencyType: EDependencyType.SUBTASK,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            this.registerNew(dependency, 'taskDependency');
+          }
+        }
       }
     }
 
@@ -156,9 +190,19 @@ export class UnitOfWork implements IUnitOfWork {
       return null;
     }
 
-    // Calculate next due date
-    const currentDueDate = completedTask.dueDate ? new Date(completedTask.dueDate) : new Date();
-    const nextDueDate = this.calculateNextOccurrence(template, currentDueDate);
+    // Calculate next occurrence date - this becomes the startDate
+    const currentStartDate = completedTask.startDate ? new Date(completedTask.startDate) : new Date();
+    const nextStartDate = this.calculateNextOccurrence(template, currentStartDate);
+
+    // Calculate dueDate: startDate + duration (if duration is specified in template)
+    let nextDueDate: Date;
+    if (template.duration && template.duration > 0) {
+      nextDueDate = new Date(nextStartDate);
+      nextDueDate.setDate(nextDueDate.getDate() + template.duration);
+    } else {
+      // If no duration, use the same as before (backward compatibility)
+      nextDueDate = this.calculateNextOccurrence(template, completedTask.dueDate ? new Date(completedTask.dueDate) : new Date());
+    }
 
     // Generate new task instance
     const { generateGuid } = await import('../../utils/index.js');
@@ -168,6 +212,8 @@ export class UnitOfWork implements IUnitOfWork {
       description: completedTask.description,
       status: 'TODO' as EStatus,
       priority: completedTask.priority,
+      // Use the recurrence date as startDate
+      startDate: nextStartDate,
       dueDate: nextDueDate,
       tags: completedTask.tags ? [...completedTask.tags] : [],
       recurrenceTemplateId: completedTask.recurrenceTemplateId,
@@ -175,7 +221,63 @@ export class UnitOfWork implements IUnitOfWork {
       updatedAt: new Date().toISOString(),
     };
 
+    // Generate subtasks if subtaskTemplates are defined (returns array to be registered by caller)
+    const subtasks = template.subtaskTemplates && template.subtaskTemplates.length > 0
+      ? await this.generateSubtasks(template.subtaskTemplates, newTask)
+      : [];
+
+    // Attach subtasks to return for caller to register
+    (newTask as any)._subtasks = subtasks;
+
     return newTask;
+  }
+
+  /**
+   * Generate subtasks from subtask templates
+   * Returns array of subtasks to be registered
+   */
+  private async generateSubtasks(subtaskTemplates: { id: string; title: string; description?: string; priority?: import('../../enums/EPriority.js').EPriority; startDateOffset: number; duration?: number }[], parentTask: ITask): Promise<ITask[]> {
+    const { generateGuid } = await import('../../utils/index.js');
+    const subtasks: ITask[] = [];
+
+    for (const subtaskTemplate of subtaskTemplates) {
+      // Calculate subtask startDate: parent.startDate + offset
+      const subtaskStartDate = new Date(parentTask.startDate);
+      subtaskStartDate.setDate(subtaskStartDate.getDate() + subtaskTemplate.startDateOffset);
+
+      // Calculate subtask dueDate
+      let subtaskDueDate: Date;
+      if (subtaskTemplate.duration && subtaskTemplate.duration > 0) {
+        subtaskDueDate = new Date(subtaskStartDate);
+        subtaskDueDate.setDate(subtaskDueDate.getDate() + subtaskTemplate.duration);
+      } else {
+        // Default: use parent's dueDate (but ensure it doesn't exceed parent dueDate)
+        subtaskDueDate = new Date(parentTask.dueDate || parentTask.startDate);
+      }
+
+      // Ensure subtask dueDate doesn't exceed parent dueDate
+      if (parentTask.dueDate && subtaskDueDate > new Date(parentTask.dueDate)) {
+        subtaskDueDate = new Date(parentTask.dueDate);
+      }
+
+      // Create the subtask
+      const subtask: ITask = {
+        id: generateGuid(),
+        title: subtaskTemplate.title,
+        description: subtaskTemplate.description,
+        status: 'TODO' as EStatus,
+        priority: subtaskTemplate.priority ?? parentTask.priority,
+        startDate: subtaskStartDate,
+        dueDate: subtaskDueDate,
+        tags: parentTask.tags ? [...parentTask.tags] : [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      subtasks.push(subtask);
+    }
+
+    return subtasks;
   }
 
   /**
@@ -280,6 +382,9 @@ export class UnitOfWork implements IUnitOfWork {
           case 'taskRecurringLink':
             await this.commitTaskRecurringLinkChange(change.type, entityWithId);
             break;
+          case 'taskDependency':
+            await this.commitTaskDependencyChange(change.type, entityWithId);
+            break;
         }
       }
 
@@ -376,6 +481,23 @@ export class UnitOfWork implements IUnitOfWork {
         break;
       case 'deleted':
         await this.taskRecurringLinkRepository.deleteAsync(entity.id);
+        break;
+    }
+  }
+
+  /**
+   * Commit a task dependency change to the repository
+   */
+  private async commitTaskDependencyChange(type: 'new' | 'modified' | 'deleted', entity: { id: string }): Promise<void> {
+    switch (type) {
+      case 'new':
+        await this.taskDependencyRepository.createAsync(entity as never);
+        break;
+      case 'modified':
+        await this.taskDependencyRepository.updateAsync(entity.id, entity as never);
+        break;
+      case 'deleted':
+        await this.taskDependencyRepository.deleteAsync(entity.id);
         break;
     }
   }

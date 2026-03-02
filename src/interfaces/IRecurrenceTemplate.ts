@@ -1,4 +1,5 @@
 import type { IInterval } from './IInterval.js';
+import type { ISubtaskTemplate } from './ISubtaskTemplate.js';
 
 /**
  * IRecurrenceTemplate Interface
@@ -17,4 +18,8 @@ export interface IRecurrenceTemplate {
   weekday?: number;
   /** Optional: nth occurrence of weekday in month (1-5 for nth, -1 for last) */
   occurrenceInMonth?: number;
+  /** Duration of the task in days (used to calculate dueDate from startDate) */
+  duration?: number;
+  /** Subtask templates - generated when recurring task is created */
+  subtaskTemplates?: ISubtaskTemplate[];
 }

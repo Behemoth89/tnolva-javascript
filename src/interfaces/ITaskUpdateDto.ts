@@ -17,6 +17,8 @@ export interface ITaskUpdateDto {
   status?: EStatus;
   /** Priority level of the task */
   priority?: EPriority;
+  /** Start date for the task */
+  startDate?: Date;
   /** Due date for the task */
   dueDate?: Date;
   /** Tags associated with the task */
