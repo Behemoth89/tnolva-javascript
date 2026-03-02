@@ -37,5 +37,4 @@ export type { ITaskRecurringLinkRepository } from './repositories/ITaskRecurring
 
 // Unit of Work Interfaces
 export type { IUnitOfWork } from './IUnitOfWork.js';
-export type { EEntityType } from '../enums/EEntityType.js';
 export type { IUnitOfWorkFactory } from './IUnitOfWorkFactory.js';

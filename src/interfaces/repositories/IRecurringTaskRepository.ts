@@ -1,6 +1,6 @@
 import type { IRepository } from './IRepository.js';
-import type { IRecurringTaskEntity } from '../entities/IRecurringTaskEntity.js';
-import type { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
+import type { IRecurringTaskEntity } from '../index.js';
+import type { ERecurringTaskStatus } from '../../enums/index.js';
 
 /**
  * IRecurringTaskRepository Interface

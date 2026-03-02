@@ -1,4 +1,4 @@
-import type { EPriority } from '../../enums/EPriority.js';
+import type { EPriority } from '../../enums/index.js';
 
 /**
  * ISubtaskTemplateCreateDto Interface

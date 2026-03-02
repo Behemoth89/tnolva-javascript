@@ -1,7 +1,5 @@
 import type { IRepository } from './IRepository.js';
-import type { ITaskRecurringLinkEntity } from '../entities/ITaskRecurringLinkEntity.js';
-
-export type { ITaskRecurringLinkEntity } from '../entities/ITaskRecurringLinkEntity.js';
+import type { ITaskRecurringLinkEntity } from '../index.js';
 
 /**
  * ITaskRecurringLinkRepository Interface

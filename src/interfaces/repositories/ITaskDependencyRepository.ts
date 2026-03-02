@@ -1,4 +1,4 @@
-import type { ITaskDependencyEntity } from '../entities/ITaskDependencyEntity.js';
+import type { ITaskDependencyEntity } from '../index.js';
 
 /**
  * ITaskDependencyRepository Interface

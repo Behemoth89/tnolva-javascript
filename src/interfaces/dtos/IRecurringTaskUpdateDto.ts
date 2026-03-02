@@ -1,6 +1,5 @@
-import type { IInterval } from '../entities/IInterval.js';
-import type { EPriority } from '../../enums/EPriority.js';
-import type { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
+import type { IInterval } from '../index.js';
+import type { EPriority, ERecurringTaskStatus } from '../../enums/index.js';
 
 /**
  * IRecurringTaskUpdateDto Interface

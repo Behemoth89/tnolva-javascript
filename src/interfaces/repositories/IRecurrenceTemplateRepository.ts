@@ -1,5 +1,5 @@
 import type { IRepository } from './IRepository.js';
-import type { IRecurrenceTemplateEntity } from '../entities/IRecurrenceTemplateEntity.js';
+import type { IRecurrenceTemplateEntity } from '../index.js';
 
 /**
  * IRecurrenceTemplateRepository Interface

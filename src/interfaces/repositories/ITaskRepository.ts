@@ -1,7 +1,6 @@
 import type { IRepository } from './IRepository.js';
-import type { ITaskEntity } from '../entities/ITaskEntity.js';
-import type { EStatus } from '../../enums/EStatus.js';
-import type { EPriority } from '../../enums/EPriority.js';
+import type { ITaskEntity } from '../index.js';
+import type { EStatus, EPriority } from '../../enums/index.js';
 
 /**
  * ITaskRepository Interface

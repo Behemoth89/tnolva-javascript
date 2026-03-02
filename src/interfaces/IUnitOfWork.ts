@@ -1,13 +1,11 @@
 import type { ITaskRepository } from './repositories/ITaskRepository.js';
 import type { ICategoryRepository } from './repositories/ICategoryRepository.js';
-import type { ITaskCategoryAssignmentEntity } from './entities/ITaskCategoryAssignmentEntity.js';
-import type { IEntityId } from './entities/IEntityId.js';
-import type { ITaskEntity } from './entities/ITaskEntity.js';
+import type { ITaskCategoryAssignmentEntity, IEntityId, ITaskEntity } from './index.js';
 import type { IRecurrenceTemplateRepository } from './repositories/IRecurrenceTemplateRepository.js';
 import type { IRecurringTaskRepository } from './repositories/IRecurringTaskRepository.js';
 import type { ITaskRecurringLinkRepository } from './repositories/ITaskRecurringLinkRepository.js';
 import type { ITaskDependencyRepository } from './repositories/ITaskDependencyRepository.js';
-import type { EEntityType } from '../enums/EEntityType.js';
+import type { EEntityType } from '../enums/index.js';
 
 /**
  * IUnitOfWork Interface

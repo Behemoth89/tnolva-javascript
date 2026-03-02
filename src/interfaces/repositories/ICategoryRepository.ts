@@ -1,6 +1,5 @@
 import type { IRepository } from './IRepository.js';
-import type { ITaskCategoryEntity } from '../entities/ITaskCategoryEntity.js';
-import type { ITaskCategoryAssignmentEntity } from '../entities/ITaskCategoryAssignmentEntity.js';
+import type { ITaskCategoryEntity, ITaskCategoryAssignmentEntity } from '../index.js';
 
 /**
  * ICategoryRepository Interface

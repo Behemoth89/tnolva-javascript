@@ -1,4 +1,4 @@
-import type { EDependencyType } from '../../enums/EDependencyType.js';
+import type { EDependencyType } from '../../enums/index.js';
 
 /**
  * ITaskDependencyCreateDto Interface

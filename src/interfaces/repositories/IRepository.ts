@@ -1,4 +1,4 @@
-import type { IEntityId } from '../entities/IEntityId.js';
+import type { IEntityId } from '../index.js';
 import type { IQueryBuilder } from '../../data/query/IQueryBuilder.js';
 
 /**
