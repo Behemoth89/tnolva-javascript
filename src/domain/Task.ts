@@ -1,13 +1,12 @@
 import { EStatus } from '../enums/EStatus.js';
 import { EPriority } from '../enums/EPriority.js';
-import type { ITask } from '../interfaces/ITask.js';
-import type { ITaskCreateDto } from '../interfaces/ITaskCreateDto.js';
+import type { ITaskEntity, ITaskCreateDto } from '../interfaces/index.js';
 
 /**
  * Task Entity Class - Pure data holder
  * Business logic is handled by BLL TaskService
  */
-export class Task implements ITask {
+export class Task implements ITaskEntity {
   id: string;
   title: string;
   description?: string;
@@ -46,7 +45,7 @@ export class Task implements ITask {
    * Convert to plain object
    * @returns Plain object representation
    */
-  toObject(): ITask {
+  toObject(): ITaskEntity {
     return {
       id: this.id,
       title: this.title,

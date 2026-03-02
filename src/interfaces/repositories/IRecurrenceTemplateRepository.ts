@@ -1,11 +1,11 @@
 import type { IRepository } from './IRepository.js';
-import type { IRecurrenceTemplate } from './IRecurrenceTemplate.js';
+import type { IRecurrenceTemplateEntity } from '../entities/IRecurrenceTemplateEntity.js';
 
 /**
  * IRecurrenceTemplateRepository Interface
  * Extends IRepository with recurrence template-specific operations
  */
-export interface IRecurrenceTemplateRepository extends IRepository<IRecurrenceTemplate> {
+export interface IRecurrenceTemplateRepository extends IRepository<IRecurrenceTemplateEntity> {
   /**
    * Initialize repository with default templates if empty
    */
@@ -14,12 +14,12 @@ export interface IRecurrenceTemplateRepository extends IRepository<IRecurrenceTe
   /**
    * Get all templates asynchronously
    */
-  getAllAsync(): Promise<IRecurrenceTemplate[]>;
+  getAllAsync(): Promise<IRecurrenceTemplateEntity[]>;
 
   /**
    * Get template by ID asynchronously
    * @param id - Template ID
    * @returns The template, or null if not found
    */
-  getByIdAsync(id: string): Promise<IRecurrenceTemplate | null>;
+  getByIdAsync(id: string): Promise<IRecurrenceTemplateEntity | null>;
 }

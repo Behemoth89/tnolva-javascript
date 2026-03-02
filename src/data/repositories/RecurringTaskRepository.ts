@@ -1,5 +1,4 @@
-import type { IRecurringTaskRepository } from '../../interfaces/IRecurringTaskRepository.js';
-import type { IRecurringTask } from '../../interfaces/IRecurringTask.js';
+import type { IRecurringTaskRepository, IRecurringTaskEntity } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { BaseRepository } from './BaseRepository.js';
 import { STORAGE_KEY_RECURRING_TASKS } from '../storageKeys.js';
@@ -7,9 +6,9 @@ import { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
 
 /**
  * RecurringTaskRepository Class
- * Implements IRecurringTaskRepository extending BaseRepository<IRecurringTask>
+ * Implements IRecurringTaskRepository extending BaseRepository<IRecurringTaskEntity>
  */
-export class RecurringTaskRepository extends BaseRepository<IRecurringTask> implements IRecurringTaskRepository {
+export class RecurringTaskRepository extends BaseRepository<IRecurringTaskEntity> implements IRecurringTaskRepository {
   /**
    * Creates a new RecurringTaskRepository instance
    * @param storage - Local storage adapter
@@ -21,21 +20,21 @@ export class RecurringTaskRepository extends BaseRepository<IRecurringTask> impl
   /**
    * Get entity ID
    */
-  protected getEntityId(entity: IRecurringTask): string {
+  protected getEntityId(entity: IRecurringTaskEntity): string {
     return entity.id;
   }
 
   /**
    * Set entity ID
    */
-  protected setEntityId(entity: IRecurringTask, id: string): void {
+  protected setEntityId(entity: IRecurringTaskEntity, id: string): void {
     entity.id = id;
   }
 
   /**
    * Get all recurring tasks with a specific status
    */
-  getByStatus(status: ERecurringTaskStatus): IRecurringTask[] {
+  getByStatus(status: ERecurringTaskStatus): IRecurringTaskEntity[] {
     const items = this.getAll();
     return items.filter((task) => task.status === status);
   }
@@ -43,7 +42,7 @@ export class RecurringTaskRepository extends BaseRepository<IRecurringTask> impl
   /**
    * Get all recurring tasks with a specific status asynchronously
    */
-  async getByStatusAsync(status: ERecurringTaskStatus): Promise<IRecurringTask[]> {
+  async getByStatusAsync(status: ERecurringTaskStatus): Promise<IRecurringTaskEntity[]> {
     const items = await this.getAllAsync();
     return items.filter((task) => task.status === status);
   }
@@ -51,14 +50,14 @@ export class RecurringTaskRepository extends BaseRepository<IRecurringTask> impl
   /**
    * Get all active recurring tasks
    */
-  getActive(): IRecurringTask[] {
+  getActive(): IRecurringTaskEntity[] {
     return this.getByStatus(ERecurringTaskStatus.ACTIVE);
   }
 
   /**
    * Get all active recurring tasks asynchronously
    */
-  async getActiveAsync(): Promise<IRecurringTask[]> {
+  async getActiveAsync(): Promise<IRecurringTaskEntity[]> {
     return this.getByStatusAsync(ERecurringTaskStatus.ACTIVE);
   }
 }

@@ -1,12 +1,4 @@
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
-import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
-import type { IRecurrenceTemplateRepository } from '../../interfaces/IRecurrenceTemplateRepository.js';
-import type { IRecurringTaskRepository } from '../../interfaces/IRecurringTaskRepository.js';
-import type { ITaskRecurringLinkRepository } from '../../interfaces/ITaskRecurringLinkRepository.js';
-import type { ITaskDependencyRepository } from '../../interfaces/ITaskDependencyRepository.js';
-import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
-import type { ITask } from '../../interfaces/ITask.js';
+import type { IUnitOfWork, ITaskRepository, ICategoryRepository, IRecurrenceTemplateRepository, IRecurringTaskRepository, ITaskRecurringLinkRepository, ITaskDependencyRepository, ITaskCategoryAssignmentEntity, ITaskEntity } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { TaskRepository } from '../repositories/TaskRepository.js';
 import { CategoryRepository } from '../repositories/CategoryRepository.js';
@@ -109,7 +101,7 @@ export class UnitOfWork implements IUnitOfWork {
   /**
    * Assign a task to a category
    */
-  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null> {
+  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
     return this.categoryRepository.assignTaskToCategory(taskId, categoryId);
   }
 
@@ -126,7 +118,7 @@ export class UnitOfWork implements IUnitOfWork {
    * @param taskId - ID of the task to complete
    * @returns The newly generated task if recurrence was created, null otherwise
    */
-  async completeTaskWithRecurrence(taskId: string): Promise<ITask | null> {
+  async completeTaskWithRecurrence(taskId: string): Promise<ITaskEntity | null> {
     // Get the task
     const taskData = await this.taskRepository.getByIdAsync(taskId);
     if (!taskData) {
@@ -139,7 +131,7 @@ export class UnitOfWork implements IUnitOfWork {
     this.registerModified(taskData, 'task');
 
     // Check if we need to generate a recurrence
-    let newRecurringTask: ITask | null = null;
+    let newRecurringTask: ITaskEntity | null = null;
     if (taskData.recurrenceTemplateId) {
       newRecurringTask = await this.generateNextRecurringTask(taskData);
       if (newRecurringTask) {
@@ -147,7 +139,7 @@ export class UnitOfWork implements IUnitOfWork {
         this.registerNew(newRecurringTask, 'task');
 
         // Register subtasks if any
-        const subtasks = (newRecurringTask as any)._subtasks as ITask[] | undefined;
+        const subtasks = (newRecurringTask as any)._subtasks as ITaskEntity[] | undefined;
         if (subtasks && subtasks.length > 0) {
           const { generateGuid } = await import('../../utils/index.js');
           const { EDependencyType } = await import('../../enums/EDependencyType.js');
@@ -180,7 +172,7 @@ export class UnitOfWork implements IUnitOfWork {
    * Generate the next recurring task instance
    * This is inlined here to avoid circular dependency between DAL and BLL layers
    */
-  private async generateNextRecurringTask(completedTask: ITask): Promise<ITask | null> {
+  private async generateNextRecurringTask(completedTask: ITaskEntity): Promise<ITaskEntity | null> {
     if (!completedTask.recurrenceTemplateId) {
       return null;
     }
@@ -206,7 +198,7 @@ export class UnitOfWork implements IUnitOfWork {
 
     // Generate new task instance
     const { generateGuid } = await import('../../utils/index.js');
-    const newTask: ITask = {
+    const newTask: ITaskEntity = {
       id: generateGuid(),
       title: completedTask.title,
       description: completedTask.description,
@@ -236,9 +228,9 @@ export class UnitOfWork implements IUnitOfWork {
    * Generate subtasks from subtask templates
    * Returns array of subtasks to be registered
    */
-  private async generateSubtasks(subtaskTemplates: { id: string; title: string; description?: string; priority?: import('../../enums/EPriority.js').EPriority; startDateOffset: number; duration?: number }[], parentTask: ITask): Promise<ITask[]> {
+  private async generateSubtasks(subtaskTemplates: { id: string; title: string; description?: string; priority?: import('../../enums/EPriority.js').EPriority; startDateOffset: number; duration?: number }[], parentTask: ITaskEntity): Promise<ITaskEntity[]> {
     const { generateGuid } = await import('../../utils/index.js');
-    const subtasks: ITask[] = [];
+    const subtasks: ITaskEntity[] = [];
 
     for (const subtaskTemplate of subtaskTemplates) {
       // Calculate subtask startDate: parent.startDate + offset
@@ -261,7 +253,7 @@ export class UnitOfWork implements IUnitOfWork {
       }
 
       // Create the subtask
-      const subtask: ITask = {
+      const subtask: ITaskEntity = {
         id: generateGuid(),
         title: subtaskTemplate.title,
         description: subtaskTemplate.description,

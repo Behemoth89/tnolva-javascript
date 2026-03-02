@@ -1,7 +1,5 @@
 import type { TaskCategory } from '../../domain/TaskCategory.js';
-import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
-import type { ITaskCategory } from '../../interfaces/ITaskCategory.js';
-import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
+import type { ICategoryRepository, ITaskCategoryEntity, ITaskCategoryAssignmentEntity } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { BaseRepository } from './BaseRepository.js';
 import { STORAGE_KEY_CATEGORIES, STORAGE_KEY_CATEGORY_ASSIGNMENTS } from '../storageKeys.js';
@@ -41,7 +39,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Get category by name
    */
-  async getByName(name: string): Promise<ITaskCategory | null> {
+  async getByName(name: string): Promise<ITaskCategoryEntity | null> {
     const items = await this.getAllAsync();
     return items.find((category) => category.name.toLowerCase() === name.toLowerCase()) || null;
   }
@@ -49,22 +47,22 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Get all assignments
    */
-  private async getAssignmentsAsync(): Promise<ITaskCategoryAssignment[]> {
-    const data = await this.storage.getItemAsync<ITaskCategoryAssignment[]>(this.assignmentsStorageKey);
+  private async getAssignmentsAsync(): Promise<ITaskCategoryAssignmentEntity[]> {
+    const data = await this.storage.getItemAsync<ITaskCategoryAssignmentEntity[]>(this.assignmentsStorageKey);
     return data || [];
   }
 
   /**
    * Save all assignments
    */
-  private async saveAssignmentsAsync(assignments: ITaskCategoryAssignment[]): Promise<void> {
+  private async saveAssignmentsAsync(assignments: ITaskCategoryAssignmentEntity[]): Promise<void> {
     await this.storage.setItemAsync(this.assignmentsStorageKey, assignments);
   }
 
   /**
    * Assign a task to a category
    */
-  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null> {
+  async assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
     // Check if category exists
     const category = await this.getByIdAsync(categoryId);
     if (!category) {
@@ -83,7 +81,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
 
     // Create new assignment
     const now = new Date().toISOString();
-    const assignment: ITaskCategoryAssignment = {
+    const assignment: ITaskCategoryAssignmentEntity = {
       id: generateGuid(),
       taskId,
       categoryId,
@@ -119,7 +117,7 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   /**
    * Get all categories for a task
    */
-  async getCategoriesForTask(taskId: string): Promise<ITaskCategory[]> {
+  async getCategoriesForTask(taskId: string): Promise<ITaskCategoryEntity[]> {
     const assignments = await this.getAssignmentsAsync();
     const categoryIds = assignments
       .filter((a) => a.taskId === taskId)

@@ -1,8 +1,5 @@
 import type { ITaskDependencyService, DueDateConflictResult } from '../interfaces/ITaskDependencyService.js';
-import type { ITask } from '../../interfaces/ITask.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { ITaskDependencyRepository } from '../../interfaces/ITaskDependencyRepository.js';
-import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
+import type { ITaskEntity, IUnitOfWork, ITaskDependencyRepository, ITaskRepository } from '../../interfaces/index.js';
 import { EDependencyType } from '../../enums/EDependencyType.js';
 import { EStatus } from '../../enums/EStatus.js';
 import { TaskDependency } from '../../domain/TaskDependency.js';
@@ -126,7 +123,7 @@ export class TaskDependencyService implements ITaskDependencyService {
   /**
    * Get all subtasks of a main task
    */
-  async getSubtasksAsync(parentTaskId: string): Promise<ITask[]> {
+  async getSubtasksAsync(parentTaskId: string): Promise<ITaskEntity[]> {
     const dependents = await this.taskDependencyRepository.getDependentsAsync(parentTaskId);
     const subtaskIds = dependents.map(d => d.taskId);
     
@@ -137,7 +134,7 @@ export class TaskDependencyService implements ITaskDependencyService {
   /**
    * Get the parent task of a subtask
    */
-  async getParentTaskAsync(subtaskId: string): Promise<ITask | null> {
+  async getParentTaskAsync(subtaskId: string): Promise<ITaskEntity | null> {
     const dependencies = await this.taskDependencyRepository.getDependenciesForTaskAsync(subtaskId);
     
     if (dependencies.length === 0) {
@@ -206,7 +203,7 @@ export class TaskDependencyService implements ITaskDependencyService {
   /**
    * Adjust subtask due date to match parent due date
    */
-  async adjustSubtaskDueDateAsync(subtaskId: string): Promise<ITask | null> {
+  async adjustSubtaskDueDateAsync(subtaskId: string): Promise<ITaskEntity | null> {
     const parentTask = await this.getParentTaskAsync(subtaskId);
     if (!parentTask || !parentTask.dueDate) {
       return null;
@@ -217,7 +214,7 @@ export class TaskDependencyService implements ITaskDependencyService {
       return null;
     }
 
-    const updatedSubtask: ITask = {
+    const updatedSubtask: ITaskEntity = {
       ...subtask,
       dueDate: parentTask.dueDate,
       updatedAt: new Date().toISOString(),
@@ -232,7 +229,7 @@ export class TaskDependencyService implements ITaskDependencyService {
   /**
    * Extend parent task due date to match subtask due date
    */
-  async extendParentDueDateAsync(subtaskId: string): Promise<ITask | null> {
+  async extendParentDueDateAsync(subtaskId: string): Promise<ITaskEntity | null> {
     const subtask = await this.taskRepository.getByIdAsync(subtaskId);
     if (!subtask || !subtask.dueDate) {
       return null;
@@ -243,7 +240,7 @@ export class TaskDependencyService implements ITaskDependencyService {
       return null;
     }
 
-    const updatedParent: ITask = {
+    const updatedParent: ITaskEntity = {
       ...parentTask,
       dueDate: subtask.dueDate,
       updatedAt: new Date().toISOString(),

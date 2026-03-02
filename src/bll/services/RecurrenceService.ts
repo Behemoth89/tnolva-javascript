@@ -1,9 +1,5 @@
 import type { IRecurrenceService } from '../interfaces/IRecurrenceService.js';
-import type { ITask } from '../../interfaces/ITask.js';
-import type { IRecurrenceTemplate } from '../../interfaces/IRecurrenceTemplate.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { IRecurrenceTemplateRepository } from '../../interfaces/IRecurrenceTemplateRepository.js';
-import type { IInterval } from '../../interfaces/IInterval.js';
+import type { ITaskEntity, IRecurrenceTemplateEntity, IUnitOfWork, IRecurrenceTemplateRepository, IInterval } from '../../interfaces/index.js';
 import { generateGuid } from '../../utils/index.js';
 
 /**
@@ -34,21 +30,21 @@ export class RecurrenceService implements IRecurrenceService {
   /**
    * Get all recurrence templates
    */
-  async getAllTemplatesAsync(): Promise<IRecurrenceTemplate[]> {
+  async getAllTemplatesAsync(): Promise<IRecurrenceTemplateEntity[]> {
     return this.recurrenceTemplateRepository.getAllAsync();
   }
 
   /**
    * Get a recurrence template by ID
    */
-  async getTemplateByIdAsync(id: string): Promise<IRecurrenceTemplate | null> {
+  async getTemplateByIdAsync(id: string): Promise<IRecurrenceTemplateEntity | null> {
     return this.recurrenceTemplateRepository.getByIdAsync(id);
   }
 
   /**
    * Calculate the next occurrence date for a template
    */
-  async calculateNextOccurrenceAsync(template: IRecurrenceTemplate, currentDate: Date): Promise<Date> {
+  async calculateNextOccurrenceAsync(template: IRecurrenceTemplateEntity, currentDate: Date): Promise<Date> {
     // Validate intervals
     this.validateIntervals(template.intervals);
 
@@ -134,7 +130,7 @@ export class RecurrenceService implements IRecurrenceService {
    * Calculate occurrence for weekday-based recurrence (e.g., "First Monday of month")
    */
   private calculateWeekdayBasedOccurrence(
-    template: IRecurrenceTemplate,
+    template: IRecurrenceTemplateEntity,
     currentDate: Date
   ): Date {
     const { weekday, occurrenceInMonth, intervals } = template;
@@ -208,7 +204,7 @@ export class RecurrenceService implements IRecurrenceService {
    * Generate the next task instance from a completed recurring task
    * Uses UOW change tracking for transactional consistency
    */
-  async generateNextTaskAsync(completedTask: ITask): Promise<ITask | null> {
+  async generateNextTaskAsync(completedTask: ITaskEntity): Promise<ITaskEntity | null> {
     if (!completedTask.recurrenceTemplateId) {
       return null;
     }
@@ -223,7 +219,7 @@ export class RecurrenceService implements IRecurrenceService {
     const nextDueDate = await this.calculateNextOccurrenceAsync(template, currentDueDate);
 
     // Generate new task instance
-    const newTask: ITask = {
+    const newTask: ITaskEntity = {
       id: generateGuid(),
       title: completedTask.title,
       description: completedTask.description,
@@ -247,7 +243,7 @@ export class RecurrenceService implements IRecurrenceService {
   /**
    * Check if a task can generate a next instance
    */
-  canGenerateNextInstance(task: ITask): boolean {
+  canGenerateNextInstance(task: ITaskEntity): boolean {
     return !!task.recurrenceTemplateId;
   }
 }

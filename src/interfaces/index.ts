@@ -2,30 +2,42 @@
  * Interfaces Index
  * Exports all interfaces from a single file
  */
-export type { IEntityId } from './IEntityId.js';
-export type { IBaseEntity } from './IBaseEntity.js';
-export type { ITask } from './ITask.js';
-export type { ITaskCreateDto } from './ITaskCreateDto.js';
-export type { ITaskUpdateDto } from './ITaskUpdateDto.js';
-export type { ITaskCategory } from './ITaskCategory.js';
-export type { ITaskCategoryCreateDto } from './ITaskCategoryCreateDto.js';
-export type { ITaskCategoryUpdateDto } from './ITaskCategoryUpdateDto.js';
-export type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
-export type { ICategoryRepository } from './ICategoryRepository.js';
-export type { IInterval } from './IInterval.js';
-export type { IRecurrenceTemplate } from './IRecurrenceTemplate.js';
-export type { IRecurringTask, IRecurringTaskCreateDto, IRecurringTaskUpdateDto } from './IRecurringTask.js';
-export type { ERecurringTaskStatus } from '../enums/ERecurringTaskStatus.js';
-export type { ITaskRecurringLink } from './ITaskRecurringLink.js';
-export type { ITaskRecurringLinkRepository } from './ITaskRecurringLinkRepository.js';
-export type { ITaskDependency, ITaskDependencyCreateDto } from './ITaskDependency.js';
-export type { ITaskDependencyRepository } from './ITaskDependencyRepository.js';
-export type { ISubtaskTemplate, ISubtaskTemplateCreateDto } from './ISubtaskTemplate.js';
 
-// DAL Interfaces
-export type { IRepository } from './IRepository.js';
-export type { ITaskRepository } from './ITaskRepository.js';
-export type { IRecurrenceTemplateRepository } from './IRecurrenceTemplateRepository.js';
-export type { IRecurringTaskRepository } from './IRecurringTaskRepository.js';
-export type { IUnitOfWork } from './IUnitOfWork.js';
+// Entity Interfaces
+export type { IEntityId } from './entities/IEntityId.js';
+export type { IBaseEntity } from './entities/IBaseEntity.js';
+export type { ITaskEntity } from './entities/ITaskEntity.js';
+export type { ITaskCategoryEntity } from './entities/ITaskCategoryEntity.js';
+export type { ITaskCategoryAssignmentEntity } from './entities/ITaskCategoryAssignmentEntity.js';
+export type { IInterval } from './entities/IInterval.js';
+export type { IRecurrenceTemplateEntity } from './entities/IRecurrenceTemplateEntity.js';
+export type { IRecurringTaskEntity } from './entities/IRecurringTaskEntity.js';
+export type { ITaskRecurringLinkEntity } from './entities/ITaskRecurringLinkEntity.js';
+export type { ITaskDependencyEntity } from './entities/ITaskDependencyEntity.js';
+export type { ISubtaskTemplate } from './entities/ISubtaskTemplate.js';
+
+// DTO Interfaces
+export type { ITaskCreateDto } from './dtos/ITaskCreateDto.js';
+export type { ITaskUpdateDto } from './dtos/ITaskUpdateDto.js';
+export type { ITaskCategoryCreateDto } from './dtos/ITaskCategoryCreateDto.js';
+export type { ITaskCategoryUpdateDto } from './dtos/ITaskCategoryUpdateDto.js';
+export type { IRecurringTaskCreateDto } from './dtos/IRecurringTaskCreateDto.js';
+export type { IRecurringTaskUpdateDto } from './dtos/IRecurringTaskUpdateDto.js';
+export type { ITaskDependencyCreateDto } from './dtos/ITaskDependencyCreateDto.js';
+export type { ISubtaskTemplateCreateDto } from './dtos/ISubtaskTemplateCreateDto.js';
+
+// Repository Interfaces
+export type { IRepository } from './repositories/IRepository.js';
+export type { ITaskRepository } from './repositories/ITaskRepository.js';
+export type { ICategoryRepository } from './repositories/ICategoryRepository.js';
+export type { IRecurrenceTemplateRepository } from './repositories/IRecurrenceTemplateRepository.js';
+export type { IRecurringTaskRepository } from './repositories/IRecurringTaskRepository.js';
+export type { ITaskDependencyRepository } from './repositories/ITaskDependencyRepository.js';
+export type { ITaskRecurringLinkRepository } from './repositories/ITaskRecurringLinkRepository.js';
+
+// Unit of Work Interfaces
+export type { IUnitOfWork, EntityType } from './IUnitOfWork.js';
 export type { IUnitOfWorkFactory } from './IUnitOfWorkFactory.js';
+
+// Enums
+export type { ERecurringTaskStatus } from '../enums/ERecurringTaskStatus.js';

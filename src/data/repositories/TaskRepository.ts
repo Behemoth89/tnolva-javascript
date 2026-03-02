@@ -1,5 +1,5 @@
 import type { Task } from '../../domain/Task.js';
-import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
+import type { ITaskRepository } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import type { IQueryBuilder } from '../query/IQueryBuilder.js';
 import { BaseRepository } from './BaseRepository.js';

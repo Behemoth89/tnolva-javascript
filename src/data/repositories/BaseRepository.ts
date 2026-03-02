@@ -1,7 +1,5 @@
-import type { IEntityId } from '../../interfaces/IEntityId.js';
+import type { IEntityId, IRepository, IBaseEntity } from '../../interfaces/index.js';
 import type { IStorageAdapter } from '../adapters/IStorageAdapter.js';
-import type { IRepository } from '../../interfaces/IRepository.js';
-import type { IBaseEntity } from '../../interfaces/IBaseEntity.js';
 import type { IQueryBuilder } from '../query/IQueryBuilder.js';
 import { QueryBuilder } from '../query/QueryBuilder.js';
 import { generateGuid } from '../../utils/index.js';

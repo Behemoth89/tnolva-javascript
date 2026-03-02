@@ -3,7 +3,7 @@ import type { ITaskService } from './interfaces/ITaskService.js';
 import type { ICategoryService } from './interfaces/ICategoryService.js';
 import type { IRecurrenceService } from './interfaces/IRecurrenceService.js';
 import type { IRecurringTaskService } from './interfaces/IRecurringTaskService.js';
-import type { IUnitOfWork } from '../interfaces/IUnitOfWork.js';
+import type { IUnitOfWork } from '../interfaces/index.js';
 import { TaskService } from './services/TaskService.js';
 import { CategoryService } from './services/CategoryService.js';
 import { RecurrenceService } from './services/RecurrenceService.js';

@@ -1,11 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RecurrenceService } from '../bll/services/RecurrenceService.js';
 import type { IRecurrenceService } from '../bll/interfaces/IRecurrenceService.js';
-import type { IUnitOfWork } from '../interfaces/IUnitOfWork.js';
-import type { ITaskRepository } from '../interfaces/ITaskRepository.js';
-import type { IRecurrenceTemplateRepository } from '../interfaces/IRecurrenceTemplateRepository.js';
-import type { ITask } from '../interfaces/ITask.js';
-import type { IRecurrenceTemplate } from '../interfaces/IRecurrenceTemplate.js';
+import type { IUnitOfWork, ITaskRepository, IRecurrenceTemplateRepository, ITaskEntity, IRecurrenceTemplateEntity } from '../interfaces/index.js';
 import { EStatus, EPriority } from '../enums/index.js';
 
 describe('RecurrenceService', () => {
@@ -14,7 +10,7 @@ describe('RecurrenceService', () => {
   let mockTaskRepository: ITaskRepository;
   let mockUnitOfWork: IUnitOfWork;
 
-  const mockTemplates: IRecurrenceTemplate[] = [
+  const mockTemplates: IRecurrenceTemplateEntity[] = [
     {
       id: 'template-1',
       name: 'Daily',
@@ -40,7 +36,7 @@ describe('RecurrenceService', () => {
       getByIdAsync: vi.fn().mockImplementation((id: string) => {
         return Promise.resolve(mockTemplates.find(t => t.id === id) || null);
       }),
-      createAsync: vi.fn().mockImplementation((template: IRecurrenceTemplate) => {
+      createAsync: vi.fn().mockImplementation((template: IRecurrenceTemplateEntity) => {
         mockTemplates.push(template);
         return Promise.resolve(template);
       }),
@@ -65,11 +61,11 @@ describe('RecurrenceService', () => {
             dueDate: new Date('2024-01-15'),
             createdAt: '2024-01-01T00:00:00.000Z',
             updatedAt: '2024-01-15T00:00:00.000Z',
-          } as ITask);
+          } as ITaskEntity);
         }
         return Promise.resolve(null);
       }),
-      createAsync: vi.fn().mockImplementation((task: ITask) => {
+      createAsync: vi.fn().mockImplementation((task: ITaskEntity) => {
         return Promise.resolve(task);
       }),
     } as unknown as ITaskRepository;
@@ -140,7 +136,7 @@ describe('RecurrenceService', () => {
     });
 
     it('should throw error for invalid interval value', async () => {
-      const template: IRecurrenceTemplate = {
+      const template: IRecurrenceTemplateEntity = {
         id: 'invalid',
         name: 'Invalid',
         intervals: [{ unit: 'days', value: 0 }],
@@ -154,7 +150,7 @@ describe('RecurrenceService', () => {
 
   describe('generateNextTaskAsync', () => {
     it('should generate next task from completed recurring task', async () => {
-      const completedTask: ITask = {
+      const completedTask: ITaskEntity = {
         id: 'task-1',
         title: 'Test Task',
         description: 'Test Description',
@@ -176,7 +172,7 @@ describe('RecurrenceService', () => {
     });
 
     it('should return null for task without recurrence template', async () => {
-      const completedTask: ITask = {
+      const completedTask: ITaskEntity = {
         id: 'task-2',
         title: 'Non-recurring Task',
         status: EStatus.DONE,
@@ -193,7 +189,7 @@ describe('RecurrenceService', () => {
     });
 
     it('should return null for non-existent template', async () => {
-      const completedTask: ITask = {
+      const completedTask: ITaskEntity = {
         id: 'task-3',
         title: 'Task with bad template',
         status: EStatus.DONE,
@@ -213,7 +209,7 @@ describe('RecurrenceService', () => {
 
   describe('canGenerateNextInstance', () => {
     it('should return true for task with recurrence template', () => {
-      const task: ITask = {
+      const task: ITaskEntity = {
         id: 'task-1',
         title: 'Test',
         status: EStatus.TODO,
@@ -228,7 +224,7 @@ describe('RecurrenceService', () => {
     });
 
     it('should return false for task without recurrence template', () => {
-      const task: ITask = {
+      const task: ITaskEntity = {
         id: 'task-2',
         title: 'Test',
         status: EStatus.TODO,

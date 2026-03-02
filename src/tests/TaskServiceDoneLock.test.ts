@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TaskService } from '../../src/bll/services/TaskService.js';
-import type { IUnitOfWork } from '../../src/interfaces/IUnitOfWork.js';
-import type { ITask } from '../../src/interfaces/ITask.js';
+import type { IUnitOfWork, ITaskEntity } from '../../src/interfaces/index.js';
 import { EStatus } from '../../src/enums/EStatus.js';
 
 describe('TaskService - Done Lock Behavior', () => {
@@ -9,7 +8,7 @@ describe('TaskService - Done Lock Behavior', () => {
   let mockTaskRepository: any;
   let taskService: TaskService;
 
-  const createMockTask = (overrides: Partial<ITask> = {}): ITask => ({
+  const createMockTask = (overrides: Partial<ITaskEntity> = {}): ITaskEntity => ({
     id: 'task-1',
     title: 'Test Task',
     status: EStatus.TODO,

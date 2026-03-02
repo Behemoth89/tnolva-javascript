@@ -2,10 +2,10 @@ import type { IInterval } from './IInterval.js';
 import type { ISubtaskTemplate } from './ISubtaskTemplate.js';
 
 /**
- * IRecurrenceTemplate Interface
+ * IRecurrenceTemplateEntity Interface
  * Defines the structure for recurrence template objects
  */
-export interface IRecurrenceTemplate {
+export interface IRecurrenceTemplateEntity {
   /** Unique identifier for the template */
   id: string;
   /** User-friendly name (e.g., "Every 2 weeks", "Monthly on 15th") */

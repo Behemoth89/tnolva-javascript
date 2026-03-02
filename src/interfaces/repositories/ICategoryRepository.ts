@@ -1,19 +1,19 @@
 import type { IRepository } from './IRepository.js';
-import type { ITaskCategory } from './ITaskCategory.js';
-import type { ITaskCategoryAssignment } from './ITaskCategoryAssignment.js';
+import type { ITaskCategoryEntity } from '../entities/ITaskCategoryEntity.js';
+import type { ITaskCategoryAssignmentEntity } from '../entities/ITaskCategoryAssignmentEntity.js';
 
 /**
  * ICategoryRepository Interface
  * Extends IRepository with category-specific operations including assignments
  */
-export interface ICategoryRepository extends IRepository<ITaskCategory> {
+export interface ICategoryRepository extends IRepository<ITaskCategoryEntity> {
   /**
    * Assign a task to a category
    * @param taskId - ID of the task
    * @param categoryId - ID of the category
    * @returns The created assignment, or null if failed
    */
-  assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null>;
+  assignTaskToCategory(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null>;
 
   /**
    * Remove a task from a category
@@ -28,7 +28,7 @@ export interface ICategoryRepository extends IRepository<ITaskCategory> {
    * @param taskId - ID of the task
    * @returns Array of categories assigned to the task
    */
-  getCategoriesForTask(taskId: string): Promise<ITaskCategory[]>;
+  getCategoriesForTask(taskId: string): Promise<ITaskCategoryEntity[]>;
 
   /**
    * Get all tasks for a category
@@ -42,5 +42,5 @@ export interface ICategoryRepository extends IRepository<ITaskCategory> {
    * @param name - Name of the category
    * @returns The category if found, null otherwise
    */
-  getByName(name: string): Promise<ITaskCategory | null>;
+  getByName(name: string): Promise<ITaskCategoryEntity | null>;
 }

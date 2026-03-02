@@ -78,7 +78,7 @@ describe('RecurringTask', () => {
   });
 
   describe('fromExisting', () => {
-    it('should create a RecurringTask from an existing IRecurringTask object', () => {
+    it('should create a RecurringTask from an existing IRecurringTaskEntity object', () => {
       const existingTask: any = {
         id: 'existing-id',
         title: 'Existing Task',

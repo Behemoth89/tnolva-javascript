@@ -1,4 +1,4 @@
-import type { ITaskRecurringLink, ITaskRecurringLinkRepository } from '../../interfaces/ITaskRecurringLinkRepository.js';
+import type { ITaskRecurringLinkEntity, ITaskRecurringLinkRepository } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { BaseRepository } from './BaseRepository.js';
 import { STORAGE_KEY_TASK_RECURRING_LINKS } from '../storageKeys.js';
@@ -7,7 +7,7 @@ import { STORAGE_KEY_TASK_RECURRING_LINKS } from '../storageKeys.js';
  * TaskRecurringLinkRepository Class
  * Implements junction table operations for task-recurring relationships
  */
-export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLink> implements ITaskRecurringLinkRepository {
+export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLinkEntity> implements ITaskRecurringLinkRepository {
   /**
    * Creates a new TaskRecurringLinkRepository instance
    * @param storage - Local storage adapter
@@ -19,21 +19,21 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Get entity ID
    */
-  protected getEntityId(entity: ITaskRecurringLink): string {
+  protected getEntityId(entity: ITaskRecurringLinkEntity): string {
     return entity.id;
   }
 
   /**
    * Set entity ID
    */
-  protected setEntityId(entity: ITaskRecurringLink, id: string): void {
+  protected setEntityId(entity: ITaskRecurringLinkEntity, id: string): void {
     entity.id = id;
   }
 
   /**
    * Get all links for a specific recurring task
    */
-  getByRecurringTaskId(recurringTaskId: string): ITaskRecurringLink[] {
+  getByRecurringTaskId(recurringTaskId: string): ITaskRecurringLinkEntity[] {
     const items = this.getAll();
     return items.filter((link) => link.recurringTaskId === recurringTaskId);
   }
@@ -41,7 +41,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Get all links for a specific recurring task asynchronously
    */
-  async getByRecurringTaskIdAsync(recurringTaskId: string): Promise<ITaskRecurringLink[]> {
+  async getByRecurringTaskIdAsync(recurringTaskId: string): Promise<ITaskRecurringLinkEntity[]> {
     const items = await this.getAllAsync();
     return items.filter((link) => link.recurringTaskId === recurringTaskId);
   }
@@ -49,7 +49,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Get all links for a specific task
    */
-  getByTaskId(taskId: string): ITaskRecurringLink[] {
+  getByTaskId(taskId: string): ITaskRecurringLinkEntity[] {
     const items = this.getAll();
     return items.filter((link) => link.taskId === taskId);
   }
@@ -57,7 +57,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Get all links for a specific task asynchronously
    */
-  async getByTaskIdAsync(taskId: string): Promise<ITaskRecurringLink[]> {
+  async getByTaskIdAsync(taskId: string): Promise<ITaskRecurringLinkEntity[]> {
     const items = await this.getAllAsync();
     return items.filter((link) => link.taskId === taskId);
   }
@@ -65,7 +65,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Get link by both IDs
    */
-  getByBothIds(recurringTaskId: string, taskId: string): ITaskRecurringLink | null {
+  getByBothIds(recurringTaskId: string, taskId: string): ITaskRecurringLinkEntity | null {
     const items = this.getAll();
     return items.find((link) => link.recurringTaskId === recurringTaskId && link.taskId === taskId) || null;
   }
@@ -73,7 +73,7 @@ export class TaskRecurringLinkRepository extends BaseRepository<ITaskRecurringLi
   /**
    * Get link by both IDs asynchronously
    */
-  async getByBothIdsAsync(recurringTaskId: string, taskId: string): Promise<ITaskRecurringLink | null> {
+  async getByBothIdsAsync(recurringTaskId: string, taskId: string): Promise<ITaskRecurringLinkEntity | null> {
     const items = await this.getAllAsync();
     return items.find((link) => link.recurringTaskId === recurringTaskId && link.taskId === taskId) || null;
   }

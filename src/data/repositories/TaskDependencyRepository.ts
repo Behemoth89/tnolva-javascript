@@ -1,5 +1,4 @@
-import type { ITaskDependency } from '../../interfaces/ITaskDependency.js';
-import type { ITaskDependencyRepository } from '../../interfaces/ITaskDependencyRepository.js';
+import type { ITaskDependencyEntity, ITaskDependencyRepository } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { BaseRepository } from './BaseRepository.js';
 import { STORAGE_KEY_TASK_DEPENDENCIES } from '../storageKeys.js';
@@ -8,7 +7,7 @@ import { STORAGE_KEY_TASK_DEPENDENCIES } from '../storageKeys.js';
  * TaskDependencyRepository Class
  * Implements junction table operations for task dependencies
  */
-export class TaskDependencyRepository extends BaseRepository<ITaskDependency> implements ITaskDependencyRepository {
+export class TaskDependencyRepository extends BaseRepository<ITaskDependencyEntity> implements ITaskDependencyRepository {
   /**
    * Creates a new TaskDependencyRepository instance
    * @param storage - Local storage adapter
@@ -20,21 +19,21 @@ export class TaskDependencyRepository extends BaseRepository<ITaskDependency> im
   /**
    * Get entity ID
    */
-  protected getEntityId(entity: ITaskDependency): string {
+  protected getEntityId(entity: ITaskDependencyEntity): string {
     return entity.id;
   }
 
   /**
    * Set entity ID
    */
-  protected setEntityId(entity: ITaskDependency, id: string): void {
+  protected setEntityId(entity: ITaskDependencyEntity, id: string): void {
     entity.id = id;
   }
 
   /**
    * Get all dependencies for a task (tasks this task depends on)
    */
-  getDependenciesForTask(taskId: string): ITaskDependency[] {
+  getDependenciesForTask(taskId: string): ITaskDependencyEntity[] {
     const items = this.getAll();
     return items.filter((dep) => dep.taskId === taskId);
   }
@@ -42,7 +41,7 @@ export class TaskDependencyRepository extends BaseRepository<ITaskDependency> im
   /**
    * Get all dependencies for a task asynchronously
    */
-  async getDependenciesForTaskAsync(taskId: string): Promise<ITaskDependency[]> {
+  async getDependenciesForTaskAsync(taskId: string): Promise<ITaskDependencyEntity[]> {
     const items = await this.getAllAsync();
     return items.filter((dep) => dep.taskId === taskId);
   }
@@ -50,7 +49,7 @@ export class TaskDependencyRepository extends BaseRepository<ITaskDependency> im
   /**
    * Get all dependents for a task (tasks that depend on this task)
    */
-  getDependents(taskId: string): ITaskDependency[] {
+  getDependents(taskId: string): ITaskDependencyEntity[] {
     const items = this.getAll();
     return items.filter((dep) => dep.dependsOnTaskId === taskId);
   }
@@ -58,7 +57,7 @@ export class TaskDependencyRepository extends BaseRepository<ITaskDependency> im
   /**
    * Get all dependents for a task asynchronously
    */
-  async getDependentsAsync(taskId: string): Promise<ITaskDependency[]> {
+  async getDependentsAsync(taskId: string): Promise<ITaskDependencyEntity[]> {
     const items = await this.getAllAsync();
     return items.filter((dep) => dep.dependsOnTaskId === taskId);
   }

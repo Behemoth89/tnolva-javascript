@@ -1,5 +1,5 @@
 import type { IStorageAdapter } from '../adapters/IStorageAdapter.js';
-import type { IRecurrenceTemplate } from '../../interfaces/IRecurrenceTemplate.js';
+import type { IRecurrenceTemplateEntity } from '../../interfaces/index.js';
 import { BaseRepository } from './BaseRepository.js';
 import { RecurrenceTemplate } from '../../domain/RecurrenceTemplate.js';
 import { STORAGE_KEY_TASKS, STORAGE_KEY_RECURRENCE_TEMPLATES } from '../storageKeys.js';
@@ -8,7 +8,7 @@ import { generateGuid } from '../../utils/index.js';
 /**
  * Default recurrence templates
  */
-const DEFAULT_TEMPLATES: IRecurrenceTemplate[] = [
+const DEFAULT_TEMPLATES: IRecurrenceTemplateEntity[] = [
   {
     id: 'default-daily',
     name: 'Daily',
@@ -109,7 +109,7 @@ export class RecurrenceTemplateRepository extends BaseRepository<RecurrenceTempl
   /**
    * Create a new recurrence template
    */
-  async createAsync(template: IRecurrenceTemplate): Promise<RecurrenceTemplate> {
+  async createAsync(template: IRecurrenceTemplateEntity): Promise<RecurrenceTemplate> {
     const entity = new RecurrenceTemplate({
       ...template,
       id: template.id || generateGuid(),
@@ -122,7 +122,7 @@ export class RecurrenceTemplateRepository extends BaseRepository<RecurrenceTempl
    */
   async updateAsync(
     id: string,
-    updates: Partial<IRecurrenceTemplate>
+    updates: Partial<IRecurrenceTemplateEntity>
   ): Promise<RecurrenceTemplate | null> {
     const existing = await this.getByIdAsync(id);
     if (!existing) {
@@ -164,7 +164,7 @@ export class RecurrenceTemplateRepository extends BaseRepository<RecurrenceTempl
    * Get all templates
    */
   async getAllAsync(): Promise<RecurrenceTemplate[]> {
-    const data = await this.storage.getItemAsync<IRecurrenceTemplate[]>(this.storageKey);
+    const data = await this.storage.getItemAsync<IRecurrenceTemplateEntity[]>(this.storageKey);
     if (!data || data.length === 0) {
       return [];
     }
@@ -184,7 +184,7 @@ export class RecurrenceTemplateRepository extends BaseRepository<RecurrenceTempl
    * @deprecated Use getAllAsync() instead
    */
   getAll(): RecurrenceTemplate[] {
-    const data = this.storage.getItem<IRecurrenceTemplate[]>(this.storageKey);
+    const data = this.storage.getItem<IRecurrenceTemplateEntity[]>(this.storageKey);
     if (!data || data.length === 0) {
       return [];
     }

@@ -1,4 +1,4 @@
-import type { ITaskDependency } from './ITaskDependency.js';
+import type { ITaskDependencyEntity } from '../entities/ITaskDependencyEntity.js';
 
 /**
  * ITaskDependencyRepository Interface
@@ -8,46 +8,46 @@ export interface ITaskDependencyRepository {
   /**
    * Get all dependencies
    */
-  getAll(): ITaskDependency[];
+  getAll(): ITaskDependencyEntity[];
 
   /**
    * Get all dependencies asynchronously
    */
-  getAllAsync(): Promise<ITaskDependency[]>;
+  getAllAsync(): Promise<ITaskDependencyEntity[]>;
 
   /**
    * Get a dependency by ID
    */
-  getById(id: string): ITaskDependency | null;
+  getById(id: string): ITaskDependencyEntity | null;
 
   /**
    * Get a dependency by ID asynchronously
    */
-  getByIdAsync(id: string): Promise<ITaskDependency | null>;
+  getByIdAsync(id: string): Promise<ITaskDependencyEntity | null>;
 
   /**
    * Get all dependencies for a task (tasks this task depends on)
    * @param taskId - The task ID
    */
-  getDependenciesForTask(taskId: string): ITaskDependency[];
+  getDependenciesForTask(taskId: string): ITaskDependencyEntity[];
 
   /**
    * Get all dependencies for a task asynchronously
    * @param taskId - The task ID
    */
-  getDependenciesForTaskAsync(taskId: string): Promise<ITaskDependency[]>;
+  getDependenciesForTaskAsync(taskId: string): Promise<ITaskDependencyEntity[]>;
 
   /**
    * Get all dependents for a task (tasks that depend on this task)
    * @param taskId - The task ID
    */
-  getDependents(taskId: string): ITaskDependency[];
+  getDependents(taskId: string): ITaskDependencyEntity[];
 
   /**
    * Get all dependents for a task asynchronously
    * @param taskId - The task ID
    */
-  getDependentsAsync(taskId: string): Promise<ITaskDependency[]>;
+  getDependentsAsync(taskId: string): Promise<ITaskDependencyEntity[]>;
 
   /**
    * Check if a dependency exists between two tasks
@@ -66,12 +66,12 @@ export interface ITaskDependencyRepository {
   /**
    * Create a new dependency
    */
-  createAsync(entity: ITaskDependency): Promise<ITaskDependency>;
+  createAsync(entity: ITaskDependencyEntity): Promise<ITaskDependencyEntity>;
 
   /**
    * Update an existing dependency
    */
-  updateAsync(id: string, entity: ITaskDependency): Promise<ITaskDependency | null>;
+  updateAsync(id: string, entity: ITaskDependencyEntity): Promise<ITaskDependencyEntity | null>;
 
   /**
    * Delete a dependency by ID

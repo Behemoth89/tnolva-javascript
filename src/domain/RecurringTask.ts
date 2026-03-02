@@ -1,4 +1,4 @@
-import type { IRecurringTask, IRecurringTaskCreateDto } from '../interfaces/IRecurringTask.js';
+import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IInterval } from '../interfaces/index.js';
 import { ERecurringTaskStatus } from '../enums/ERecurringTaskStatus.js';
 import { EPriority } from '../enums/EPriority.js';
 import { generateGuid } from '../utils/index.js';
@@ -7,14 +7,14 @@ import { generateGuid } from '../utils/index.js';
  * RecurringTask Domain Class - Pure data holder
  * Business logic is handled by BLL RecurringTaskService
  */
-export class RecurringTask implements IRecurringTask {
+export class RecurringTask implements IRecurringTaskEntity {
   id: string;
   title: string;
   description?: string;
   priority: EPriority;
   startDate: Date;
   endDate?: Date;
-  intervals: import('../interfaces/IInterval.js').IInterval[];
+  intervals: IInterval[];
   tags: string[];
   categoryIds: string[];
   status: ERecurringTaskStatus;
@@ -44,10 +44,10 @@ export class RecurringTask implements IRecurringTask {
   }
 
   /**
-   * Create a RecurringTask from an existing IRecurringTask object
-   * @param existing - Existing IRecurringTask object
+   * Create a RecurringTask from an existing IRecurringTaskEntity object
+   * @param existing - Existing IRecurringTaskEntity object
    */
-  static fromExisting(existing: IRecurringTask): RecurringTask {
+  static fromExisting(existing: IRecurringTaskEntity): RecurringTask {
     const task = new RecurringTask({
       title: existing.title,
       description: existing.description,
@@ -69,7 +69,7 @@ export class RecurringTask implements IRecurringTask {
    * Convert to plain object
    * @returns Plain object representation
    */
-  toObject(): IRecurringTask {
+  toObject(): IRecurringTaskEntity {
     return {
       id: this.id,
       title: this.title,

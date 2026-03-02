@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateAllPendingTasks } from '../../src/domain/batchGeneration.js';
-import type { IRecurringTaskRepository } from '../../src/interfaces/IRecurringTaskRepository.js';
-import type { ITaskRepository } from '../../src/interfaces/ITaskRepository.js';
-import type { ITaskRecurringLinkRepository } from '../../src/interfaces/ITaskRecurringLinkRepository.js';
-import type { IRecurringTask } from '../../src/interfaces/IRecurringTask.js';
+import type { IRecurringTaskRepository, ITaskRepository, ITaskRecurringLinkRepository, IRecurringTaskEntity } from '../../src/interfaces/index.js';
 import { ERecurringTaskStatus } from '../../src/enums/ERecurringTaskStatus.js';
 import { EStatus } from '../../src/enums/EStatus.js';
 
@@ -12,7 +9,7 @@ describe('Batch Generation Utility', () => {
   let mockTaskRepo: any;
   let mockLinkRepo: any;
 
-  const createMockRecurringTask = (overrides: Partial<IRecurringTask> = {}): IRecurringTask => ({
+  const createMockRecurringTask = (overrides: Partial<IRecurringTaskEntity> = {}): IRecurringTaskEntity => ({
     id: 'recurring-1',
     title: 'Weekly Meeting',
     description: 'Weekly team meeting',

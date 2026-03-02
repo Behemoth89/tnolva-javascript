@@ -1,8 +1,4 @@
-import type { IRecurringTask } from '../interfaces/IRecurringTask.js';
-import type { IRecurringTaskRepository } from '../interfaces/IRecurringTaskRepository.js';
-import type { ITask } from '../interfaces/ITask.js';
-import type { ITaskRepository } from '../interfaces/ITaskRepository.js';
-import type { ITaskRecurringLinkRepository } from '../interfaces/ITaskRecurringLinkRepository.js';
+import type { IRecurringTaskEntity, IRecurringTaskRepository, ITaskEntity, ITaskRepository, ITaskRecurringLinkRepository } from '../interfaces/index.js';
 import { EStatus } from '../enums/EStatus.js';
 import { RecurringTaskGenerator } from '../domain/RecurringTaskGenerator.js';
 import { TaskRecurringLink } from '../domain/TaskRecurringLink.js';
@@ -93,7 +89,7 @@ export async function generateAllPendingTasks(
         }
 
         // Generate new tasks
-        const newTasks: ITask[] = [];
+        const newTasks: ITaskEntity[] = [];
         
         // Calculate occurrences from start date
         while (startDate <= endDate) {
@@ -152,7 +148,7 @@ export async function generateAllPendingTasks(
  */
 function calculateNextOccurrence(
   fromDate: Date,
-  intervals: IRecurringTask['intervals']
+  intervals: IRecurringTaskEntity['intervals']
 ): Date {
   if (!intervals || intervals.length === 0) {
     return new Date(fromDate.getTime() + MAX_ADVANCE_PERIOD_MS);

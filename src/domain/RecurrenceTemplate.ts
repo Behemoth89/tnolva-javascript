@@ -1,12 +1,10 @@
-import type { IRecurrenceTemplate } from '../interfaces/IRecurrenceTemplate.js';
-import type { IInterval } from '../interfaces/IInterval.js';
-import type { ISubtaskTemplate } from '../interfaces/ISubtaskTemplate.js';
+import type { IRecurrenceTemplateEntity, IInterval, ISubtaskTemplate } from '../interfaces/index.js';
 
 /**
  * RecurrenceTemplate Entity Class
- * Implements IRecurrenceTemplate and provides domain logic for recurrence templates
+ * Implements IRecurrenceTemplateEntity and provides domain logic for recurrence templates
  */
-export class RecurrenceTemplate implements IRecurrenceTemplate {
+export class RecurrenceTemplate implements IRecurrenceTemplateEntity {
   id: string;
   name: string;
   intervals: IInterval[];
@@ -23,7 +21,7 @@ export class RecurrenceTemplate implements IRecurrenceTemplate {
    * @param template - Recurrence template data
    * @throws Error if required fields are missing or invalid
    */
-  constructor(template: IRecurrenceTemplate) {
+  constructor(template: IRecurrenceTemplateEntity) {
     // Validate required fields
     if (!template.id || template.id.trim() === '') {
       throw new Error('RecurrenceTemplate id is required');
@@ -79,7 +77,7 @@ export class RecurrenceTemplate implements IRecurrenceTemplate {
    * Convert to plain object
    * @returns Plain object representation
    */
-  toObject(): IRecurrenceTemplate {
+  toObject(): IRecurrenceTemplateEntity {
     return {
       id: this.id,
       name: this.name,

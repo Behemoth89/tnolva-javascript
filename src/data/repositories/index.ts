@@ -2,9 +2,7 @@
  * Repositories Index
  * Exports all repository interfaces and implementations
  */
-export type { IRepository } from '../../interfaces/IRepository.js';
-export type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
-export type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
+export type { IRepository, ITaskRepository, ICategoryRepository } from '../../interfaces/index.js';
 export { BaseRepository } from './BaseRepository.js';
 export { TaskRepository } from './TaskRepository.js';
 export { CategoryRepository } from './CategoryRepository.js';

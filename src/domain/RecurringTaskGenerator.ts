@@ -1,6 +1,4 @@
-import type { IRecurrenceTemplate } from '../interfaces/IRecurrenceTemplate.js';
-import type { IRecurringTask } from '../interfaces/IRecurringTask.js';
-import type { ITask } from '../interfaces/ITask.js';
+import type { IRecurrenceTemplateEntity, IRecurringTaskEntity, ITaskEntity } from '../interfaces/index.js';
 import { RecurrenceCalculator } from './RecurrenceCalculator.js';
 import { generateGuid } from '../utils/index.js';
 
@@ -29,7 +27,7 @@ export class RecurringTaskGenerator {
    * @param template - The recurrence template
    * @returns A new task with updated dueDate
    */
-  generateNextInstance(task: ITask, template: IRecurrenceTemplate): ITask {
+  generateNextInstance(task: ITaskEntity, template: IRecurrenceTemplateEntity): ITaskEntity {
     // Calculate the next due date
     const currentDueDate = task.dueDate ? new Date(task.dueDate) : new Date();
     const nextDueDate = this.recurrenceCalculator.calculateNextOccurrence(
@@ -38,7 +36,7 @@ export class RecurringTaskGenerator {
     );
 
     // Generate new task instance
-    const newTask: ITask = {
+    const newTask: ITaskEntity = {
       id: generateGuid(),
       title: task.title,
       description: task.description,
@@ -60,8 +58,8 @@ export class RecurringTaskGenerator {
    * @param recurringTask - The recurring task template
    * @returns Array of generated task instances
    */
-  generateFromRecurringTask(recurringTask: IRecurringTask): ITask[] {
-    const generatedTasks: ITask[] = [];
+  generateFromRecurringTask(recurringTask: IRecurringTaskEntity): ITaskEntity[] {
+    const generatedTasks: ITaskEntity[] = [];
     const now = new Date();
     
     // Calculate end date for generation (1 year ahead or recurring task's end date)
@@ -103,7 +101,7 @@ export class RecurringTaskGenerator {
    * @returns The next occurrence date
    */
   private calculateNextOccurrenceFromDate(
-    intervals: IRecurringTask['intervals'],
+    intervals: IRecurringTaskEntity['intervals'],
     fromDate: Date
   ): Date {
     // Use the smallest interval to calculate next occurrence
@@ -153,7 +151,7 @@ export class RecurringTaskGenerator {
    * @param dueDate - The calculated due date for the task
    * @returns A new task instance
    */
-  createTaskFromRecurringTask(recurringTask: IRecurringTask, dueDate: Date): ITask {
+  createTaskFromRecurringTask(recurringTask: IRecurringTaskEntity, dueDate: Date): ITaskEntity {
     const now = new Date().toISOString();
     
     return {
@@ -175,7 +173,7 @@ export class RecurringTaskGenerator {
    * @param recurringTask - The recurring task template
    * @returns Array of occurrence dates
    */
-  calculateOccurrences(recurringTask: IRecurringTask): Date[] {
+  calculateOccurrences(recurringTask: IRecurringTaskEntity): Date[] {
     const occurrences: Date[] = [];
     const now = new Date();
     
@@ -215,7 +213,7 @@ export class RecurringTaskGenerator {
    * @param task - The task to check
    * @returns true if the task has a recurrence template
    */
-  canGenerateNextInstance(task: ITask): boolean {
+  canGenerateNextInstance(task: ITaskEntity): boolean {
     return !!task.recurrenceTemplateId;
   }
 }

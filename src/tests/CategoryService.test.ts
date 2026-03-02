@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CategoryService } from '../bll/services/CategoryService.js';
-import type { IUnitOfWork } from '../interfaces/IUnitOfWork.js';
-import type { ICategoryRepository } from '../interfaces/ICategoryRepository.js';
-import type { ITaskRepository } from '../interfaces/ITaskRepository.js';
-import type { ITaskCategory } from '../interfaces/ITaskCategory.js';
+import type { IUnitOfWork, ICategoryRepository, ITaskRepository, ITaskCategoryEntity } from '../interfaces/index.js';
 
 // Mock UnitOfWork
 const createMockUnitOfWork = (
@@ -42,7 +39,7 @@ const createMockUnitOfWork = (
 };
 
 describe('CategoryService', () => {
-  let mockCategories: ITaskCategory[];
+  let mockCategories: ITaskCategoryEntity[];
   let categoryRepository: ICategoryRepository;
   let categoryService: CategoryService;
 
@@ -78,11 +75,11 @@ describe('CategoryService', () => {
         const cat = mockCategories.find(c => c.id === id);
         return Promise.resolve(cat || null);
       }),
-      createAsync: vi.fn().mockImplementation((cat: ITaskCategory) => {
+      createAsync: vi.fn().mockImplementation((cat: ITaskCategoryEntity) => {
         mockCategories.push(cat);
         return Promise.resolve(cat);
       }),
-      updateAsync: vi.fn().mockImplementation((id: string, cat: ITaskCategory) => {
+      updateAsync: vi.fn().mockImplementation((id: string, cat: ITaskCategoryEntity) => {
         const index = mockCategories.findIndex(c => c.id === id);
         if (index !== -1) {
           mockCategories[index] = cat;

@@ -1,8 +1,5 @@
-import type { ITask } from '../../interfaces/ITask.js';
-import type { ITaskCreateDto } from '../../interfaces/ITaskCreateDto.js';
-import type { ITaskUpdateDto } from '../../interfaces/ITaskUpdateDto.js';
-import type { EStatus } from '../../enums/EStatus.js';
-import type { EPriority } from '../../enums/EPriority.js';
+import type { ITaskEntity, ITaskCreateDto, ITaskUpdateDto } from '../../interfaces/index.js';
+import type { EStatus, EPriority } from '../../enums/index.js';
 
 /**
  * ITaskService Interface
@@ -15,7 +12,7 @@ export interface ITaskService {
    * @returns The created task
    * @throws Error if title is empty or whitespace
    */
-  createAsync(dto: ITaskCreateDto): Promise<ITask>;
+  createAsync(dto: ITaskCreateDto): Promise<ITaskEntity>;
 
   /**
    * Update an existing task
@@ -24,7 +21,7 @@ export interface ITaskService {
    * @returns The updated task, or null if not found
    * @throws Error if title is set to empty/whitespace
    */
-  updateAsync(id: string, dto: ITaskUpdateDto): Promise<ITask | null>;
+  updateAsync(id: string, dto: ITaskUpdateDto): Promise<ITaskEntity | null>;
 
   /**
    * Delete a task
@@ -38,34 +35,34 @@ export interface ITaskService {
    * @param id - Task ID
    * @returns The task, or null if not found
    */
-  getByIdAsync(id: string): Promise<ITask | null>;
+  getByIdAsync(id: string): Promise<ITaskEntity | null>;
 
   /**
    * Get all tasks
    * @returns Array of all tasks
    */
-  getAllAsync(): Promise<ITask[]>;
+  getAllAsync(): Promise<ITaskEntity[]>;
 
   /**
    * Start a TODO task - transitions to IN_PROGRESS
    * @param id - Task ID
    * @returns The updated task, or null if not found or not in TODO status
    */
-  startAsync(id: string): Promise<ITask | null>;
+  startAsync(id: string): Promise<ITaskEntity | null>;
 
   /**
    * Complete an IN_PROGRESS task - transitions to DONE
    * @param id - Task ID
    * @returns The updated task, or null if not found or not in IN_PROGRESS status
    */
-  completeAsync(id: string): Promise<ITask | null>;
+  completeAsync(id: string): Promise<ITaskEntity | null>;
 
   /**
    * Cancel any task - transitions to CANCELLED
    * @param id - Task ID
    * @returns The updated task, or null if not found
    */
-  cancelAsync(id: string): Promise<ITask | null>;
+  cancelAsync(id: string): Promise<ITaskEntity | null>;
 
   /**
    * Add a tag to a task
@@ -73,7 +70,7 @@ export interface ITaskService {
    * @param tag - Tag to add
    * @returns The updated task, or null if not found
    */
-  addTagAsync(id: string, tag: string): Promise<ITask | null>;
+  addTagAsync(id: string, tag: string): Promise<ITaskEntity | null>;
 
   /**
    * Remove a tag from a task
@@ -81,7 +78,7 @@ export interface ITaskService {
    * @param tag - Tag to remove
    * @returns The updated task, or null if not found
    */
-  removeTagAsync(id: string, tag: string): Promise<ITask | null>;
+  removeTagAsync(id: string, tag: string): Promise<ITaskEntity | null>;
 
   /**
    * Change the priority of a task
@@ -89,19 +86,19 @@ export interface ITaskService {
    * @param priority - New priority
    * @returns The updated task, or null if not found
    */
-  changePriorityAsync(id: string, priority: EPriority): Promise<ITask | null>;
+  changePriorityAsync(id: string, priority: EPriority): Promise<ITaskEntity | null>;
 
   /**
    * Get all tasks with a specific status
    * @param status - Status to filter by
    * @returns Array of tasks matching the status
    */
-  getByStatusAsync(status: EStatus): Promise<ITask[]>;
+  getByStatusAsync(status: EStatus): Promise<ITaskEntity[]>;
 
   /**
    * Get all tasks with a specific priority
    * @param priority - Priority to filter by
    * @returns Array of tasks matching the priority
    */
-  getByPriorityAsync(priority: EPriority): Promise<ITask[]>;
+  getByPriorityAsync(priority: EPriority): Promise<ITaskEntity[]>;
 }

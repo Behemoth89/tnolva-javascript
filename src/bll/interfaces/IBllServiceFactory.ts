@@ -1,7 +1,7 @@
 import type { ITaskService } from './ITaskService.js';
 import type { ICategoryService } from './ICategoryService.js';
 import type { IRecurrenceService } from './IRecurrenceService.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
+import type { IUnitOfWork } from '../../interfaces/index.js';
 
 /**
  * IBllServiceFactory Interface

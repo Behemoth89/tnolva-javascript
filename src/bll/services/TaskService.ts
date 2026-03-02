@@ -1,13 +1,8 @@
 import type { ITaskService } from '../interfaces/ITaskService.js';
-import type { ITask } from '../../interfaces/ITask.js';
-import type { ITaskCreateDto } from '../../interfaces/ITaskCreateDto.js';
-import type { ITaskUpdateDto } from '../../interfaces/ITaskUpdateDto.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
+import type { ITaskEntity, ITaskCreateDto, ITaskUpdateDto, IUnitOfWork, ITaskRepository, ITaskDependencyRepository } from '../../interfaces/index.js';
 import { EStatus } from '../../enums/EStatus.js';
 import { EPriority } from '../../enums/EPriority.js';
 import { generateGuid } from '../../utils/index.js';
-import type { ITaskDependencyRepository } from '../../interfaces/ITaskDependencyRepository.js';
 import { TaskDependencyService } from './TaskDependencyService.js';
 
 /**
@@ -34,7 +29,7 @@ export class TaskService implements ITaskService {
   /**
    * Create a new task
    */
-  async createAsync(dto: ITaskCreateDto): Promise<ITask> {
+  async createAsync(dto: ITaskCreateDto): Promise<ITaskEntity> {
     // Validate title
     if (!dto.title || dto.title.trim() === '') {
       throw new Error('Task title is required');
@@ -53,7 +48,7 @@ export class TaskService implements ITaskService {
     const id = dto.id || generateGuid();
     const now = new Date().toISOString();
 
-    const task: ITask = {
+    const task: ITaskEntity = {
       id,
       title: dto.title.trim(),
       description: dto.description?.trim(),
@@ -91,7 +86,7 @@ export class TaskService implements ITaskService {
    * Update an existing task
    * @throws Error if task is completed (done lock)
    */
-  async updateAsync(id: string, dto: ITaskUpdateDto): Promise<ITask | null> {
+  async updateAsync(id: string, dto: ITaskUpdateDto): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return null;
@@ -135,7 +130,7 @@ export class TaskService implements ITaskService {
 
     const now = new Date().toISOString();
 
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       title: dto.title !== undefined ? dto.title.trim() : task.title,
       description: dto.description !== undefined ? dto.description?.trim() : task.description,
@@ -196,28 +191,28 @@ export class TaskService implements ITaskService {
   /**
    * Get a task by ID
    */
-  async getByIdAsync(id: string): Promise<ITask | null> {
+  async getByIdAsync(id: string): Promise<ITaskEntity | null> {
     return this.taskRepository.getByIdAsync(id);
   }
 
   /**
    * Get all tasks
    */
-  async getAllAsync(): Promise<ITask[]> {
+  async getAllAsync(): Promise<ITaskEntity[]> {
     return this.taskRepository.getAllAsync();
   }
 
   /**
    * Start a TODO task - transitions to IN_PROGRESS
    */
-  async startAsync(id: string): Promise<ITask | null> {
+  async startAsync(id: string): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task || task.status !== EStatus.TODO) {
       return null;
     }
 
     const now = new Date().toISOString();
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       status: EStatus.IN_PROGRESS,
       updatedAt: now,
@@ -233,7 +228,7 @@ export class TaskService implements ITaskService {
   /**
    * Complete an IN_PROGRESS task - transitions to DONE
    */
-  async completeAsync(id: string): Promise<ITask | null> {
+  async completeAsync(id: string): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task || task.status !== EStatus.IN_PROGRESS) {
       return null;
@@ -251,7 +246,7 @@ export class TaskService implements ITaskService {
     }
 
     const now = new Date().toISOString();
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       status: EStatus.DONE,
       updatedAt: now,
@@ -267,14 +262,14 @@ export class TaskService implements ITaskService {
   /**
    * Cancel any task - transitions to CANCELLED
    */
-  async cancelAsync(id: string): Promise<ITask | null> {
+  async cancelAsync(id: string): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return null;
     }
 
     const now = new Date().toISOString();
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       status: EStatus.CANCELLED,
       updatedAt: now,
@@ -290,7 +285,7 @@ export class TaskService implements ITaskService {
   /**
    * Add a tag to a task
    */
-  async addTagAsync(id: string, tag: string): Promise<ITask | null> {
+  async addTagAsync(id: string, tag: string): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return null;
@@ -309,7 +304,7 @@ export class TaskService implements ITaskService {
       return task;
     }
 
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       tags: [...tags, trimmedTag],
       updatedAt: now,
@@ -325,7 +320,7 @@ export class TaskService implements ITaskService {
   /**
    * Remove a tag from a task
    */
-  async removeTagAsync(id: string, tag: string): Promise<ITask | null> {
+  async removeTagAsync(id: string, tag: string): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return null;
@@ -339,7 +334,7 @@ export class TaskService implements ITaskService {
     }
 
     const now = new Date().toISOString();
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       tags: tags.filter(t => t !== trimmedTag),
       updatedAt: now,
@@ -355,14 +350,14 @@ export class TaskService implements ITaskService {
   /**
    * Change the priority of a task
    */
-  async changePriorityAsync(id: string, priority: EPriority): Promise<ITask | null> {
+  async changePriorityAsync(id: string, priority: EPriority): Promise<ITaskEntity | null> {
     const task = await this.taskRepository.getByIdAsync(id);
     if (!task) {
       return null;
     }
 
     const now = new Date().toISOString();
-    const updatedTask: ITask = {
+    const updatedTask: ITaskEntity = {
       ...task,
       priority,
       updatedAt: now,
@@ -378,14 +373,14 @@ export class TaskService implements ITaskService {
   /**
    * Get all tasks with a specific status
    */
-  async getByStatusAsync(status: EStatus): Promise<ITask[]> {
+  async getByStatusAsync(status: EStatus): Promise<ITaskEntity[]> {
     return this.taskRepository.getByStatusAsync(status);
   }
 
   /**
    * Get all tasks with a specific priority
    */
-  async getByPriorityAsync(priority: EPriority): Promise<ITask[]> {
+  async getByPriorityAsync(priority: EPriority): Promise<ITaskEntity[]> {
     return this.taskRepository.getByPriorityAsync(priority);
   }
 

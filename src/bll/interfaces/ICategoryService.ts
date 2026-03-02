@@ -1,7 +1,4 @@
-import type { ITaskCategory } from '../../interfaces/ITaskCategory.js';
-import type { ITaskCategoryCreateDto } from '../../interfaces/ITaskCategoryCreateDto.js';
-import type { ITaskCategoryUpdateDto } from '../../interfaces/ITaskCategoryUpdateDto.js';
-import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
+import type { ITaskCategoryEntity, ITaskCategoryCreateDto, ITaskCategoryUpdateDto, ITaskCategoryAssignmentEntity } from '../../interfaces/index.js';
 
 /**
  * ICategoryService Interface
@@ -14,7 +11,7 @@ export interface ICategoryService {
    * @returns The created category, or existing category if duplicate name (case-insensitive)
    * @throws Error if name is empty or whitespace
    */
-  createAsync(dto: ITaskCategoryCreateDto): Promise<ITaskCategory>;
+  createAsync(dto: ITaskCategoryCreateDto): Promise<ITaskCategoryEntity>;
 
   /**
    * Update an existing category
@@ -23,7 +20,7 @@ export interface ICategoryService {
    * @returns The updated category, or null if not found
    * @throws Error if name is set to empty/whitespace
    */
-  updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<ITaskCategory | null>;
+  updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<ITaskCategoryEntity | null>;
 
   /**
    * Delete a category
@@ -37,20 +34,20 @@ export interface ICategoryService {
    * @param id - Category ID
    * @returns The category, or null if not found
    */
-  getByIdAsync(id: string): Promise<ITaskCategory | null>;
+  getByIdAsync(id: string): Promise<ITaskCategoryEntity | null>;
 
   /**
    * Get all categories
    * @returns Array of all categories
    */
-  getAllAsync(): Promise<ITaskCategory[]>;
+  getAllAsync(): Promise<ITaskCategoryEntity[]>;
 
   /**
    * Get category by name (case-insensitive)
    * @param name - Category name
    * @returns The category, or null if not found
    */
-  getByNameAsync(name: string): Promise<ITaskCategory | null>;
+  getByNameAsync(name: string): Promise<ITaskCategoryEntity | null>;
 
   /**
    * Assign a task to a category
@@ -58,7 +55,7 @@ export interface ICategoryService {
    * @param categoryId - Category ID
    * @returns The created assignment, or null if task/category not found
    */
-  assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null>;
+  assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null>;
 
   /**
    * Remove a task from a category
@@ -73,7 +70,7 @@ export interface ICategoryService {
    * @param taskId - Task ID
    * @returns Array of categories assigned to the task
    */
-  getCategoriesForTaskAsync(taskId: string): Promise<ITaskCategory[]>;
+  getCategoriesForTaskAsync(taskId: string): Promise<ITaskCategoryEntity[]>;
 
   /**
    * Get all task IDs for a category

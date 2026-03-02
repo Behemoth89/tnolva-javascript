@@ -1,5 +1,4 @@
-import type { IUnitOfWorkFactory } from '../../interfaces/IUnitOfWorkFactory.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
+import type { IUnitOfWorkFactory, IUnitOfWork } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { UnitOfWork } from './UnitOfWork.js';
 

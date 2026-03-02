@@ -1,4 +1,4 @@
-import type { ITaskDependency, ITaskDependencyCreateDto } from '../interfaces/ITaskDependency.js';
+import type { ITaskDependencyEntity, ITaskDependencyCreateDto } from '../interfaces/index.js';
 import { EDependencyType } from '../enums/EDependencyType.js';
 import { generateGuid } from '../utils/index.js';
 
@@ -6,7 +6,7 @@ import { generateGuid } from '../utils/index.js';
  * TaskDependency Entity Class - Pure data holder
  * Represents a junction table record for task dependencies
  */
-export class TaskDependency implements ITaskDependency {
+export class TaskDependency implements ITaskDependencyEntity {
   id: string;
   taskId: string;
   dependsOnTaskId: string;
@@ -32,7 +32,7 @@ export class TaskDependency implements ITaskDependency {
    * Convert to plain object
    * @returns Plain object representation
    */
-  toObject(): ITaskDependency {
+  toObject(): ITaskDependencyEntity {
     return {
       id: this.id,
       taskId: this.taskId,

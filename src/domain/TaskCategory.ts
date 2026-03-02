@@ -1,11 +1,10 @@
-import type { ITaskCategory } from '../interfaces/ITaskCategory.js';
-import type { ITaskCategoryCreateDto } from '../interfaces/ITaskCategoryCreateDto.js';
+import type { ITaskCategoryEntity, ITaskCategoryCreateDto } from '../interfaces/index.js';
 
 /**
  * TaskCategory Entity Class - Pure data holder
  * Business logic is handled by BLL CategoryService
  */
-export class TaskCategory implements ITaskCategory {
+export class TaskCategory implements ITaskCategoryEntity {
   id: string;
   name: string;
   description?: string;
@@ -32,7 +31,7 @@ export class TaskCategory implements ITaskCategory {
    * Convert to plain object
    * @returns Plain object representation
    */
-  toObject(): ITaskCategory {
+  toObject(): ITaskCategoryEntity {
     return {
       id: this.id,
       name: this.name,

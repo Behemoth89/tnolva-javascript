@@ -1,4 +1,4 @@
-import type { ITask } from '../../interfaces/ITask.js';
+import type { ITaskEntity } from '../../interfaces/index.js';
 
 /**
  * Result type for due date conflict check
@@ -38,16 +38,16 @@ export interface ITaskDependencyService {
   /**
    * Get all subtasks of a main task
    * @param parentTaskId - The parent/main task ID
-   * @returns Array of subtask ITask objects
+   * @returns Array of subtask ITaskEntity objects
    */
-  getSubtasksAsync(parentTaskId: string): Promise<ITask[]>;
+  getSubtasksAsync(parentTaskId: string): Promise<ITaskEntity[]>;
 
   /**
    * Get the parent task of a subtask
    * @param subtaskId - The subtask ID
    * @returns The parent task or null if not found
    */
-  getParentTaskAsync(subtaskId: string): Promise<ITask | null>;
+  getParentTaskAsync(subtaskId: string): Promise<ITaskEntity | null>;
 
   /**
    * Check if a main task can be completed (all subtasks must be done)
@@ -67,13 +67,13 @@ export interface ITaskDependencyService {
    * Adjust subtask due date to match parent due date
    * @param subtaskId - The subtask ID
    */
-  adjustSubtaskDueDateAsync(subtaskId: string): Promise<ITask | null>;
+  adjustSubtaskDueDateAsync(subtaskId: string): Promise<ITaskEntity | null>;
 
   /**
    * Extend parent task due date to match subtask due date
    * @param subtaskId - The subtask ID
    */
-  extendParentDueDateAsync(subtaskId: string): Promise<ITask | null>;
+  extendParentDueDateAsync(subtaskId: string): Promise<ITaskEntity | null>;
 
   /**
    * Delete all dependencies for a task (used when a task is deleted)

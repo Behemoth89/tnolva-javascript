@@ -1,11 +1,11 @@
-import type { ITaskRecurringLink } from '../interfaces/ITaskRecurringLink.js';
+import type { ITaskRecurringLinkEntity } from '../interfaces/index.js';
 import { generateGuid } from '../utils/index.js';
 
 /**
  * TaskRecurringLink Domain Class - Junction table entry
  * Represents the relationship between a task instance and its recurring task source
  */
-export class TaskRecurringLink implements ITaskRecurringLink {
+export class TaskRecurringLink implements ITaskRecurringLinkEntity {
   id: string;
   recurringTaskId: string;
   taskId: string;
@@ -31,10 +31,10 @@ export class TaskRecurringLink implements ITaskRecurringLink {
   }
 
   /**
-   * Create a TaskRecurringLink from an existing ITaskRecurringLink object
-   * @param existing - Existing ITaskRecurringLink object
+   * Create a TaskRecurringLink from an existing ITaskRecurringLinkEntity object
+   * @param existing - Existing ITaskRecurringLinkEntity object
    */
-  static fromExisting(existing: ITaskRecurringLink): TaskRecurringLink {
+  static fromExisting(existing: ITaskRecurringLinkEntity): TaskRecurringLink {
     const link = new TaskRecurringLink(
       existing.recurringTaskId,
       existing.taskId,
@@ -49,7 +49,7 @@ export class TaskRecurringLink implements ITaskRecurringLink {
    * Convert to plain object
    * @returns Plain object representation
    */
-  toObject(): ITaskRecurringLink {
+  toObject(): ITaskRecurringLinkEntity {
     return {
       id: this.id,
       recurringTaskId: this.recurringTaskId,

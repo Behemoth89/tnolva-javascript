@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskService } from '../bll/services/TaskService.js';
-import type { IUnitOfWork } from '../interfaces/IUnitOfWork.js';
-import type { ITaskRepository } from '../interfaces/ITaskRepository.js';
-import type { ITask } from '../interfaces/ITask.js';
+import type { IUnitOfWork, ITaskRepository, ITaskEntity } from '../interfaces/index.js';
 import { EStatus } from '../enums/EStatus.js';
 import { EPriority } from '../enums/EPriority.js';
 
@@ -40,7 +38,7 @@ const createMockUnitOfWork = (taskRepo: Partial<ITaskRepository>): IUnitOfWork =
 };
 
 describe('TaskService', () => {
-  let mockTasks: ITask[];
+  let mockTasks: ITaskEntity[];
   let taskRepository: ITaskRepository;
   let taskService: TaskService;
   let mockUnitOfWork: IUnitOfWork;
@@ -82,11 +80,11 @@ describe('TaskService', () => {
         const task = mockTasks.find(t => t.id === id);
         return Promise.resolve(task || null);
       }),
-      createAsync: vi.fn().mockImplementation((task: ITask) => {
+      createAsync: vi.fn().mockImplementation((task: ITaskEntity) => {
         mockTasks.push(task);
         return Promise.resolve(task);
       }),
-      updateAsync: vi.fn().mockImplementation((id: string, task: ITask) => {
+      updateAsync: vi.fn().mockImplementation((id: string, task: ITaskEntity) => {
         const index = mockTasks.findIndex(t => t.id === id);
         if (index !== -1) {
           mockTasks[index] = task;

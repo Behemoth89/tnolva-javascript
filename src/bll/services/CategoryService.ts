@@ -1,10 +1,5 @@
 import type { ICategoryService } from '../interfaces/ICategoryService.js';
-import type { ITaskCategory } from '../../interfaces/ITaskCategory.js';
-import type { ITaskCategoryCreateDto } from '../../interfaces/ITaskCategoryCreateDto.js';
-import type { ITaskCategoryUpdateDto } from '../../interfaces/ITaskCategoryUpdateDto.js';
-import type { ITaskCategoryAssignment } from '../../interfaces/ITaskCategoryAssignment.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { ICategoryRepository } from '../../interfaces/ICategoryRepository.js';
+import type { ITaskCategoryEntity, ITaskCategoryCreateDto, ITaskCategoryUpdateDto, ITaskCategoryAssignmentEntity, IUnitOfWork, ICategoryRepository } from '../../interfaces/index.js';
 import { generateGuid } from '../../utils/index.js';
 
 /**
@@ -28,7 +23,7 @@ export class CategoryService implements ICategoryService {
    * Create a new category
    * Returns existing category if duplicate name (case-insensitive)
    */
-  async createAsync(dto: ITaskCategoryCreateDto): Promise<ITaskCategory> {
+  async createAsync(dto: ITaskCategoryCreateDto): Promise<ITaskCategoryEntity> {
     // Validate name
     if (!dto.name || dto.name.trim() === '') {
       throw new Error('Category name is required');
@@ -44,7 +39,7 @@ export class CategoryService implements ICategoryService {
     const id = dto.id || generateGuid();
     const now = new Date().toISOString();
 
-    const category: ITaskCategory = {
+    const category: ITaskCategoryEntity = {
       id,
       name: dto.name.trim(),
       description: dto.description?.trim(),
@@ -63,7 +58,7 @@ export class CategoryService implements ICategoryService {
   /**
    * Update an existing category
    */
-  async updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<ITaskCategory | null> {
+  async updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<ITaskCategoryEntity | null> {
     const category = await this.categoryRepository.getByIdAsync(id);
     if (!category) {
       return null;
@@ -76,7 +71,7 @@ export class CategoryService implements ICategoryService {
 
     const now = new Date().toISOString();
 
-    const updatedCategory: ITaskCategory = {
+    const updatedCategory: ITaskCategoryEntity = {
       ...category,
       name: dto.name !== undefined ? dto.name.trim() : category.name,
       description: dto.description !== undefined ? dto.description?.trim() : category.description,
@@ -113,28 +108,33 @@ export class CategoryService implements ICategoryService {
   /**
    * Get a category by ID
    */
-  async getByIdAsync(id: string): Promise<ITaskCategory | null> {
+  /**
+   * Retrieves a task category by its identifier.
+   * @param {string} id - The unique identifier of the category to retrieve.
+   * @returns {Promise<ITaskCategoryEntity | null>} A promise that resolves to the task category entity if found, or null if not found.
+   */
+  async getByIdAsync(id: string): Promise<ITaskCategoryEntity | null> {
     return this.categoryRepository.getByIdAsync(id);
   }
 
   /**
    * Get all categories
    */
-  async getAllAsync(): Promise<ITaskCategory[]> {
+  async getAllAsync(): Promise<ITaskCategoryEntity[]> {
     return this.categoryRepository.getAllAsync();
   }
 
   /**
    * Get category by name (case-insensitive)
    */
-  async getByNameAsync(name: string): Promise<ITaskCategory | null> {
+  async getByNameAsync(name: string): Promise<ITaskCategoryEntity | null> {
     return this.categoryRepository.getByName(name);
   }
 
   /**
    * Assign a task to a category
    */
-  async assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignment | null> {
+  async assignTaskToCategoryAsync(taskId: string, categoryId: string): Promise<ITaskCategoryAssignmentEntity | null> {
     // Validate task exists
     const taskRepo = this.unitOfWork.getTaskRepository();
     const task = await taskRepo.getByIdAsync(taskId);
@@ -161,7 +161,7 @@ export class CategoryService implements ICategoryService {
   /**
    * Get all categories for a task
    */
-  async getCategoriesForTaskAsync(taskId: string): Promise<ITaskCategory[]> {
+  async getCategoriesForTaskAsync(taskId: string): Promise<ITaskCategoryEntity[]> {
     return this.categoryRepository.getCategoriesForTask(taskId);
   }
 

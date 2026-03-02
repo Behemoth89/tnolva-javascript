@@ -1,5 +1,4 @@
-import type { IRecurrenceTemplate } from '../interfaces/IRecurrenceTemplate.js';
-import type { IInterval } from '../interfaces/IInterval.js';
+import type { IRecurrenceTemplateEntity, IInterval } from '../interfaces/index.js';
 
 /**
  * RecurrenceCalculator Class
@@ -13,7 +12,7 @@ export class RecurrenceCalculator {
    * @returns The next occurrence date
    * @throws Error if interval values are invalid
    */
-  calculateNextOccurrence(template: IRecurrenceTemplate, currentDate: Date): Date {
+  calculateNextOccurrence(template: IRecurrenceTemplateEntity, currentDate: Date): Date {
     // Validate intervals
     this.validateIntervals(template.intervals);
 
@@ -99,7 +98,7 @@ export class RecurrenceCalculator {
    * Calculate occurrence for weekday-based recurrence (e.g., "First Monday of month")
    */
   private calculateWeekdayBasedOccurrence(
-    template: IRecurrenceTemplate,
+    template: IRecurrenceTemplateEntity,
     currentDate: Date
   ): Date {
     const { weekday, occurrenceInMonth, intervals } = template;

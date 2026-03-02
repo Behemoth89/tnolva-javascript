@@ -1,10 +1,5 @@
 import type { IRecurringTaskService } from '../interfaces/IRecurringTaskService.js';
-import type { IRecurringTask, IRecurringTaskCreateDto, IRecurringTaskUpdateDto } from '../../interfaces/IRecurringTask.js';
-import type { ITask } from '../../interfaces/ITask.js';
-import type { IRecurringTaskRepository } from '../../interfaces/IRecurringTaskRepository.js';
-import type { ITaskRepository } from '../../interfaces/ITaskRepository.js';
-import type { IUnitOfWork } from '../../interfaces/IUnitOfWork.js';
-import type { ITaskRecurringLinkRepository } from '../../interfaces/ITaskRecurringLinkRepository.js';
+import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto, ITaskEntity, IRecurringTaskRepository, ITaskRepository, IUnitOfWork, ITaskRecurringLinkRepository } from '../../interfaces/index.js';
 import { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
 import { EStatus } from '../../enums/EStatus.js';
 import { RecurringTask } from '../../domain/RecurringTask.js';
@@ -37,7 +32,7 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Create a new recurring task and generate initial task instances
    */
-  async createAsync(dto: IRecurringTaskCreateDto): Promise<IRecurringTask> {
+  async createAsync(dto: IRecurringTaskCreateDto): Promise<IRecurringTaskEntity> {
     // Validate title
     if (!dto.title || dto.title.trim() === '') {
       throw new Error('Recurring task title is required');
@@ -91,7 +86,7 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Update an existing recurring task and sync linked tasks
    */
-  async updateAsync(id: string, dto: IRecurringTaskUpdateDto): Promise<IRecurringTask | null> {
+  async updateAsync(id: string, dto: IRecurringTaskUpdateDto): Promise<IRecurringTaskEntity | null> {
     const existing = await this.recurringTaskRepository.getByIdAsync(id);
     if (!existing) {
       return null;
@@ -109,7 +104,7 @@ export class RecurringTaskService implements IRecurringTaskService {
       JSON.stringify(dto.intervals) !== JSON.stringify(existing.intervals);
 
     // Update the recurring task
-    const updatedRecurringTask: IRecurringTask = {
+    const updatedRecurringTask: IRecurringTaskEntity = {
       ...existing,
       title: dto.title !== undefined ? dto.title.trim() : existing.title,
       description: dto.description !== undefined ? dto.description?.trim() : existing.description,
@@ -143,14 +138,14 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Stop an active recurring task
    */
-  async stopAsync(id: string): Promise<IRecurringTask | null> {
+  async stopAsync(id: string): Promise<IRecurringTaskEntity | null> {
     return this.updateAsync(id, { status: ERecurringTaskStatus.STOPPED });
   }
 
   /**
    * Reactivate a stopped recurring task
    */
-  async reactivateAsync(id: string): Promise<IRecurringTask | null> {
+  async reactivateAsync(id: string): Promise<IRecurringTaskEntity | null> {
     const existing = await this.recurringTaskRepository.getByIdAsync(id);
     if (!existing || existing.status !== ERecurringTaskStatus.STOPPED) {
       return null;
@@ -180,37 +175,37 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Get a recurring task by ID
    */
-  async getByIdAsync(id: string): Promise<IRecurringTask | null> {
+  async getByIdAsync(id: string): Promise<IRecurringTaskEntity | null> {
     return this.recurringTaskRepository.getByIdAsync(id);
   }
 
   /**
    * Get all recurring tasks
    */
-  async getAllAsync(): Promise<IRecurringTask[]> {
+  async getAllAsync(): Promise<IRecurringTaskEntity[]> {
     return this.recurringTaskRepository.getAllAsync();
   }
 
   /**
    * Get recurring tasks by status
    */
-  async getByStatusAsync(status: ERecurringTaskStatus): Promise<IRecurringTask[]> {
+  async getByStatusAsync(status: ERecurringTaskStatus): Promise<IRecurringTaskEntity[]> {
     return this.recurringTaskRepository.getByStatusAsync(status);
   }
 
   /**
    * Get all active recurring tasks
    */
-  async getActiveAsync(): Promise<IRecurringTask[]> {
+  async getActiveAsync(): Promise<IRecurringTaskEntity[]> {
     return this.recurringTaskRepository.getActiveAsync();
   }
 
   /**
    * Get all tasks linked to a recurring task
    */
-  async getLinkedTasksAsync(recurringTaskId: string): Promise<ITask[]> {
+  async getLinkedTasksAsync(recurringTaskId: string): Promise<ITaskEntity[]> {
     const links = await this.taskRecurringLinkRepository.getByRecurringTaskIdAsync(recurringTaskId);
-    const tasks: ITask[] = [];
+    const tasks: ITaskEntity[] = [];
     
     for (const link of links) {
       const task = await this.taskRepository.getByIdAsync(link.taskId);
@@ -255,7 +250,7 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Regenerate future tasks when interval changes
    */
-  private async regenerateFutureTasks(recurringTask: IRecurringTask): Promise<void> {
+  private async regenerateFutureTasks(recurringTask: IRecurringTaskEntity): Promise<void> {
     const links = await this.taskRecurringLinkRepository.getByRecurringTaskIdAsync(recurringTask.id);
     const now = new Date();
 
@@ -286,7 +281,7 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Update linked tasks when only properties change (not interval)
    */
-  private async updateLinkedTasks(recurringTask: IRecurringTask): Promise<void> {
+  private async updateLinkedTasks(recurringTask: IRecurringTaskEntity): Promise<void> {
     const links = await this.taskRecurringLinkRepository.getByRecurringTaskIdAsync(recurringTask.id);
     const now = new Date().toISOString();
 
@@ -294,7 +289,7 @@ export class RecurringTaskService implements IRecurringTaskService {
       const task = await this.taskRepository.getByIdAsync(link.taskId);
       // Only update non-done tasks
       if (task && task.status !== EStatus.DONE) {
-        const updatedTask: ITask = {
+        const updatedTask: ITaskEntity = {
           ...task,
           title: recurringTask.title,
           description: recurringTask.description,

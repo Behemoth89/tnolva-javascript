@@ -1,5 +1,5 @@
-import type { IEntityId } from './IEntityId.js';
-import type { IQueryBuilder } from '../data/query/IQueryBuilder.ts';
+import type { IEntityId } from '../entities/IEntityId.js';
+import type { IQueryBuilder } from '../../data/query/IQueryBuilder.js';
 
 /**
  * IRepository<T> Interface
