@@ -7,11 +7,7 @@ import type { IRecurrenceTemplateRepository } from './repositories/IRecurrenceTe
 import type { IRecurringTaskRepository } from './repositories/IRecurringTaskRepository.js';
 import type { ITaskRecurringLinkRepository } from './repositories/ITaskRecurringLinkRepository.js';
 import type { ITaskDependencyRepository } from './repositories/ITaskDependencyRepository.js';
-
-/**
- * Entity type for routing changes to the correct repository
- */
-export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurringTask' | 'taskRecurringLink' | 'taskDependency';
+import type { EEntityType } from '../enums/EEntityType.js';
 
 /**
  * IUnitOfWork Interface
@@ -81,21 +77,21 @@ export interface IUnitOfWork {
    * @param entity - Entity to register (must extend IEntityId)
    * @param entityType - Type of entity for routing to correct repository
    */
-  registerNew<T extends IEntityId>(entity: T, entityType: EntityType): void;
+  registerNew<T extends IEntityId>(entity: T, entityType: EEntityType): void;
 
   /**
    * Register a modified entity for update on commit
    * @param entity - Entity to register (must extend IEntityId)
    * @param entityType - Type of entity for routing to correct repository
    */
-  registerModified<T extends IEntityId>(entity: T, entityType: EntityType): void;
+  registerModified<T extends IEntityId>(entity: T, entityType: EEntityType): void;
 
   /**
    * Register a deleted entity for deletion on commit
    * @param entity - Entity to register (must extend IEntityId)
    * @param entityType - Type of entity for routing to correct repository
    */
-  registerDeleted<T extends IEntityId>(entity: T, entityType: EntityType): void;
+  registerDeleted<T extends IEntityId>(entity: T, entityType: EEntityType): void;
 
   /**
    * Commit all registered changes to storage atomically

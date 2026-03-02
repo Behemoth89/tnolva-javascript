@@ -6,3 +6,4 @@ export { EStatus, type EStatus as EStatusType } from './EStatus.js';
 export { EPriority, PriorityValues, type EPriority as EPriorityType } from './EPriority.js';
 export { ERecurringTaskStatus, type ERecurringTaskStatus as ERecurringTaskStatusType } from './ERecurringTaskStatus.js';
 export { EDependencyType, type EDependencyType as EDependencyTypeType } from './EDependencyType.js';
+export { EEntityType, type EEntityType as EEntityTypeType } from './EEntityType.js';

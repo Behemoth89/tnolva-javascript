@@ -7,11 +7,7 @@ import { RecurringTaskRepository } from '../repositories/RecurringTaskRepository
 import { TaskRecurringLinkRepository } from '../repositories/TaskRecurringLinkRepository.js';
 import { TaskDependencyRepository } from '../repositories/TaskDependencyRepository.js';
 import { EStatus } from '../../enums/EStatus.js';
-
-/**
- * Entity type for routing changes to the correct repository
- */
-export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurringTask' | 'taskRecurringLink' | 'taskDependency';
+import type { EEntityType } from '../../enums/EEntityType.js';
 
 /**
  * Change tracking entry with type metadata
@@ -19,7 +15,7 @@ export type EntityType = 'task' | 'category' | 'recurrenceTemplate' | 'recurring
 interface ChangeEntry {
   entity: unknown;
   type: 'new' | 'modified' | 'deleted';
-  entityType: EntityType;
+  entityType: EEntityType;
 }
 
 /**
@@ -321,7 +317,7 @@ export class UnitOfWork implements IUnitOfWork {
    * @param entity - Entity to register (must have id property)
    * @param entityType - Type of entity for routing to correct repository
    */
-  registerNew(entity: unknown, entityType: EntityType): void {
+  registerNew(entity: unknown, entityType: EEntityType): void {
     this.assertNotCommitted();
     this.changes.push({ entity, type: 'new', entityType });
   }
@@ -331,7 +327,7 @@ export class UnitOfWork implements IUnitOfWork {
    * @param entity - Entity to register (must have id property)
    * @param entityType - Type of entity for routing to correct repository
    */
-  registerModified(entity: unknown, entityType: EntityType): void {
+  registerModified(entity: unknown, entityType: EEntityType): void {
     this.assertNotCommitted();
     this.changes.push({ entity, type: 'modified', entityType });
   }
@@ -341,7 +337,7 @@ export class UnitOfWork implements IUnitOfWork {
    * @param entity - Entity to register (must have id property)
    * @param entityType - Type of entity for routing to correct repository
    */
-  registerDeleted(entity: unknown, entityType: EntityType): void {
+  registerDeleted(entity: unknown, entityType: EEntityType): void {
     this.assertNotCommitted();
     this.changes.push({ entity, type: 'deleted', entityType });
   }
