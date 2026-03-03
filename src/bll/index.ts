@@ -20,3 +20,4 @@ export type { IRecurringTaskService } from './interfaces/IRecurringTaskService.j
 export type { ITaskDependencyService } from './interfaces/ITaskDependencyService.js';
 export type { IStatisticsService } from './interfaces/IStatisticsService.js';
 export type { IBllServiceFactory } from './interfaces/IBllServiceFactory.js';
+export { bllServiceFactory } from './BllServiceFactory.js';

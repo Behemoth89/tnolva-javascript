@@ -95,12 +95,20 @@ export class CategoryService implements ICategoryService {
       return false;
     }
 
+    // DEBUG: Check for orphaned assignments before deletion
+    const assignedTasks = await this.categoryRepository.getTasksForCategoryAsync(id);
+    console.log('[CategoryService] Deleting category:', id, '| Assigned tasks:', assignedTasks.length);
+    if (assignedTasks.length > 0) {
+      console.warn('[CategoryService] WARNING: Category has assigned tasks - assignments will become orphaned!');
+    }
+
     // Register with UOW change tracking
     this.unitOfWork.registerDeleted(category, 'category');
     try {
       await this.unitOfWork.commit();
       return true;
-    } catch {
+    } catch (error) {
+      console.error('[CategoryService] Error committing category deletion:', error);
       return false;
     }
   }

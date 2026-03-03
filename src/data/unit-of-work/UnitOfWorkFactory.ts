@@ -1,6 +1,7 @@
 import type { IUnitOfWorkFactory, IUnitOfWork } from '../../interfaces/index.js';
 import type { ILocalStorageAdapter } from '../adapters/ILocalStorageAdapter.js';
 import { UnitOfWork } from './UnitOfWork.js';
+import { LocalStorageAdapter } from '../adapters/LocalStorageAdapter.js';
 
 /**
  * UnitOfWorkFactory Class
@@ -29,3 +30,8 @@ export class UnitOfWorkFactory implements IUnitOfWorkFactory {
     return uow;
   }
 }
+
+/**
+ * Default factory instance with LocalStorage
+ */
+export const unitOfWorkFactory = new UnitOfWorkFactory(new LocalStorageAdapter());

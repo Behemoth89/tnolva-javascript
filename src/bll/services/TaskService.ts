@@ -65,17 +65,6 @@ export class TaskService implements ITaskService {
 
     // Register with UOW change tracking
     this.unitOfWork.registerNew(task, 'task');
-
-    // If parentTaskId is provided, create the dependency relationship
-    if (dto.parentTaskId) {
-      try {
-        await this.taskDependencyService.addSubtaskAsync(id, dto.parentTaskId);
-      } catch (error) {
-        // If dependency creation fails, rollback and rethrow
-        this.unitOfWork.rollback();
-        throw error;
-      }
-    }
     
     await this.unitOfWork.commit();
     

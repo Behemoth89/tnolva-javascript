@@ -1,0 +1,69 @@
+/**
+ * Main CSS - Base styles with Tailwind CSS
+ */
+
+@import "tailwindcss";
+
+/* Keep custom CSS variables for app-specific needs */
+:root {
+  /* Z-index scale (Tailwind uses different approach, keep for reference) */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-toast: 1060;
+}
+
+/* Base styles */
+html {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Typography defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: #0f172a;
+}
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.125rem; }
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* App container */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Page container */
+.page-container {
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Utility classes that extend Tailwind */
+.text-muted { color: #64748b; }
+.text-danger { color: #ef4444; }
+.text-success { color: #22c55e; }

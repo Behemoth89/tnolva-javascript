@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { StatisticsService } from '../bll/services/StatisticsService.js';
 import type { IUnitOfWork, ITaskRepository, ITaskEntity, ITaskCategoryEntity, ITaskCategoryAssignmentEntity, IRecurringTaskEntity, ITaskDependencyEntity, IRecurrenceTemplateRepository, IRecurringTaskRepository, ITaskDependencyRepository, ITaskRecurringLinkRepository, ICategoryRepository } from '../interfaces/index.js';
-import { EStatus, EPriority, ERecurringTaskStatus, EDateRange } from '../enums/index.js';
+import { EStatus, EPriority, ERecurringTaskStatus } from '../enums/index.js';
 
 // Mock UnitOfWork
 const createMockUnitOfWork = (options: {

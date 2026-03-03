@@ -7,3 +7,4 @@ export * from './repositories/index.js';
 export * from './unit-of-work/index.js';
 export * from './query/index.js';
 export { STORAGE_NAMESPACE, STORAGE_KEY_TASKS, STORAGE_KEY_TASK_RELATIONSHIPS, STORAGE_KEY_TASK_DEPENDENCIES, getNamespacedKey } from './storageKeys.js';
+export { unitOfWorkFactory } from './unit-of-work/UnitOfWorkFactory.js';

@@ -3,6 +3,7 @@ import type { ICategoryService } from './ICategoryService.js';
 import type { IRecurrenceService } from './IRecurrenceService.js';
 import type { IRecurringTaskService } from './IRecurringTaskService.js';
 import type { IStatisticsService } from './IStatisticsService.js';
+import type { ITaskDependencyService } from './ITaskDependencyService.js';
 import type { IUnitOfWork } from '../../interfaces/index.js';
 
 /**
@@ -44,4 +45,11 @@ export interface IBllServiceFactory {
    * @returns A new StatisticsService instance
    */
   createStatisticsService(unitOfWork: IUnitOfWork): IStatisticsService;
+
+  /**
+   * Create a TaskDependencyService instance
+   * @param unitOfWork - The UnitOfWork for data access
+   * @returns A new TaskDependencyService instance
+   */
+  createTaskDependencyService(unitOfWork: IUnitOfWork): ITaskDependencyService;
 }

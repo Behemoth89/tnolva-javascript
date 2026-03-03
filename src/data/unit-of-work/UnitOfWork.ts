@@ -353,6 +353,7 @@ export class UnitOfWork implements IUnitOfWork {
       // In a real database, this would be a single transaction
       for (const change of this.changes) {
         const entityWithId = change.entity as { id: string };
+        console.log('[UnitOfWork] Committing change:', change.entityType, change.type, entityWithId.id);
 
         switch (change.entityType) {
           case 'task':
@@ -383,6 +384,7 @@ export class UnitOfWork implements IUnitOfWork {
       // potentially leaving inconsistent state. The changes array is cleared to
       // prevent re-attempting the same failed operations. committed remains false
       // to allow caller to handle recovery (retry or rollback).
+      console.error('[UnitOfWork] Error during commit:', error);
       this.changes = [];
       throw error;
     }
