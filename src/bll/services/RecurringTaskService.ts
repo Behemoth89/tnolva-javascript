@@ -219,6 +219,10 @@ export class RecurringTaskService implements IRecurringTaskService {
 
   /**
    * Delete a recurring task and all its linked tasks
+   * 
+   * Business Logic:
+   * - If ANY linked task is DONE: stop the recurring task (don't delete), set not-done tasks to CANCELLED
+   * - If NO linked tasks are DONE: delete the recurring task and all linked tasks (original behavior)
    */
   async deleteAsync(id: string): Promise<boolean> {
     const existing = await this.recurringTaskRepository.getByIdAsync(id);
@@ -229,6 +233,42 @@ export class RecurringTaskService implements IRecurringTaskService {
     // Get all linked tasks
     const links = await this.taskRecurringLinkRepository.getByRecurringTaskIdAsync(id);
     
+    // Check if any linked task is done
+    let hasDoneTask = false;
+    const linkedTasks: ITaskEntity[] = [];
+    
+    for (const link of links) {
+      const task = await this.taskRepository.getByIdAsync(link.taskId);
+      if (task) {
+        linkedTasks.push(task);
+        if (task.status === EStatus.DONE) {
+          hasDoneTask = true;
+        }
+      }
+    }
+
+    // If any linked task is done, stop the recurring task instead of deleting
+    if (hasDoneTask) {
+      // Stop the recurring task (mark as STOPPED)
+      await this.stopAsync(id);
+      
+      // Set all not-done tasks to CANCELLED
+      for (const task of linkedTasks) {
+        if (task.status !== EStatus.DONE) {
+          const updatedTask: ITaskEntity = {
+            ...task,
+            status: EStatus.CANCELLED,
+            updatedAt: new Date().toISOString(),
+          };
+          this.unitOfWork.registerModified(updatedTask, 'task');
+        }
+      }
+      
+      await this.unitOfWork.commit();
+      return true;
+    }
+
+    // No done tasks - proceed with original deletion logic
     // Delete linked tasks
     for (const link of links) {
       const task = await this.taskRepository.getByIdAsync(link.taskId);
