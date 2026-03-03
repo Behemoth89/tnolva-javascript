@@ -38,3 +38,12 @@ export type { ITaskRecurringLinkRepository } from './repositories/ITaskRecurring
 // Unit of Work Interfaces
 export type { IUnitOfWork } from './IUnitOfWork.js';
 export type { IUnitOfWorkFactory } from './IUnitOfWorkFactory.js';
+
+// Statistics Interfaces
+export type { ITaskStatusStatistics } from './statistics/ITaskStatusStatistics.js';
+export type { ITaskPriorityStatistics } from './statistics/ITaskPriorityStatistics.js';
+export type { ITaskTimeStatistics } from './statistics/ITaskTimeStatistics.js';
+export type { ICategoryStatistics, CategoryTaskCount } from './statistics/ICategoryStatistics.js';
+export type { IRecurringTaskStatistics, TemplateFrequencyBreakdown } from './statistics/IRecurringTaskStatistics.js';
+export type { IDependencyStatistics, DependencyCountDistribution } from './statistics/IDependencyStatistics.js';
+export type { IStatisticsSummary } from './statistics/IStatisticsSummary.js';

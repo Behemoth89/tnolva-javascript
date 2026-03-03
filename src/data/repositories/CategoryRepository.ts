@@ -45,6 +45,13 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
   }
 
   /**
+   * Get all category assignments
+   */
+  async getAllAssignmentsAsync(): Promise<ITaskCategoryAssignmentEntity[]> {
+    return this.getAssignmentsAsync();
+  }
+
+  /**
    * Get all assignments
    */
   private async getAssignmentsAsync(): Promise<ITaskCategoryAssignmentEntity[]> {

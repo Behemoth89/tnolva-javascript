@@ -7,3 +7,4 @@ export { EPriority, PriorityValues, type EPriority as EPriorityType } from './EP
 export { ERecurringTaskStatus, type ERecurringTaskStatus as ERecurringTaskStatusType } from './ERecurringTaskStatus.js';
 export { EDependencyType, type EDependencyType as EDependencyTypeType } from './EDependencyType.js';
 export { EEntityType, type EEntityType as EEntityTypeType } from './EEntityType.js';
+export { EDateRange, type EDateRange as EDateRangeType } from './EDateRange.js';

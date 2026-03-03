@@ -7,6 +7,12 @@ import type { ITaskCategoryEntity, ITaskCategoryAssignmentEntity } from '../inde
  */
 export interface ICategoryRepository extends IRepository<ITaskCategoryEntity> {
   /**
+   * Get all category assignments
+   * @returns Array of all task-category assignments
+   */
+  getAllAssignmentsAsync(): Promise<ITaskCategoryAssignmentEntity[]>;
+
+  /**
    * Assign a task to a category
    * @param taskId - ID of the task
    * @param categoryId - ID of the category
