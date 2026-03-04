@@ -319,3 +319,29 @@
     transform: rotate(360deg);
   }
 }
+
+/* Sortable table headers */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 150ms ease;
+}
+
+.sortable-header:hover {
+  background-color: #e2e8f0 !important;
+}
+
+.sortable-header.sorted {
+  background-color: #e2e8f0 !important;
+}
+
+.sort-header-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sort-indicator {
+  font-size: 0.625rem;
+  color: #2563eb;
+}

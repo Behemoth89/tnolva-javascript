@@ -5,8 +5,26 @@
 
 import { UiBridge, EStatus, EPriority } from '../services/ui-bridge.js';
 import type { ITaskEntity } from '../../interfaces/index.js';
+import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 
 const bridge = new UiBridge();
+
+// Sort state management
+let taskSorter: TableSorter<ITaskEntity> | null = null;
+let currentTasks: ITaskEntity[] = [];
+
+/**
+ * Global sort handler - must be on window for inline onclick
+ */
+function handleTaskSort(key: string): void {
+  if (taskSorter) {
+    const sorted = taskSorter.sort(key as keyof ITaskEntity);
+    renderTasksTable(sorted);
+  }
+}
+
+// Expose to window for inline onclick handlers
+(window as unknown as { handleTaskSort: typeof handleTaskSort }).handleTaskSort = handleTaskSort;
 
 /**
  * Render tasks CRUD page
@@ -58,9 +76,12 @@ async function loadTasks(): Promise<void> {
   if (!container) return;
   
   try {
-    const tasks = await bridge.getAllTasks();
+    currentTasks = await bridge.getAllTasks();
     
-    if (tasks.length === 0) {
+    // Initialize sorter
+    taskSorter = new TableSorter<ITaskEntity>(currentTasks);
+    
+    if (currentTasks.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">📋</div>
@@ -73,40 +94,7 @@ async function loadTasks(): Promise<void> {
       return;
     }
     
-    container.innerHTML = `
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Start Date</th>
-              <th>Due Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tasks-tbody">
-            ${tasks.map(task => renderTaskRow(task)).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-    
-    // Add event listeners
-    container.querySelectorAll('.edit-task-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) showTaskForm(id);
-      });
-    });
-    
-    container.querySelectorAll('.delete-task-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) confirmDeleteTask(id);
-      });
-    });
+    renderTasksTable(currentTasks);
   } catch (error) {
     console.error('Error loading tasks:', error);
     container.innerHTML = `<div class="text-danger">Error loading tasks</div>`;
@@ -114,8 +102,50 @@ async function loadTasks(): Promise<void> {
 }
 
 /**
- * Render a task row
+ * Render tasks table with given data
  */
+function renderTasksTable(tasks: ITaskEntity[]): void {
+  const container = document.getElementById('tasks-table-container');
+  if (!container) return;
+  
+  const sortState = taskSorter?.getSortState() ?? null;
+  
+  container.innerHTML = `
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            ${getSortHeaderHtml({ key: 'title', label: 'Title' }, sortState, 'handleTaskSort')}
+            ${getSortHeaderHtml({ key: 'status', label: 'Status' }, sortState, 'handleTaskSort')}
+            ${getSortHeaderHtml({ key: 'priority', label: 'Priority' }, sortState, 'handleTaskSort')}
+            ${getSortHeaderHtml({ key: 'startDate', label: 'Start Date' }, sortState, 'handleTaskSort')}
+            ${getSortHeaderHtml({ key: 'dueDate', label: 'Due Date' }, sortState, 'handleTaskSort')}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tasks-tbody">
+          ${tasks.map(task => renderTaskRow(task)).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Add event listeners
+  container.querySelectorAll('.edit-task-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) showTaskForm(id);
+    });
+  });
+  
+  container.querySelectorAll('.delete-task-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) confirmDeleteTask(id);
+    });
+  });
+}
+
 function renderTaskRow(task: ITaskEntity): string {
   const statusClass = `badge-${task.status.toLowerCase().replace('_', '-')}`;
   const priorityClass = `badge-${task.priority.toLowerCase()}`;

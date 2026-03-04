@@ -5,12 +5,33 @@
 
 import { UiBridge, ERecurringTaskStatus, EPriority } from '../services/ui-bridge.js';
 import type { IRecurringTaskEntity } from '../../interfaces/index.js';
+import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
+
+// Sort state management
+let recurringTaskSorter: TableSorter<IRecurringTaskEntity> | null = null;
+let currentRecurringTasks: IRecurringTaskEntity[] = [];
+
+// Bridge instance
+let bridge: UiBridge;
+
+/**
+ * Global sort handler - must be on window for inline onclick
+ */
+function handleRecurringTaskSort(key: string): void {
+  if (recurringTaskSorter) {
+    const sorted = recurringTaskSorter.sort(key as keyof IRecurringTaskEntity);
+    renderRecurringTasksTable(sorted);
+  }
+}
+
+// Expose to window for inline onclick handlers
+(window as unknown as { handleRecurringTaskSort: typeof handleRecurringTaskSort }).handleRecurringTaskSort = handleRecurringTaskSort;
 
 /**
  * Render recurring tasks CRUD page
  */
 export async function renderRecurringTasksCrud(): Promise<void> {
-  const bridge = new UiBridge();
+  bridge = new UiBridge();
   
   // Update sidebar active state
   updateSidebarActive('/settings/recurring-tasks');
@@ -60,7 +81,11 @@ async function loadRecurringTasks(bridge: UiBridge): Promise<void> {
   try {
     const tasks = await bridge.getAllRecurringTasks();
     
-    if (tasks.length === 0) {
+    // Initialize sorter
+    currentRecurringTasks = tasks;
+    recurringTaskSorter = new TableSorter<IRecurringTaskEntity>(currentRecurringTasks);
+    
+    if (currentRecurringTasks.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">📅</div>
@@ -73,64 +98,79 @@ async function loadRecurringTasks(bridge: UiBridge): Promise<void> {
       return;
     }
     
-    container.innerHTML = `
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Priority</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="recurring-tasks-tbody">
-            ${tasks.map(task => renderRecurringTaskRow(task)).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-    
-    // Add event listeners
-    container.querySelectorAll('.edit-recurring-task-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) showRecurringTaskForm(bridge, id);
-      });
-    });
-    
-    container.querySelectorAll('.delete-recurring-task-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) confirmDeleteRecurringTask(bridge, id);
-      });
-    });
-    
-    container.querySelectorAll('.stop-recurring-task-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) {
-          await bridge.stopRecurringTask(id);
-          await loadRecurringTasks(bridge);
-        }
-      });
-    });
-    
-    container.querySelectorAll('.reactivate-recurring-task-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) {
-          await bridge.reactivateRecurringTask(id);
-          await loadRecurringTasks(bridge);
-        }
-      });
-    });
+    renderRecurringTasksTable(currentRecurringTasks);
   } catch (error) {
     console.error('Error loading recurring tasks:', error);
-    container.innerHTML = `<div class="text-danger">Error loading recurring tasks</div>`;
+    const container = document.getElementById('recurring-tasks-table-container');
+    if (container) {
+      container.innerHTML = `<div class="text-danger">Error loading recurring tasks</div>`;
+    }
   }
+}
+
+/**
+ * Render recurring tasks table with given data
+ */
+function renderRecurringTasksTable(tasks: IRecurringTaskEntity[]): void {
+  const container = document.getElementById('recurring-tasks-table-container');
+  if (!container) return;
+  
+  const sortState = recurringTaskSorter?.getSortState() ?? null;
+  
+  container.innerHTML = `
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            ${getSortHeaderHtml({ key: 'title', label: 'Title' }, sortState, 'handleRecurringTaskSort')}
+            ${getSortHeaderHtml({ key: 'priority', label: 'Priority' }, sortState, 'handleRecurringTaskSort')}
+            ${getSortHeaderHtml({ key: 'startDate', label: 'Start Date' }, sortState, 'handleRecurringTaskSort')}
+            ${getSortHeaderHtml({ key: 'endDate', label: 'End Date' }, sortState, 'handleRecurringTaskSort')}
+            ${getSortHeaderHtml({ key: 'status', label: 'Status' }, sortState, 'handleRecurringTaskSort')}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recurring-tasks-tbody">
+          ${tasks.map(task => renderRecurringTaskRow(task)).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Add event listeners
+  container.querySelectorAll('.edit-recurring-task-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) showRecurringTaskForm(bridge, id);
+    });
+  });
+  
+  container.querySelectorAll('.delete-recurring-task-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) confirmDeleteRecurringTask(bridge, id);
+    });
+  });
+  
+  container.querySelectorAll('.stop-recurring-task-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) {
+        await bridge.stopRecurringTask(id);
+        await loadRecurringTasks(bridge);
+      }
+    });
+  });
+  
+  container.querySelectorAll('.reactivate-recurring-task-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) {
+        await bridge.reactivateRecurringTask(id);
+        await loadRecurringTasks(bridge);
+      }
+    });
+  });
 }
 
 /**

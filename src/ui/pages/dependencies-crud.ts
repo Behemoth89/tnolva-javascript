@@ -4,6 +4,7 @@
  */
 
 import { UiBridge, EDependencyType } from '../services/ui-bridge.js';
+import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 
 interface Dependency {
   taskId: string;
@@ -13,11 +14,31 @@ interface Dependency {
   dependsOnTaskTitle?: string;
 }
 
+// Sort state management
+let dependencySorter: TableSorter<Dependency> | null = null;
+let currentDependencies: Dependency[] = [];
+
+// Bridge instance
+let bridge: UiBridge;
+
+/**
+ * Global sort handler - must be on window for inline onclick
+ */
+function handleDependencySort(key: string): void {
+  if (dependencySorter) {
+    const sorted = dependencySorter.sort(key as keyof Dependency);
+    renderDependenciesTable(sorted);
+  }
+}
+
+// Expose to window for inline onclick handlers
+(window as unknown as { handleDependencySort: typeof handleDependencySort }).handleDependencySort = handleDependencySort;
+
 /**
  * Render dependencies CRUD page
  */
 export async function renderDependenciesCrud(): Promise<void> {
-  const bridge = new UiBridge();
+  bridge = new UiBridge();
   
   // Update sidebar active state
   updateSidebarActive('/settings/dependencies');
@@ -79,7 +100,11 @@ async function loadDependencies(bridge: UiBridge): Promise<void> {
       };
     });
     
-    if (enrichedDeps.length === 0) {
+    // Initialize sorter
+    currentDependencies = enrichedDeps;
+    dependencySorter = new TableSorter<Dependency>(currentDependencies);
+    
+    if (currentDependencies.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">🔗</div>
@@ -92,36 +117,48 @@ async function loadDependencies(bridge: UiBridge): Promise<void> {
       return;
     }
     
-    container.innerHTML = `
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Task (Subtask)</th>
-              <th>Depends On (Parent)</th>
-              <th>Type</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="dependencies-tbody">
-            ${enrichedDeps.map(dep => renderDependencyRow(dep)).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-    
-    // Add event listeners
-    container.querySelectorAll('.delete-dependency-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const taskId = (e.target as HTMLElement).dataset.taskId;
-        const parentTaskId = (e.target as HTMLElement).dataset.parentTaskId;
-        if (taskId && parentTaskId) confirmDeleteDependency(bridge, taskId, parentTaskId);
-      });
-    });
+    renderDependenciesTable(currentDependencies);
   } catch (error) {
     console.error('Error loading dependencies:', error);
     container.innerHTML = `<div class="text-danger">Error loading dependencies</div>`;
   }
+}
+
+/**
+ * Render dependencies table with given data
+ */
+function renderDependenciesTable(dependencies: Dependency[]): void {
+  const container = document.getElementById('dependencies-table-container');
+  if (!container) return;
+  
+  const sortState = dependencySorter?.getSortState() ?? null;
+  
+  container.innerHTML = `
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            ${getSortHeaderHtml({ key: 'taskTitle', label: 'Task (Subtask)' }, sortState, 'handleDependencySort')}
+            ${getSortHeaderHtml({ key: 'dependsOnTaskTitle', label: 'Depends On (Parent)' }, sortState, 'handleDependencySort')}
+            ${getSortHeaderHtml({ key: 'dependencyType', label: 'Type' }, sortState, 'handleDependencySort')}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dependencies-tbody">
+          ${dependencies.map(dep => renderDependencyRow(dep)).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Add event listeners
+  container.querySelectorAll('.delete-dependency-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const taskId = (e.target as HTMLElement).dataset.taskId;
+      const parentTaskId = (e.target as HTMLElement).dataset.parentTaskId;
+      if (taskId && parentTaskId) confirmDeleteDependency(bridge, taskId, parentTaskId);
+    });
+  });
 }
 
 /**

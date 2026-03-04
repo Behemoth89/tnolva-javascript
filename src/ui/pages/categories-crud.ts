@@ -5,12 +5,33 @@
 
 import { UiBridge } from '../services/ui-bridge.js';
 import type { ITaskCategoryEntity } from '../../interfaces/index.js';
+import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
+
+// Sort state management
+let categorySorter: TableSorter<ITaskCategoryEntity> | null = null;
+let currentCategories: ITaskCategoryEntity[] = [];
+
+// Bridge instance
+let bridge: UiBridge;
+
+/**
+ * Global sort handler - must be on window for inline onclick
+ */
+function handleCategorySort(key: string): void {
+  if (categorySorter) {
+    const sorted = categorySorter.sort(key as keyof ITaskCategoryEntity);
+    renderCategoriesTable(sorted);
+  }
+}
+
+// Expose to window for inline onclick handlers
+(window as unknown as { handleCategorySort: typeof handleCategorySort }).handleCategorySort = handleCategorySort;
 
 /**
  * Render categories CRUD page
  */
 export async function renderCategoriesCrud(): Promise<void> {
-  const bridge = new UiBridge();
+  bridge = new UiBridge();
   
   // Update sidebar active state
   updateSidebarActive('/settings/categories');
@@ -58,9 +79,12 @@ async function loadCategories(bridge: UiBridge): Promise<void> {
   if (!container) return;
   
   try {
-    const categories = await bridge.getAllCategories();
+    currentCategories = await bridge.getAllCategories();
     
-    if (categories.length === 0) {
+    // Initialize sorter
+    categorySorter = new TableSorter<ITaskCategoryEntity>(currentCategories);
+    
+    if (currentCategories.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">🏷️</div>
@@ -73,43 +97,55 @@ async function loadCategories(bridge: UiBridge): Promise<void> {
       return;
     }
     
-    container.innerHTML = `
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Color</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="categories-tbody">
-            ${categories.map(category => renderCategoryRow(category)).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-    
-    // Add event listeners
-    container.querySelectorAll('.edit-category-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) showCategoryForm(bridge, id);
-      });
-    });
-    
-    container.querySelectorAll('.delete-category-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        if (id) confirmDeleteCategory(bridge, id);
-      });
-    });
+    renderCategoriesTable(currentCategories);
   } catch (error) {
     console.error('Error loading categories:', error);
     container.innerHTML = `<div class="text-danger">Error loading categories</div>`;
   }
+}
+
+/**
+ * Render categories table with given data
+ */
+function renderCategoriesTable(categories: ITaskCategoryEntity[]): void {
+  const container = document.getElementById('categories-table-container');
+  if (!container) return;
+  
+  const sortState = categorySorter?.getSortState() ?? null;
+  
+  container.innerHTML = `
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Color</th>
+            ${getSortHeaderHtml({ key: 'name', label: 'Name' }, sortState, 'handleCategorySort')}
+            ${getSortHeaderHtml({ key: 'description', label: 'Description' }, sortState, 'handleCategorySort')}
+            ${getSortHeaderHtml({ key: 'createdAt', label: 'Created' }, sortState, 'handleCategorySort')}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="categories-tbody">
+          ${categories.map(category => renderCategoryRow(category)).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Add event listeners
+  container.querySelectorAll('.edit-category-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) showCategoryForm(bridge, id);
+    });
+  });
+  
+  container.querySelectorAll('.delete-category-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.target as HTMLElement).dataset.id;
+      if (id) confirmDeleteCategory(bridge, id);
+    });
+  });
 }
 
 /**
