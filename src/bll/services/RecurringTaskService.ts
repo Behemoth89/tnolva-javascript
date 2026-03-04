@@ -121,8 +121,8 @@ export class RecurringTaskService implements IRecurringTaskService {
     // Register with UOW change tracking
     this.unitOfWork.registerModified(updatedRecurringTask, 'recurringTask');
 
-    // If intervals changed, regenerate future tasks
-    if (intervalsChanged) {
+    // If intervals or end date changed, regenerate future tasks
+    if (intervalsChanged || dto.endDate !== undefined) {
       await this.regenerateFutureTasks(updatedRecurringTask);
     } else if (dto.title !== undefined || dto.description !== undefined || 
                dto.priority !== undefined || dto.tags !== undefined || dto.categoryIds !== undefined) {
