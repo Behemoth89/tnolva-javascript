@@ -7,6 +7,7 @@ import { UiBridge, EStatus, EPriority } from '../services/ui-bridge.js';
 import type { IBllTaskDto } from '../../bll/interfaces/dtos/index.js';
 import type { ITaskCategoryEntity } from '../../interfaces/index.js';
 import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
+import { createSearchableDropdown } from '../../utils/filter.js';
 
 const bridge = new UiBridge();
 
@@ -115,7 +116,10 @@ function renderTasksTable(tasks: IBllTaskDto[]): void {
   
   container.innerHTML = `
     <div class="table-container">
-      <table class="table">
+      <div class="table-toolbar">
+        <input type="text" class="form-input" id="tasks-search" placeholder="Search tasks...">
+      </div>
+      <table class="table" id="tasks-table">
         <thead>
           <tr>
             ${getSortHeaderHtml({ key: 'title', label: 'Title' }, sortState, 'handleTaskSort')}
@@ -146,6 +150,21 @@ function renderTasksTable(tasks: IBllTaskDto[]): void {
     btn.addEventListener('click', (e) => {
       const id = (e.target as HTMLElement).dataset.id;
       if (id) confirmDeleteTask(id);
+    });
+  });
+  
+  // Setup table search filter
+  const searchInput = document.getElementById('tasks-search') as HTMLInputElement;
+  searchInput?.addEventListener('input', () => {
+    const searchTerm = searchInput.value;
+    const tbody = document.getElementById('tasks-tbody');
+    if (!tbody) return;
+    
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.forEach(row => {
+      const text = row.textContent?.toLowerCase() || '';
+      const matches = text.includes(searchTerm.toLowerCase());
+      (row as HTMLElement).style.display = matches ? '' : 'none';
     });
   });
 }
@@ -258,6 +277,9 @@ async function showTaskForm(taskId?: string): Promise<void> {
   
   // Cancel button
   document.getElementById('cancel-task-btn')?.addEventListener('click', () => modal.remove());
+  
+  // Setup category dropdown search
+  createSearchableDropdown('task-category');
   
   // Form submit
   document.getElementById('task-form')?.addEventListener('submit', async (e) => {
