@@ -45,7 +45,7 @@ export class RecurringTaskGenerator {
       startDate: task.startDate ? new Date(task.startDate) : new Date(),
       dueDate: nextDueDate,
       tags: task.tags ? [...task.tags] : [],
-      recurrenceTemplateId: task.recurrenceTemplateId,
+      isSystemCreated: true, // Mark as system-created
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -214,6 +214,7 @@ export class RecurringTaskGenerator {
    * @returns true if the task has a recurrence template
    */
   canGenerateNextInstance(task: ITaskEntity): boolean {
-    return !!task.recurrenceTemplateId;
+    // Check via link repository instead of recurrenceTemplateId
+    return !!task.isSystemCreated;
   }
 }

@@ -48,6 +48,11 @@ export class RecurringTaskService implements IRecurringTaskService {
       throw new Error('Start date is required');
     }
 
+    // Validate recurrenceTemplateId
+    if (!dto.recurrenceTemplateId) {
+      throw new Error('Recurrence template ID is required');
+    }
+
     // Create the recurring task
     const recurringTask = new RecurringTask(dto);
     const recurringTaskObj = recurringTask.toObject();

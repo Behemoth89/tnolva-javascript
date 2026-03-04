@@ -1,5 +1,5 @@
 import type { IRecurrenceService } from '../interfaces/IRecurrenceService.js';
-import type { ITaskEntity, IRecurrenceTemplateEntity, IUnitOfWork, IRecurrenceTemplateRepository, IInterval } from '../../interfaces/index.js';
+import type { ITaskEntity, IRecurrenceTemplateEntity, IUnitOfWork, IRecurrenceTemplateRepository, IInterval, ITaskRecurringLinkRepository } from '../../interfaces/index.js';
 import { generateGuid } from '../../utils/index.js';
 
 /**
@@ -10,6 +10,7 @@ import { generateGuid } from '../../utils/index.js';
 export class RecurrenceService implements IRecurrenceService {
   private readonly unitOfWork: IUnitOfWork;
   private readonly recurrenceTemplateRepository: IRecurrenceTemplateRepository;
+  private readonly taskRecurringLinkRepository: ITaskRecurringLinkRepository;
 
   /**
    * Creates a new RecurrenceService instance
@@ -18,6 +19,7 @@ export class RecurrenceService implements IRecurrenceService {
   constructor(unitOfWork: IUnitOfWork) {
     this.unitOfWork = unitOfWork;
     this.recurrenceTemplateRepository = unitOfWork.getRecurrenceTemplateRepository();
+    this.taskRecurringLinkRepository = unitOfWork.getTaskRecurringLinkRepository();
   }
 
   /**
@@ -205,11 +207,23 @@ export class RecurrenceService implements IRecurrenceService {
    * Uses UOW change tracking for transactional consistency
    */
   async generateNextTaskAsync(completedTask: ITaskEntity): Promise<ITaskEntity | null> {
-    if (!completedTask.recurrenceTemplateId) {
+    // Get recurring task link to find the template
+    const links = await this.taskRecurringLinkRepository.getByTaskIdAsync(completedTask.id);
+    if (links.length === 0) {
+      return null;
+    }
+    
+    const recurringTaskId = links[0].recurringTaskId;
+    
+    // Use UnitOfWork to get the recurring task
+    const recurringTaskRepo = this.unitOfWork.getRecurringTaskRepository();
+    const recurringTask = await recurringTaskRepo.getByIdAsync(recurringTaskId);
+    if (!recurringTask) {
       return null;
     }
 
-    const template = await this.recurrenceTemplateRepository.getByIdAsync(completedTask.recurrenceTemplateId);
+    const templateId = recurringTask.recurrenceTemplateId;
+    const template = await this.recurrenceTemplateRepository.getByIdAsync(templateId);
     if (!template) {
       return null;
     }
@@ -228,7 +242,7 @@ export class RecurrenceService implements IRecurrenceService {
       startDate: completedTask.startDate ? new Date(completedTask.startDate) : new Date(),
       dueDate: nextDueDate,
       tags: completedTask.tags ? [...completedTask.tags] : [],
-      recurrenceTemplateId: completedTask.recurrenceTemplateId,
+      isSystemCreated: true, // Mark as system-created
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -244,6 +258,8 @@ export class RecurrenceService implements IRecurrenceService {
    * Check if a task can generate a next instance
    */
   canGenerateNextInstance(task: ITaskEntity): boolean {
-    return !!task.recurrenceTemplateId;
+    // Check via link repository instead of recurrenceTemplateId
+    const links = this.taskRecurringLinkRepository.getByTaskId(task.id);
+    return links.length > 0;
   }
 }

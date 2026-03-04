@@ -15,8 +15,8 @@ export class Task implements ITaskEntity {
   startDate: Date;
   dueDate?: Date;
   tags: string[];
-  /** Reference to a recurrence template for repeating tasks */
-  recurrenceTemplateId?: string;
+  /** Indicates whether the task was created by the system (e.g., recurring task generator) */
+  isSystemCreated?: boolean;
   createdAt: string;
   updatedAt: string;
 
@@ -35,7 +35,7 @@ export class Task implements ITaskEntity {
     this.startDate = dto.startDate ?? new Date();
     this.dueDate = dto.dueDate;
     this.tags = dto.tags ? [...dto.tags] : [];
-    this.recurrenceTemplateId = dto.recurrenceTemplateId;
+    this.isSystemCreated = dto.isSystemCreated ?? false;
     // Handle timestamps - use provided or set to now
     this.createdAt = dto.createdAt ?? new Date().toISOString();
     this.updatedAt = dto.updatedAt ?? new Date().toISOString();
@@ -55,7 +55,7 @@ export class Task implements ITaskEntity {
       startDate: this.startDate,
       dueDate: this.dueDate,
       tags: [...this.tags],
-      recurrenceTemplateId: this.recurrenceTemplateId,
+      isSystemCreated: this.isSystemCreated,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

@@ -299,6 +299,7 @@ async function showRecurringTaskForm(bridge: UiBridge, taskId?: string): Promise
       intervals: [{ value: intervalValue, unit: intervalUnit }],
       tags,
       duration,
+      recurrenceTemplateId: '', // TODO: Add recurrence template selection to form
     };
     
     try {

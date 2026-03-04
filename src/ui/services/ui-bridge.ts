@@ -5,14 +5,13 @@
 
 import { BllServiceFactory } from '../../bll/BllServiceFactory.js';
 import { unitOfWorkFactory } from '../../data/unit-of-work/UnitOfWorkFactory.js';
-import type { ITaskEntity, ITaskCreateDto, ITaskUpdateDto, IInterval } from '../../interfaces/index.js';
+import type { ITaskEntity, IInterval } from '../../interfaces/index.js';
 import type { ITaskCategoryEntity, ITaskCategoryCreateDto, ITaskCategoryUpdateDto } from '../../interfaces/index.js';
 import type { IRecurrenceTemplateEntity } from '../../interfaces/index.js';
 import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto } from '../../interfaces/index.js';
-import { EStatus, EPriority } from '../../enums/index.js';
-import { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
-import { EDependencyType } from '../../enums/EDependencyType.js';
+import { EStatus, EPriority, ERecurringTaskStatus, EDependencyType } from '../../enums/index.js';
 import { generateGuid } from '../../utils/guid.js';
+import type { IBllTaskCreateDto, IBllTaskUpdateDto } from '../../bll/interfaces/dtos/index.js';
 
 // Create factory instance
 const bllFactory = new BllServiceFactory();
@@ -77,8 +76,9 @@ export class UiBridge {
     startDate?: Date;
     dueDate?: Date;
     tags?: string[];
+    categoryId?: string;
   }): Promise<ITaskEntity> {
-    const dto: ITaskCreateDto = {
+    const dto: IBllTaskCreateDto = {
       id: generateGuid(),
       title: data.title,
       description: data.description,
@@ -87,6 +87,7 @@ export class UiBridge {
       startDate: data.startDate,
       dueDate: data.dueDate,
       tags: data.tags,
+      categoryId: data.categoryId,
     };
     return this.getTaskService().createAsync(dto);
   }
@@ -102,8 +103,9 @@ export class UiBridge {
     startDate?: Date;
     dueDate?: Date;
     tags?: string[];
+    categoryId?: string | null;
   }): Promise<ITaskEntity | null> {
-    const dto: ITaskUpdateDto = {
+    const dto: IBllTaskUpdateDto = {
       title: data.title,
       description: data.description,
       status: data.status,
@@ -111,6 +113,7 @@ export class UiBridge {
       startDate: data.startDate,
       dueDate: data.dueDate,
       tags: data.tags,
+      categoryId: data.categoryId,
     };
     return this.getTaskService().updateAsync(id, dto);
   }
@@ -226,6 +229,7 @@ export class UiBridge {
     intervals: { value: number; unit: string }[];
     tags?: string[];
     categoryIds?: string[];
+    recurrenceTemplateId: string;
   }): Promise<IRecurringTaskEntity> {
     const dto: IRecurringTaskCreateDto = {
       title: data.title,
@@ -236,6 +240,7 @@ export class UiBridge {
       intervals: data.intervals as IInterval[],
       tags: data.tags,
       categoryIds: data.categoryIds,
+      recurrenceTemplateId: data.recurrenceTemplateId,
     };
     return this.getRecurringTaskService().createAsync(dto);
   }

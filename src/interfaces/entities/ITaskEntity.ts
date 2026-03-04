@@ -22,6 +22,6 @@ export interface ITaskEntity extends IBaseEntity {
   dueDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
-  /** Reference to a recurrence template for repeating tasks (optional) */
-  recurrenceTemplateId?: string;
+  /** Indicates whether the task was created by the system (e.g., recurring task generator) */
+  isSystemCreated?: boolean;
 }

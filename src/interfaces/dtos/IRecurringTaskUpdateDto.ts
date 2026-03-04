@@ -24,4 +24,6 @@ export interface IRecurringTaskUpdateDto {
   categoryIds?: string[];
   /** Status of the recurring task */
   status?: ERecurringTaskStatus;
+  /** ID of the recurrence template used by this recurring task */
+  recurrenceTemplateId?: string;
 }

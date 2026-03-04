@@ -43,6 +43,20 @@ export interface ICategoryRepository extends IRepository<ITaskCategoryEntity> {
   getTasksForCategoryAsync(categoryId: string): Promise<string[]>;
 
   /**
+   * Get category assignment for a specific task
+   * @param taskId - ID of the task
+   * @returns The category assignment if found, null otherwise
+   */
+  getAssignmentForTaskAsync(taskId: string): Promise<ITaskCategoryAssignmentEntity | null>;
+
+  /**
+   * Delete all category assignments for a specific task
+   * @param taskId - ID of the task
+   * @returns True if any assignments were deleted, false if none found
+   */
+  deleteAssignmentForTaskAsync(taskId: string): Promise<boolean>;
+
+  /**
    * Get category by name
    * @param name - Name of the category
    * @returns The category if found, null otherwise

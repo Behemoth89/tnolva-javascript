@@ -18,6 +18,7 @@ export class RecurringTask implements IRecurringTaskEntity {
   tags: string[];
   categoryIds: string[];
   status: ERecurringTaskStatus;
+  recurrenceTemplateId: string;
   createdAt: string;
   updatedAt: string;
 
@@ -37,6 +38,7 @@ export class RecurringTask implements IRecurringTaskEntity {
     this.tags = dto.tags ? [...dto.tags] : [];
     this.categoryIds = dto.categoryIds ? [...dto.categoryIds] : [];
     this.status = ERecurringTaskStatus.ACTIVE;
+    this.recurrenceTemplateId = dto.recurrenceTemplateId;
     // Handle timestamps
     const now = new Date().toISOString();
     this.createdAt = now;
@@ -57,6 +59,7 @@ export class RecurringTask implements IRecurringTaskEntity {
       intervals: existing.intervals,
       tags: existing.tags,
       categoryIds: existing.categoryIds,
+      recurrenceTemplateId: existing.recurrenceTemplateId,
     });
     task.id = existing.id;
     task.status = existing.status;
@@ -81,6 +84,7 @@ export class RecurringTask implements IRecurringTaskEntity {
       tags: [...this.tags],
       categoryIds: [...this.categoryIds],
       status: this.status,
+      recurrenceTemplateId: this.recurrenceTemplateId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

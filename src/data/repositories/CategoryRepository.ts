@@ -147,4 +147,31 @@ export class CategoryRepository extends BaseRepository<TaskCategory> implements 
       .filter((a) => a.categoryId === categoryId)
       .map((a) => a.taskId);
   }
+
+  /**
+   * Get category assignment for a specific task
+   * @param taskId - ID of the task
+   * @returns The category assignment if found, null otherwise
+   */
+  async getAssignmentForTaskAsync(taskId: string): Promise<ITaskCategoryAssignmentEntity | null> {
+    const assignments = await this.getAssignmentsAsync();
+    return assignments.find((a) => a.taskId === taskId) || null;
+  }
+
+  /**
+   * Delete all category assignments for a specific task
+   * @param taskId - ID of the task
+   * @returns True if any assignments were deleted, false if none found
+   */
+  async deleteAssignmentForTaskAsync(taskId: string): Promise<boolean> {
+    const assignments = await this.getAssignmentsAsync();
+    const initialLength = assignments.length;
+    const filteredAssignments = assignments.filter((a) => a.taskId !== taskId);
+    
+    if (filteredAssignments.length < initialLength) {
+      await this.saveAssignmentsAsync(filteredAssignments);
+      return true;
+    }
+    return false;
+  }
 }

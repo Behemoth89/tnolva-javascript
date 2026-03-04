@@ -4,21 +4,23 @@
  */
 
 import { UiBridge, EStatus, EPriority } from '../services/ui-bridge.js';
-import type { ITaskEntity } from '../../interfaces/index.js';
+import type { IBllTaskDto } from '../../bll/interfaces/dtos/index.js';
+import type { ITaskCategoryEntity } from '../../interfaces/index.js';
 import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 
 const bridge = new UiBridge();
 
 // Sort state management
-let taskSorter: TableSorter<ITaskEntity> | null = null;
-let currentTasks: ITaskEntity[] = [];
+let taskSorter: TableSorter<IBllTaskDto> | null = null;
+let currentTasks: IBllTaskDto[] = [];
+let currentCategories: ITaskCategoryEntity[] = [];
 
 /**
  * Global sort handler - must be on window for inline onclick
  */
 function handleTaskSort(key: string): void {
   if (taskSorter) {
-    const sorted = taskSorter.sort(key as keyof ITaskEntity);
+    const sorted = taskSorter.sort(key as keyof IBllTaskDto);
     renderTasksTable(sorted);
   }
 }
@@ -51,6 +53,7 @@ export async function renderTasksCrud(): Promise<void> {
   
   // Load tasks
   await loadTasks();
+  await loadCategories();
   
   // Add button handler
   document.getElementById('add-task-btn')?.addEventListener('click', () => showTaskForm());
@@ -79,7 +82,7 @@ async function loadTasks(): Promise<void> {
     currentTasks = await bridge.getAllTasks();
     
     // Initialize sorter
-    taskSorter = new TableSorter<ITaskEntity>(currentTasks);
+    taskSorter = new TableSorter<IBllTaskDto>(currentTasks);
     
     if (currentTasks.length === 0) {
       container.innerHTML = `
@@ -104,7 +107,7 @@ async function loadTasks(): Promise<void> {
 /**
  * Render tasks table with given data
  */
-function renderTasksTable(tasks: ITaskEntity[]): void {
+function renderTasksTable(tasks: IBllTaskDto[]): void {
   const container = document.getElementById('tasks-table-container');
   if (!container) return;
   
@@ -120,6 +123,7 @@ function renderTasksTable(tasks: ITaskEntity[]): void {
             ${getSortHeaderHtml({ key: 'priority', label: 'Priority' }, sortState, 'handleTaskSort')}
             ${getSortHeaderHtml({ key: 'startDate', label: 'Start Date' }, sortState, 'handleTaskSort')}
             ${getSortHeaderHtml({ key: 'dueDate', label: 'Due Date' }, sortState, 'handleTaskSort')}
+            <th>Category</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -146,9 +150,13 @@ function renderTasksTable(tasks: ITaskEntity[]): void {
   });
 }
 
-function renderTaskRow(task: ITaskEntity): string {
+function renderTaskRow(task: IBllTaskDto): string {
   const statusClass = `badge-${task.status.toLowerCase().replace('_', '-')}`;
   const priorityClass = `badge-${task.priority.toLowerCase()}`;
+  
+  const categoryDisplay = task.categoryId && task.categoryName 
+    ? `<span class="badge" style="background-color: ${task.categoryColor || '#666'}">${escapeHtml(task.categoryName)}</span>`
+    : '-';
   
   return `
     <tr>
@@ -157,6 +165,7 @@ function renderTaskRow(task: ITaskEntity): string {
       <td><span class="badge ${priorityClass}">${task.priority}</span></td>
       <td>${task.startDate ? formatDate(task.startDate) : '-'}</td>
       <td>${task.dueDate ? formatDate(task.dueDate) : '-'}</td>
+      <td>${categoryDisplay}</td>
       <td class="table-actions">
         <button class="btn btn-ghost btn-sm edit-task-btn" data-id="${task.id}">Edit</button>
         <button class="btn btn-ghost btn-sm text-danger delete-task-btn" data-id="${task.id}">Delete</button>
@@ -166,12 +175,24 @@ function renderTaskRow(task: ITaskEntity): string {
 }
 
 /**
+ * Load categories for dropdown
+ */
+async function loadCategories(): Promise<void> {
+  try {
+    currentCategories = await bridge.getAllCategories();
+  } catch (error) {
+    console.error('Error loading categories:', error);
+    currentCategories = [];
+  }
+}
+
+/**
  * Show task form (create or edit)
  */
 async function showTaskForm(taskId?: string): Promise<void> {
-  let task: ITaskEntity | null = null;
+  let task: IBllTaskDto | null = null;
   if (taskId) {
-    task = await bridge.getTaskById(taskId);
+    task = await bridge.getTaskById(taskId) as IBllTaskDto | null;
   }
   
   const isEdit = !!task;
@@ -221,6 +242,13 @@ async function showTaskForm(taskId?: string): Promise<void> {
         <label class="form-label" for="task-tags">Tags (comma separated)</label>
         <input type="text" class="form-input" id="task-tags" name="tags" value="${task?.tags?.join(', ') || ''}">
       </div>
+      <div class="form-group">
+        <label class="form-label" for="task-category">Category</label>
+        <select class="form-select" id="task-category" name="categoryId">
+          <option value="">No category</option>
+          ${currentCategories.map(cat => `<option value="${cat.id}" ${task?.categoryId === cat.id ? 'selected' : ''}>${escapeHtml(cat.name)}</option>`).join('')}
+        </select>
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="cancel-task-btn">Cancel</button>
         <button type="submit" class="btn btn-primary">${isEdit ? 'Save Changes' : 'Create Task'}</button>
@@ -241,6 +269,7 @@ async function showTaskForm(taskId?: string): Promise<void> {
     const tagsStr = formData.get('tags') as string;
     const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : undefined;
     
+    const categoryId = formData.get('categoryId') as string || undefined;
     const data = {
       title: formData.get('title') as string,
       description: formData.get('description') as string || undefined,
@@ -249,6 +278,7 @@ async function showTaskForm(taskId?: string): Promise<void> {
       startDate: formData.get('startDate') ? new Date(formData.get('startDate') as string) : undefined,
       dueDate: formData.get('dueDate') ? new Date(formData.get('dueDate') as string) : undefined,
       tags,
+      categoryId: categoryId || undefined,
     };
     
     try {

@@ -1,11 +1,11 @@
-import type { EStatus, EPriority } from '../../enums/index.js';
+import type { EStatus, EPriority } from '../../../enums/index.js';
 
 /**
- * ITaskCreateDto Interface
- * Interface for creating new tasks
- * Requires id and title, with optional other fields
+ * IBllTaskCreateDto Interface
+ * BLL-layer DTO for creating new tasks
+ * Includes categoryId for category assignment
  */
-export interface ITaskCreateDto {
+export interface IBllTaskCreateDto {
   /** Unique identifier for the task (required) */
   id: string;
   /** Title of the task (required, non-empty) */
@@ -22,10 +22,12 @@ export interface ITaskCreateDto {
   dueDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
+  /** Category ID to assign to the task (optional) */
+  categoryId?: string;
   /** Indicates whether the task was created by the system (optional, defaults to false) */
   isSystemCreated?: boolean;
-  /** Creation timestamp in ISO 8601 format (optional, set by repository if not provided) */
+  /** Creation timestamp in ISO 8601 format (optional, set by service if not provided) */
   createdAt?: string;
-  /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */
+  /** Last update timestamp in ISO 8601 format (optional, set by service if not provided) */
   updatedAt?: string;
 }

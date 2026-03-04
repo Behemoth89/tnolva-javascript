@@ -128,7 +128,8 @@ export class UnitOfWork implements IUnitOfWork {
 
     // Check if we need to generate a recurrence
     let newRecurringTask: ITaskEntity | null = null;
-    if (taskData.recurrenceTemplateId) {
+    const links = this.taskRecurringLinkRepository.getByTaskId(taskData.id);
+    if (links.length > 0) {
       newRecurringTask = await this.generateNextRecurringTask(taskData);
       if (newRecurringTask) {
         // Register main task
@@ -169,11 +170,20 @@ export class UnitOfWork implements IUnitOfWork {
    * This is inlined here to avoid circular dependency between DAL and BLL layers
    */
   private async generateNextRecurringTask(completedTask: ITaskEntity): Promise<ITaskEntity | null> {
-    if (!completedTask.recurrenceTemplateId) {
+    // Get recurring task link to find the template
+    const links = this.taskRecurringLinkRepository.getByTaskId(completedTask.id);
+    if (links.length === 0) {
       return null;
     }
 
-    const template = await this.recurrenceTemplateRepository.getByIdAsync(completedTask.recurrenceTemplateId);
+    const recurringTaskId = links[0].recurringTaskId;
+    const recurringTask = await this.recurringTaskRepository.getByIdAsync(recurringTaskId);
+    if (!recurringTask) {
+      return null;
+    }
+
+    const templateId = recurringTask.recurrenceTemplateId;
+    const template = await this.recurrenceTemplateRepository.getByIdAsync(templateId);
     if (!template) {
       return null;
     }
@@ -204,7 +214,7 @@ export class UnitOfWork implements IUnitOfWork {
       startDate: nextStartDate,
       dueDate: nextDueDate,
       tags: completedTask.tags ? [...completedTask.tags] : [],
-      recurrenceTemplateId: completedTask.recurrenceTemplateId,
+      isSystemCreated: true, // Mark as system-created
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

@@ -22,4 +22,6 @@ export interface IRecurringTaskCreateDto {
   tags?: string[];
   /** Category IDs for generated tasks (optional) */
   categoryIds?: string[];
+  /** ID of the recurrence template used by this recurring task (required) */
+  recurrenceTemplateId: string;
 }
