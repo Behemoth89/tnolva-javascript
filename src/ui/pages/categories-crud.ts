@@ -11,6 +11,7 @@ import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 // Sort state management
 let categorySorter: TableSorter<ITaskCategoryEntity> | null = null;
 let currentCategories: ITaskCategoryEntity[] = [];
+let currentTaskCounts: Map<string, number> = new Map();
 
 // Bridge instance
 let bridge: UiBridge;
@@ -83,6 +84,16 @@ async function loadCategories(bridge: UiBridge): Promise<void> {
   try {
     currentCategories = await bridge.getAllCategories();
     
+    // Load all tasks to count per category
+    const allTasks = await bridge.getAllTasks();
+    currentTaskCounts = new Map();
+    for (const task of allTasks) {
+      if (task.categoryId) {
+        const count = currentTaskCounts.get(task.categoryId) || 0;
+        currentTaskCounts.set(task.categoryId, count + 1);
+      }
+    }
+    
     // Initialize sorter
     categorySorter = new TableSorter<ITaskCategoryEntity>(currentCategories);
     
@@ -123,6 +134,7 @@ function renderCategoriesTable(categories: ITaskCategoryEntity[]): void {
             <th>Color</th>
             ${getSortHeaderHtml({ key: 'name', label: 'Name' }, sortState, 'handleCategorySort')}
             ${getSortHeaderHtml({ key: 'description', label: 'Description' }, sortState, 'handleCategorySort')}
+            <th>Tasks</th>
             ${getSortHeaderHtml({ key: 'createdAt', label: 'Created' }, sortState, 'handleCategorySort')}
             <th>Actions</th>
           </tr>
@@ -155,12 +167,14 @@ function renderCategoriesTable(categories: ITaskCategoryEntity[]): void {
  */
 function renderCategoryRow(category: ITaskCategoryEntity): string {
   const color = category.color || '#cccccc';
+  const taskCount = currentTaskCounts.get(category.id) || 0;
   
   return `
     <tr>
       <td><span class="color-swatch" style="background-color: ${color}"></span></td>
       <td>${escapeHtml(category.name)}</td>
       <td>${category.description ? escapeHtml(category.description) : '-'}</td>
+      <td>${taskCount}</td>
       <td>${category.createdAt ? formatDate(category.createdAt) : '-'}</td>
       <td class="table-actions">
         <button class="btn btn-ghost btn-sm edit-category-btn" data-id="${category.id}">Edit</button>
