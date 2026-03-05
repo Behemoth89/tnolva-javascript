@@ -1,5 +1,6 @@
 import type { IRecurringTaskService } from '../interfaces/IRecurringTaskService.js';
-import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto, ITaskEntity, IRecurringTaskRepository, ITaskRepository, IUnitOfWork, ITaskRecurringLinkRepository } from '../../interfaces/index.js';
+import type { IBllTaskDto } from '../interfaces/dtos/index.js';
+import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto, ITaskEntity, IRecurringTaskRepository, ITaskRepository, IUnitOfWork, ITaskRecurringLinkRepository, ICategoryRepository } from '../../interfaces/index.js';
 import { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
 import { EStatus } from '../../enums/EStatus.js';
 import { RecurringTask } from '../../domain/RecurringTask.js';
@@ -15,6 +16,7 @@ export class RecurringTaskService implements IRecurringTaskService {
   private readonly recurringTaskRepository: IRecurringTaskRepository;
   private readonly taskRepository: ITaskRepository;
   private readonly taskRecurringLinkRepository: ITaskRecurringLinkRepository;
+  private readonly categoryRepository: ICategoryRepository;
   private readonly generator: RecurringTaskGenerator;
 
   /**
@@ -26,7 +28,45 @@ export class RecurringTaskService implements IRecurringTaskService {
     this.recurringTaskRepository = unitOfWork.getRecurringTaskRepository();
     this.taskRepository = unitOfWork.getTaskRepository();
     this.taskRecurringLinkRepository = unitOfWork.getTaskRecurringLinkRepository();
+    this.categoryRepository = unitOfWork.getCategoryRepository();
     this.generator = new RecurringTaskGenerator();
+  }
+
+  /**
+   * Map ITaskEntity to IBllTaskDto with category info
+   */
+  private async mapToBllTaskDto(task: ITaskEntity): Promise<IBllTaskDto> {
+    const assignment = await this.categoryRepository.getAssignmentForTaskAsync(task.id);
+    let categoryId: string | undefined;
+    let categoryName: string | undefined;
+    let categoryColor: string | undefined;
+
+    if (assignment) {
+      categoryId = assignment.categoryId;
+      const categories = await this.categoryRepository.getCategoriesForTaskAsync(task.id);
+      if (categories.length > 0) {
+        const category = categories[0];
+        categoryName = category.name;
+        categoryColor = category.color;
+      }
+    }
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      startDate: task.startDate,
+      dueDate: task.dueDate,
+      tags: task.tags,
+      categoryId,
+      categoryName,
+      categoryColor,
+      isSystemCreated: task.isSystemCreated,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    };
   }
 
   /**
@@ -208,14 +248,14 @@ export class RecurringTaskService implements IRecurringTaskService {
   /**
    * Get all tasks linked to a recurring task
    */
-  async getLinkedTasksAsync(recurringTaskId: string): Promise<ITaskEntity[]> {
+  async getLinkedTasksAsync(recurringTaskId: string): Promise<IBllTaskDto[]> {
     const links = await this.taskRecurringLinkRepository.getByRecurringTaskIdAsync(recurringTaskId);
-    const tasks: ITaskEntity[] = [];
+    const tasks: IBllTaskDto[] = [];
     
     for (const link of links) {
       const task = await this.taskRepository.getByIdAsync(link.taskId);
       if (task) {
-        tasks.push(task);
+        tasks.push(await this.mapToBllTaskDto(task));
       }
     }
     

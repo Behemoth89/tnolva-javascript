@@ -2,6 +2,8 @@
  * Router - Simple hash-based routing
  */
 
+import { renderSidebar, initSidebar } from '../components/sidebar.js';
+
 type RouteHandler = () => void;
 
 interface Route {
@@ -62,7 +64,7 @@ export const router = {
  */
 export function initRouter(): void {
   // Register routes
-  router.register('/', () => renderHome());
+  router.register('/', () => import('../pages/index.js').then(m => m.renderIndexPage()));
   router.register('/settings', () => renderSettings());
   router.register('/settings/tasks', () => import('../pages/tasks-crud.js').then(m => m.renderTasksCrud()));
   router.register('/settings/categories', () => import('../pages/categories-crud.js').then(m => m.renderCategoriesCrud()));
@@ -78,58 +80,17 @@ export function initRouter(): void {
 }
 
 /**
- * Render home page (redirect to settings)
- */
-function renderHome(): void {
-  router.navigate('/settings');
-}
-
-/**
  * Render settings layout
  */
 function renderSettings(): void {
   const appElement = document.getElementById('app');
   if (!appElement) return;
   
+  const currentPath = router.getPath();
+  
   appElement.innerHTML = `
     <div class="settings-layout">
-      <aside class="settings-sidebar">
-        <div class="settings-sidebar-title">Settings</div>
-        <nav>
-          <ul class="settings-nav">
-            <li class="settings-nav-item">
-              <a href="#/settings/tasks" class="settings-nav-link ${getActiveClass('/settings/tasks')}">
-                <span class="settings-nav-icon">📋</span>
-                Tasks
-              </a>
-            </li>
-            <li class="settings-nav-item">
-              <a href="#/settings/categories" class="settings-nav-link ${getActiveClass('/settings/categories')}">
-                <span class="settings-nav-icon">🏷️</span>
-                Categories
-              </a>
-            </li>
-            <li class="settings-nav-item">
-              <a href="#/settings/templates" class="settings-nav-link ${getActiveClass('/settings/templates')}">
-                <span class="settings-nav-icon">🔄</span>
-                Recurrence Templates
-              </a>
-            </li>
-            <li class="settings-nav-item">
-              <a href="#/settings/recurring-tasks" class="settings-nav-link ${getActiveClass('/settings/recurring-tasks')}">
-                <span class="settings-nav-icon">📅</span>
-                Recurring Tasks
-              </a>
-            </li>
-            <li class="settings-nav-item">
-              <a href="#/settings/dependencies" class="settings-nav-link ${getActiveClass('/settings/dependencies')}">
-                <span class="settings-nav-icon">🔗</span>
-                Task Dependencies
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      ${renderSidebar(currentPath)}
       <main class="settings-content" id="settings-content">
         <!-- Content loaded dynamically -->
       </main>
@@ -137,15 +98,11 @@ function renderSettings(): void {
     <div class="toast-container" id="toast-container"></div>
   `;
   
+  // Initialize sidebar toggle
+  initSidebar();
+  
   // Navigate to tasks by default
   router.navigate('/settings/tasks');
-}
-
-/**
- * Get active class for navigation
- */
-function getActiveClass(path: string): string {
-  return router.getPath() === path ? 'active' : '';
 }
 
 export { };

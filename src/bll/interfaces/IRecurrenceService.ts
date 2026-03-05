@@ -1,4 +1,5 @@
 import type { ITaskEntity, IRecurrenceTemplateEntity } from '../../interfaces/index.js';
+import type { IBllTaskDto } from './dtos/index.js';
 
 /**
  * IRecurrenceService Interface
@@ -35,9 +36,9 @@ export interface IRecurrenceService {
   /**
    * Generate the next task instance from a completed recurring task
    * @param completedTask - The completed task
-   * @returns The new generated task, or null if no recurrence template
+   * @returns The new generated task as IBllTaskDto, or null if no recurrence template
    */
-  generateNextTaskAsync(completedTask: ITaskEntity): Promise<ITaskEntity | null>;
+  generateNextTaskAsync(completedTask: ITaskEntity): Promise<IBllTaskDto | null>;
 
   /**
    * Check if a task can generate a next instance

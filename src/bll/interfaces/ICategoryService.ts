@@ -1,4 +1,5 @@
 import type { ITaskCategoryEntity, ITaskCategoryCreateDto, ITaskCategoryUpdateDto, ITaskCategoryAssignmentEntity } from '../../interfaces/index.js';
+import type { IBllCategoryDto } from './dtos/index.js';
 
 /**
  * ICategoryService Interface
@@ -8,19 +9,19 @@ export interface ICategoryService {
   /**
    * Create a new category
    * @param dto - Category creation data
-   * @returns The created category, or existing category if duplicate name (case-insensitive)
+   * @returns The created category as IBllCategoryDto, or existing category if duplicate name (case-insensitive)
    * @throws Error if name is empty or whitespace
    */
-  createAsync(dto: ITaskCategoryCreateDto): Promise<ITaskCategoryEntity>;
+  createAsync(dto: ITaskCategoryCreateDto): Promise<IBllCategoryDto>;
 
   /**
    * Update an existing category
    * @param id - Category ID
    * @param dto - Update data
-   * @returns The updated category, or null if not found
+   * @returns The updated category as IBllCategoryDto, or null if not found
    * @throws Error if name is set to empty/whitespace
    */
-  updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<ITaskCategoryEntity | null>;
+  updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<IBllCategoryDto | null>;
 
   /**
    * Delete a category
@@ -32,15 +33,15 @@ export interface ICategoryService {
   /**
    * Get a category by ID
    * @param id - Category ID
-   * @returns The category, or null if not found
+   * @returns The category as IBllCategoryDto, or null if not found
    */
-  getByIdAsync(id: string): Promise<ITaskCategoryEntity | null>;
+  getByIdAsync(id: string): Promise<IBllCategoryDto | null>;
 
   /**
    * Get all categories
-   * @returns Array of all categories
+   * @returns Array of all categories as IBllCategoryDto
    */
-  getAllAsync(): Promise<ITaskCategoryEntity[]>;
+  getAllAsync(): Promise<IBllCategoryDto[]>;
 
   /**
    * Get category by name (case-insensitive)

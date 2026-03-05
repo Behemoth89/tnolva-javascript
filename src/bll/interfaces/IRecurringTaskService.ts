@@ -1,5 +1,6 @@
-import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto, ITaskEntity } from '../../interfaces/index.js';
+import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto } from '../../interfaces/index.js';
 import type { ERecurringTaskStatus } from '../../enums/ERecurringTaskStatus.js';
+import type { IBllTaskDto } from './dtos/index.js';
 
 /**
  * IRecurringTaskService Interface
@@ -66,9 +67,9 @@ export interface IRecurringTaskService {
   /**
    * Get all tasks linked to a recurring task
    * @param recurringTaskId - Recurring task ID
-   * @returns Array of linked tasks
+   * @returns Array of linked tasks as IBllTaskDto
    */
-  getLinkedTasksAsync(recurringTaskId: string): Promise<ITaskEntity[]>;
+  getLinkedTasksAsync(recurringTaskId: string): Promise<IBllTaskDto[]>;
 
   /**
    * Delete a recurring task and all its linked tasks

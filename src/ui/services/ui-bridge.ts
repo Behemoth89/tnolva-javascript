@@ -5,13 +5,13 @@
 
 import { BllServiceFactory } from '../../bll/BllServiceFactory.js';
 import { unitOfWorkFactory } from '../../data/unit-of-work/UnitOfWorkFactory.js';
-import type { ITaskEntity, IInterval } from '../../interfaces/index.js';
-import type { ITaskCategoryEntity, ITaskCategoryCreateDto, ITaskCategoryUpdateDto } from '../../interfaces/index.js';
+import type { IInterval } from '../../interfaces/index.js';
+import type { ITaskCategoryCreateDto, ITaskCategoryUpdateDto } from '../../interfaces/index.js';
 import type { IRecurrenceTemplateEntity } from '../../interfaces/index.js';
 import type { IRecurringTaskEntity, IRecurringTaskCreateDto, IRecurringTaskUpdateDto } from '../../interfaces/index.js';
 import { EStatus, EPriority, ERecurringTaskStatus, EDependencyType } from '../../enums/index.js';
 import { generateGuid } from '../../utils/guid.js';
-import type { IBllTaskCreateDto, IBllTaskUpdateDto } from '../../bll/interfaces/dtos/index.js';
+import type { IBllTaskCreateDto, IBllTaskUpdateDto, IBllCategoryDto, IBllTaskDto } from '../../bll/interfaces/dtos/index.js';
 
 // Create factory instance
 const bllFactory = new BllServiceFactory();
@@ -54,14 +54,14 @@ export class UiBridge {
   /**
    * Get all tasks
    */
-  async getAllTasks(): Promise<ITaskEntity[]> {
+  async getAllTasks(): Promise<IBllTaskDto[]> {
     return this.getTaskService().getAllAsync();
   }
   
   /**
    * Get task by ID
    */
-  async getTaskById(id: string): Promise<ITaskEntity | null> {
+  async getTaskById(id: string): Promise<IBllTaskDto | null> {
     return this.getTaskService().getByIdAsync(id);
   }
   
@@ -77,7 +77,8 @@ export class UiBridge {
     dueDate?: Date;
     tags?: string[];
     categoryId?: string;
-  }): Promise<ITaskEntity> {
+    parentTaskId?: string;
+  }): Promise<IBllTaskDto> {
     const dto: IBllTaskCreateDto = {
       id: generateGuid(),
       title: data.title,
@@ -89,7 +90,15 @@ export class UiBridge {
       tags: data.tags,
       categoryId: data.categoryId,
     };
-    return this.getTaskService().createAsync(dto);
+    const task = await this.getTaskService().createAsync(dto);
+    
+    // If parentTaskId is provided, create dependency
+    if (data.parentTaskId) {
+      const dependencyService = bllFactory.createTaskDependencyService(this.createUnitOfWork());
+      await dependencyService.addSubtaskAsync(task.id, data.parentTaskId);
+    }
+    
+    return task;
   }
   
   /**
@@ -104,7 +113,7 @@ export class UiBridge {
     dueDate?: Date;
     tags?: string[];
     categoryId?: string | null;
-  }): Promise<ITaskEntity | null> {
+  }): Promise<IBllTaskDto | null> {
     const dto: IBllTaskUpdateDto = {
       title: data.title,
       description: data.description,
@@ -130,14 +139,14 @@ export class UiBridge {
   /**
    * Get all categories
    */
-  async getAllCategories(): Promise<ITaskCategoryEntity[]> {
+  async getAllCategories(): Promise<IBllCategoryDto[]> {
     return this.getCategoryService().getAllAsync();
   }
   
   /**
    * Get category by ID
    */
-  async getCategoryById(id: string): Promise<ITaskCategoryEntity | null> {
+  async getCategoryById(id: string): Promise<IBllCategoryDto | null> {
     return this.getCategoryService().getByIdAsync(id);
   }
   
@@ -148,7 +157,7 @@ export class UiBridge {
     name: string;
     description?: string;
     color?: string;
-  }): Promise<ITaskCategoryEntity> {
+  }): Promise<IBllCategoryDto> {
     const dto: ITaskCategoryCreateDto = {
       id: generateGuid(),
       name: data.name,
@@ -165,7 +174,7 @@ export class UiBridge {
     name?: string;
     description?: string;
     color?: string;
-  }): Promise<ITaskCategoryEntity | null> {
+  }): Promise<IBllCategoryDto | null> {
     const dto: ITaskCategoryUpdateDto = {
       name: data.name,
       description: data.description,
@@ -297,7 +306,7 @@ export class UiBridge {
   /**
    * Get all tasks (for dependency selection)
    */
-  async getAllTasksForDependency(): Promise<ITaskEntity[]> {
+  async getAllTasksForDependency(): Promise<IBllTaskDto[]> {
     return this.getTaskService().getAllAsync();
   }
   
@@ -334,9 +343,17 @@ export class UiBridge {
   /**
    * Get all subtasks for a task
    */
-  async getSubtasks(taskId: string): Promise<ITaskEntity[]> {
+  async getSubtasks(taskId: string): Promise<IBllTaskDto[]> {
     const dependencyService = bllFactory.createTaskDependencyService(this.createUnitOfWork());
     return dependencyService.getSubtasksAsync(taskId);
+  }
+
+  /**
+   * Get parent task for a subtask
+   */
+  async getParentTask(subtaskId: string): Promise<IBllTaskDto | null> {
+    const dependencyService = bllFactory.createTaskDependencyService(this.createUnitOfWork());
+    return dependencyService.getParentTaskAsync(subtaskId);
   }
 }
 

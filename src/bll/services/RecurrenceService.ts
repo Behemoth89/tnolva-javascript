@@ -1,5 +1,6 @@
 import type { IRecurrenceService } from '../interfaces/IRecurrenceService.js';
-import type { ITaskEntity, IRecurrenceTemplateEntity, IUnitOfWork, IRecurrenceTemplateRepository, IInterval, ITaskRecurringLinkRepository } from '../../interfaces/index.js';
+import type { IBllTaskDto } from '../interfaces/dtos/index.js';
+import type { ITaskEntity, IRecurrenceTemplateEntity, IUnitOfWork, IRecurrenceTemplateRepository, IInterval, ITaskRecurringLinkRepository, ICategoryRepository } from '../../interfaces/index.js';
 import { generateGuid } from '../../utils/index.js';
 
 /**
@@ -11,6 +12,7 @@ export class RecurrenceService implements IRecurrenceService {
   private readonly unitOfWork: IUnitOfWork;
   private readonly recurrenceTemplateRepository: IRecurrenceTemplateRepository;
   private readonly taskRecurringLinkRepository: ITaskRecurringLinkRepository;
+  private readonly categoryRepository: ICategoryRepository;
 
   /**
    * Creates a new RecurrenceService instance
@@ -20,6 +22,44 @@ export class RecurrenceService implements IRecurrenceService {
     this.unitOfWork = unitOfWork;
     this.recurrenceTemplateRepository = unitOfWork.getRecurrenceTemplateRepository();
     this.taskRecurringLinkRepository = unitOfWork.getTaskRecurringLinkRepository();
+    this.categoryRepository = unitOfWork.getCategoryRepository();
+  }
+
+  /**
+   * Map ITaskEntity to IBllTaskDto with category info
+   */
+  private async mapToBllTaskDto(task: ITaskEntity): Promise<IBllTaskDto> {
+    const assignment = await this.categoryRepository.getAssignmentForTaskAsync(task.id);
+    let categoryId: string | undefined;
+    let categoryName: string | undefined;
+    let categoryColor: string | undefined;
+
+    if (assignment) {
+      categoryId = assignment.categoryId;
+      const categories = await this.categoryRepository.getCategoriesForTaskAsync(task.id);
+      if (categories.length > 0) {
+        const category = categories[0];
+        categoryName = category.name;
+        categoryColor = category.color;
+      }
+    }
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      startDate: task.startDate,
+      dueDate: task.dueDate,
+      tags: task.tags,
+      categoryId,
+      categoryName,
+      categoryColor,
+      isSystemCreated: task.isSystemCreated,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    };
   }
 
   /**
@@ -206,7 +246,7 @@ export class RecurrenceService implements IRecurrenceService {
    * Generate the next task instance from a completed recurring task
    * Uses UOW change tracking for transactional consistency
    */
-  async generateNextTaskAsync(completedTask: ITaskEntity): Promise<ITaskEntity | null> {
+  async generateNextTaskAsync(completedTask: ITaskEntity): Promise<IBllTaskDto | null> {
     // Get recurring task link to find the template
     const links = await this.taskRecurringLinkRepository.getByTaskIdAsync(completedTask.id);
     if (links.length === 0) {
@@ -251,7 +291,7 @@ export class RecurrenceService implements IRecurrenceService {
     this.unitOfWork.registerNew(newTask, 'task');
     await this.unitOfWork.commit();
     
-    return newTask;
+    return this.mapToBllTaskDto(newTask);
   }
 
   /**

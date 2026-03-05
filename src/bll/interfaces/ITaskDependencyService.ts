@@ -1,4 +1,5 @@
 import type { ITaskEntity } from '../../interfaces/index.js';
+import type { IBllTaskDto } from './dtos/index.js';
 
 /**
  * Result type for due date conflict check
@@ -38,16 +39,16 @@ export interface ITaskDependencyService {
   /**
    * Get all subtasks of a main task
    * @param parentTaskId - The parent/main task ID
-   * @returns Array of subtask ITaskEntity objects
+   * @returns Array of subtask IBllTaskDto objects
    */
-  getSubtasksAsync(parentTaskId: string): Promise<ITaskEntity[]>;
+  getSubtasksAsync(parentTaskId: string): Promise<IBllTaskDto[]>;
 
   /**
    * Get the parent task of a subtask
    * @param subtaskId - The subtask ID
-   * @returns The parent task or null if not found
+   * @returns The parent task as IBllTaskDto or null if not found
    */
-  getParentTaskAsync(subtaskId: string): Promise<ITaskEntity | null>;
+  getParentTaskAsync(subtaskId: string): Promise<IBllTaskDto | null>;
 
   /**
    * Check if a main task can be completed (all subtasks must be done)

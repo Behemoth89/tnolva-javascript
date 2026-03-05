@@ -1,5 +1,6 @@
 import type { ITaskDependencyService, DueDateConflictResult } from '../interfaces/ITaskDependencyService.js';
-import type { ITaskEntity, IUnitOfWork, ITaskDependencyRepository, ITaskRepository } from '../../interfaces/index.js';
+import type { IBllTaskDto } from '../interfaces/dtos/index.js';
+import type { ITaskEntity, IUnitOfWork, ITaskDependencyRepository, ITaskRepository, ICategoryRepository } from '../../interfaces/index.js';
 import { EDependencyType } from '../../enums/EDependencyType.js';
 import { EStatus } from '../../enums/EStatus.js';
 import { TaskDependency } from '../../domain/TaskDependency.js';
@@ -12,6 +13,7 @@ export class TaskDependencyService implements ITaskDependencyService {
   private readonly unitOfWork: IUnitOfWork;
   private readonly taskDependencyRepository: ITaskDependencyRepository;
   private readonly taskRepository: ITaskRepository;
+  private readonly categoryRepository: ICategoryRepository;
 
   /**
    * Creates a new TaskDependencyService instance
@@ -21,6 +23,44 @@ export class TaskDependencyService implements ITaskDependencyService {
     this.unitOfWork = unitOfWork;
     this.taskDependencyRepository = unitOfWork.getTaskDependencyRepository();
     this.taskRepository = unitOfWork.getTaskRepository();
+    this.categoryRepository = unitOfWork.getCategoryRepository();
+  }
+
+  /**
+   * Map ITaskEntity to IBllTaskDto with category info
+   */
+  private async mapToBllTaskDto(task: ITaskEntity): Promise<IBllTaskDto> {
+    const assignment = await this.categoryRepository.getAssignmentForTaskAsync(task.id);
+    let categoryId: string | undefined;
+    let categoryName: string | undefined;
+    let categoryColor: string | undefined;
+
+    if (assignment) {
+      categoryId = assignment.categoryId;
+      const categories = await this.categoryRepository.getCategoriesForTaskAsync(task.id);
+      if (categories.length > 0) {
+        const category = categories[0];
+        categoryName = category.name;
+        categoryColor = category.color;
+      }
+    }
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      startDate: task.startDate,
+      dueDate: task.dueDate,
+      tags: task.tags,
+      categoryId,
+      categoryName,
+      categoryColor,
+      isSystemCreated: task.isSystemCreated,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    };
   }
 
   /**
@@ -123,18 +163,19 @@ export class TaskDependencyService implements ITaskDependencyService {
   /**
    * Get all subtasks of a main task
    */
-  async getSubtasksAsync(parentTaskId: string): Promise<ITaskEntity[]> {
+  async getSubtasksAsync(parentTaskId: string): Promise<IBllTaskDto[]> {
     const dependents = await this.taskDependencyRepository.getDependentsAsync(parentTaskId);
     const subtaskIds = dependents.map(d => d.taskId);
     
     const allTasks = await this.taskRepository.getAllAsync();
-    return allTasks.filter(task => subtaskIds.includes(task.id));
+    const tasks = allTasks.filter(task => subtaskIds.includes(task.id));
+    return Promise.all(tasks.map(task => this.mapToBllTaskDto(task)));
   }
 
   /**
    * Get the parent task of a subtask
    */
-  async getParentTaskAsync(subtaskId: string): Promise<ITaskEntity | null> {
+  async getParentTaskAsync(subtaskId: string): Promise<IBllTaskDto | null> {
     const dependencies = await this.taskDependencyRepository.getDependenciesForTaskAsync(subtaskId);
     
     if (dependencies.length === 0) {
@@ -142,7 +183,11 @@ export class TaskDependencyService implements ITaskDependencyService {
     }
 
     const parentId = dependencies[0].dependsOnTaskId;
-    return this.taskRepository.getByIdAsync(parentId);
+    const parentTask = await this.taskRepository.getByIdAsync(parentId);
+    if (!parentTask) {
+      return null;
+    }
+    return this.mapToBllTaskDto(parentTask);
   }
 
   /**

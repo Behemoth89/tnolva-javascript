@@ -1,4 +1,5 @@
 import type { ICategoryService } from '../interfaces/ICategoryService.js';
+import type { IBllCategoryDto } from '../interfaces/dtos/index.js';
 import type { ITaskCategoryEntity, ITaskCategoryCreateDto, ITaskCategoryUpdateDto, ITaskCategoryAssignmentEntity, IUnitOfWork, ICategoryRepository } from '../../interfaces/index.js';
 import { generateGuid } from '../../utils/index.js';
 
@@ -23,7 +24,7 @@ export class CategoryService implements ICategoryService {
    * Create a new category
    * Returns existing category if duplicate name (case-insensitive)
    */
-  async createAsync(dto: ITaskCategoryCreateDto): Promise<ITaskCategoryEntity> {
+  async createAsync(dto: ITaskCategoryCreateDto): Promise<IBllCategoryDto> {
     // Validate name
     if (!dto.name || dto.name.trim() === '') {
       throw new Error('Category name is required');
@@ -32,7 +33,7 @@ export class CategoryService implements ICategoryService {
     // Check for duplicate name (case-insensitive)
     const existing = await this.categoryRepository.getByNameAsync(dto.name.trim());
     if (existing) {
-      return existing;
+      return this.toDto(existing);
     }
 
     // Generate ID if not provided
@@ -52,13 +53,13 @@ export class CategoryService implements ICategoryService {
     this.unitOfWork.registerNew(category, 'category');
     await this.unitOfWork.commit();
     
-    return category;
+    return this.toDto(category);
   }
 
   /**
    * Update an existing category
    */
-  async updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<ITaskCategoryEntity | null> {
+  async updateAsync(id: string, dto: ITaskCategoryUpdateDto): Promise<IBllCategoryDto | null> {
     const category = await this.categoryRepository.getByIdAsync(id);
     if (!category) {
       return null;
@@ -83,7 +84,7 @@ export class CategoryService implements ICategoryService {
     this.unitOfWork.registerModified(updatedCategory, 'category');
     await this.unitOfWork.commit();
     
-    return updatedCategory;
+    return this.toDto(updatedCategory);
   }
 
   /**
@@ -93,13 +94,6 @@ export class CategoryService implements ICategoryService {
     const category = await this.categoryRepository.getByIdAsync(id);
     if (!category) {
       return false;
-    }
-
-    // DEBUG: Check for orphaned assignments before deletion
-    const assignedTasks = await this.categoryRepository.getTasksForCategoryAsync(id);
-    console.log('[CategoryService] Deleting category:', id, '| Assigned tasks:', assignedTasks.length);
-    if (assignedTasks.length > 0) {
-      console.warn('[CategoryService] WARNING: Category has assigned tasks - assignments will become orphaned!');
     }
 
     // Register with UOW change tracking
@@ -116,20 +110,39 @@ export class CategoryService implements ICategoryService {
   /**
    * Get a category by ID
    */
-  /**
-   * Retrieves a task category by its identifier.
-   * @param {string} id - The unique identifier of the category to retrieve.
-   * @returns {Promise<ITaskCategoryEntity | null>} A promise that resolves to the task category entity if found, or null if not found.
-   */
-  async getByIdAsync(id: string): Promise<ITaskCategoryEntity | null> {
-    return this.categoryRepository.getByIdAsync(id);
+  async getByIdAsync(id: string): Promise<IBllCategoryDto | null> {
+    const category = await this.categoryRepository.getByIdAsync(id);
+    if (!category) {
+      return null;
+    }
+    return this.toDto(category);
   }
 
   /**
    * Get all categories
    */
-  async getAllAsync(): Promise<ITaskCategoryEntity[]> {
-    return this.categoryRepository.getAllAsync();
+  async getAllAsync(): Promise<IBllCategoryDto[]> {
+    const categories = await this.categoryRepository.getAllAsync();
+    const dtos: IBllCategoryDto[] = [];
+    for (const category of categories) {
+      dtos.push(this.toDto(category));
+    }
+    return dtos;
+  }
+
+  /**
+   * Convert ITaskCategoryEntity to IBllCategoryDto
+   */
+  private toDto(entity: ITaskCategoryEntity): IBllCategoryDto {
+    return {
+      id: entity.id,
+      name: entity.name,
+      color: entity.color,
+      description: entity.description,
+      taskCount: 0, // Will be populated when needed
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
   }
 
   /**
