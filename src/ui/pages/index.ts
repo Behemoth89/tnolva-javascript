@@ -162,6 +162,7 @@ function handleIndexSort(key: string): void {
     const sorted = taskSorter.sort(key as keyof IBllTaskDto);
     const filtered = applyAllColumnFilters(sorted);
     renderTasksTable(filtered);
+    attachActionButtonListeners();
   }
 }
 
@@ -250,6 +251,9 @@ async function loadTasks(): Promise<void> {
     const sorted = taskSorter.sort('dueDate');
     updateStatistics(sorted);
     renderTasksTable(sorted);
+    
+    // Attach event listeners for action buttons
+    attachActionButtonListeners();
   } catch (error) {
     console.error('Error loading tasks:', error);
     container.innerHTML = `<div class="text-danger">Error loading tasks</div>`;
