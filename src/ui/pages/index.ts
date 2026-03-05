@@ -624,6 +624,7 @@ function renderTasksTable(tasks: IBllTaskDto[]): void {
             ${getSortHeaderHtml({ key: 'tags', label: 'Tags' }, sortState, 'handleIndexSort')}
             ${getSortHeaderHtml({ key: 'startDate', label: 'Start Date' }, sortState, 'handleIndexSort')}
             ${getSortHeaderHtml({ key: 'dueDate', label: 'Due Date' }, sortState, 'handleIndexSort')}
+            ${getSortHeaderHtml({ key: 'completionDate', label: 'Completed At' }, sortState, 'handleIndexSort')}
           </tr>
         </thead>
         <tbody id="tasks-tbody">
@@ -679,9 +680,10 @@ function renderTaskRow(task: IBllTaskDto): string {
       <td>${tagsDisplay}</td>
       <td>${task.startDate ? formatDate(task.startDate) : '-'}</td>
       <td>${task.dueDate ? formatDate(task.dueDate) : '-'}</td>
+      <td>${task.completionDate ? formatDate(task.completionDate) : '-'}</td>
     </tr>
     <tr class="task-detail-row ${detailClass}" data-detail-for="${task.id}">
-      <td colspan="8">
+      <td colspan="9">
         <div class="task-detail-content">
           <div class="detail-section">
             <strong>Full Description:</strong>
