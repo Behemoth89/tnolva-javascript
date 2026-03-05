@@ -302,4 +302,25 @@ export class RecurrenceService implements IRecurrenceService {
     const links = this.taskRecurringLinkRepository.getByTaskId(task.id);
     return links.length > 0;
   }
+
+  /**
+   * Create a new recurrence template
+   */
+  async createTemplateAsync(template: IRecurrenceTemplateEntity): Promise<IRecurrenceTemplateEntity> {
+    return this.recurrenceTemplateRepository.createAsync(template);
+  }
+
+  /**
+   * Update an existing recurrence template
+   */
+  async updateTemplateAsync(id: string, updates: Partial<IRecurrenceTemplateEntity>): Promise<IRecurrenceTemplateEntity | null> {
+    return this.recurrenceTemplateRepository.updateAsync(id, updates);
+  }
+
+  /**
+   * Delete a recurrence template
+   */
+  async deleteTemplateAsync(id: string): Promise<boolean> {
+    return this.recurrenceTemplateRepository.deleteAsync(id);
+  }
 }

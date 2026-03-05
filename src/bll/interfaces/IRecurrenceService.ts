@@ -46,4 +46,26 @@ export interface IRecurrenceService {
    * @returns true if the task has a recurrence template
    */
   canGenerateNextInstance(task: ITaskEntity): boolean;
+
+  /**
+   * Create a new recurrence template
+   * @param template - The template to create
+   * @returns The created template
+   */
+  createTemplateAsync(template: IRecurrenceTemplateEntity): Promise<IRecurrenceTemplateEntity>;
+
+  /**
+   * Update an existing recurrence template
+   * @param id - Template ID
+   * @param updates - Partial template with updates
+   * @returns The updated template, or null if not found
+   */
+  updateTemplateAsync(id: string, updates: Partial<IRecurrenceTemplateEntity>): Promise<IRecurrenceTemplateEntity | null>;
+
+  /**
+   * Delete a recurrence template
+   * @param id - Template ID
+   * @returns True if deleted, false if not found
+   */
+  deleteTemplateAsync(id: string): Promise<boolean>;
 }

@@ -209,8 +209,57 @@ export class UiBridge {
   async getTemplateById(id: string): Promise<IRecurrenceTemplateEntity | null> {
     return this.getRecurrenceService().getTemplateByIdAsync(id);
   }
-  
-  // Note: RecurrenceService doesn't have create/update/delete for templates in the current interface
+
+  /**
+   * Create a new recurrence template
+   */
+  async createTemplate(data: {
+    name: string;
+    intervals: { value: number; unit: string }[];
+    dayOfMonth?: number;
+    weekday?: number;
+    occurrenceInMonth?: number;
+    duration?: number;
+  }): Promise<IRecurrenceTemplateEntity> {
+    const template: IRecurrenceTemplateEntity = {
+      id: generateGuid(),
+      name: data.name,
+      intervals: data.intervals as IInterval[],
+      dayOfMonth: data.dayOfMonth,
+      weekday: data.weekday,
+      occurrenceInMonth: data.occurrenceInMonth,
+      duration: data.duration,
+    };
+    return this.getRecurrenceService().createTemplateAsync(template);
+  }
+
+  /**
+   * Update a recurrence template
+   */
+  async updateTemplate(id: string, data: {
+    name?: string;
+    intervals?: { value: number; unit: string }[];
+    dayOfMonth?: number | null;
+    weekday?: number | null;
+    occurrenceInMonth?: number | null;
+    duration?: number | null;
+  }): Promise<IRecurrenceTemplateEntity | null> {
+    const updates: Partial<IRecurrenceTemplateEntity> = {};
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.intervals !== undefined) updates.intervals = data.intervals as IInterval[];
+    if (data.dayOfMonth !== undefined) updates.dayOfMonth = data.dayOfMonth ?? undefined;
+    if (data.weekday !== undefined) updates.weekday = data.weekday ?? undefined;
+    if (data.occurrenceInMonth !== undefined) updates.occurrenceInMonth = data.occurrenceInMonth ?? undefined;
+    if (data.duration !== undefined) updates.duration = data.duration ?? undefined;
+    return this.getRecurrenceService().updateTemplateAsync(id, updates);
+  }
+
+  /**
+   * Delete a recurrence template
+   */
+  async deleteTemplate(id: string): Promise<boolean> {
+    return this.getRecurrenceService().deleteTemplateAsync(id);
+  }
   
   // ==================== Recurring Task Operations ====================
   
