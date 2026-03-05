@@ -66,7 +66,6 @@ export function initRouter(): void {
   // Register routes
   router.register('/', () => import('../pages/index.js').then(m => m.renderIndexPage()));
   router.register('/settings', () => renderSettings());
-  router.register('/settings/tasks', () => import('../pages/tasks-crud.js').then(m => m.renderTasksCrud()));
   router.register('/settings/categories', () => import('../pages/categories-crud.js').then(m => m.renderCategoriesCrud()));
   router.register('/settings/templates', () => import('../pages/recurrence-templates-crud.js').then(m => m.renderTemplatesCrud()));
   router.register('/settings/recurring-tasks', () => import('../pages/recurring-tasks-crud.js').then(m => m.renderRecurringTasksCrud()));
@@ -101,8 +100,8 @@ function renderSettings(): void {
   // Initialize sidebar toggle
   initSidebar();
   
-  // Navigate to tasks by default
-  router.navigate('/settings/tasks');
+  // Navigate to categories by default
+  router.navigate('/settings/categories');
 }
 
 export { };

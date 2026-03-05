@@ -50,7 +50,6 @@ export function renderSidebar(currentPath: string): string {
   
   const navItems = [
     { path: '/', label: 'Tasks (Home)', icon: '🏠' },
-    { path: '/settings/tasks', label: 'Tasks', icon: '📋' },
     { path: '/settings/categories', label: 'Categories', icon: '🏷️' },
     { path: '/settings/templates', label: 'Templates', icon: '🔄' },
     { path: '/settings/recurring-tasks', label: 'Recurring Tasks', icon: '📅' },
