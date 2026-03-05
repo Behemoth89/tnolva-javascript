@@ -415,50 +415,81 @@ function applyDateRangeFilter(tasks: IBllTaskDto[]): IBllTaskDto[] {
   }
 
   return tasks.filter(task => {
-    // Parse task dates
-    const taskStartDate = task.startDate ? new Date(task.startDate) : null;
-    const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
-    const taskCompletionDate = task.completionDate ? new Date(task.completionDate) : null;
+    // Parse task dates - strip time portion for consistent comparison
+    const taskStartDate = task.startDate ? new Date(task.startDate).setHours(0, 0, 0, 0) : null;
+    const taskDueDate = task.dueDate ? new Date(task.dueDate).setHours(0, 0, 0, 0) : null;
+    const taskCompletionDate = task.completionDate ? new Date(task.completionDate).setHours(0, 0, 0, 0) : null;
     
     // Determine end date based on task status
-    // For DONE tasks: use completionDate
-    // For non-DONE tasks: use dueDate (or 01.01.3000 if not set)
-    let taskEndDate: Date | null;
-    if (task.status === 'DONE') {
-      taskEndDate = taskCompletionDate || taskDueDate;
+    // For DONE tasks: use completionDate (or fall back to dueDate if not set)
+    // For other tasks (TODO, IN_PROGRESS, CANCELLED): use dueDate (or null if not set)
+    let taskEndDate: number | null;
+    if (task.status === EStatus.DONE && taskCompletionDate) {
+      taskEndDate = taskCompletionDate;
+    } else if (taskDueDate) {
+      taskEndDate = taskDueDate;
     } else {
-      // For non-DONE tasks, use dueDate or 01.01.3000 as placeholder
-      taskEndDate = taskDueDate || new Date('3000-01-01');
+      // If no end date defined, include task in all date filters
+      taskEndDate = null;
     }
     
-    if (!taskStartDate || !taskEndDate) {
-      // If task has no start date, exclude it from date filtering
-      return false;
+    if (!taskStartDate) {
+      // If task has no start date, include it in date filtering (can't determine range)
+      return true;
     }
 
-    // Parse filter dates
-    const filterStart = startDate ? new Date(startDate + 'T00:00:00') : null;
-    const filterEnd = endDate ? new Date(endDate + 'T23:59:59') : null;
+    // Parse filter dates - handle both ISO format (from presets) and YYYY-MM-DD format (from manual inputs)
+    const parseFilterDate = (dateStr: string | null): number | null => {
+      if (!dateStr) return null;
+      // If already contains 'T', it's ISO format
+      if (dateStr.includes('T')) {
+        return new Date(dateStr).getTime();
+      }
+      // Otherwise, assume YYYY-MM-DD format
+      return new Date(dateStr + 'T00:00:00').getTime();
+    };
 
+    const filterStart = parseFilterDate(startDate);
+    const filterEnd = endDate 
+      ? (endDate.includes('T') 
+          ? new Date(endDate).getTime() 
+          : new Date(endDate + 'T23:59:59').getTime())
+      : null;
+
+    // If task has no end date, include it based on filter
+    if (taskEndDate === null) {
+      if (filterStart !== null && filterEnd !== null) {
+        // Task spans infinite - include if filter range is after task start
+        return taskStartDate <= filterEnd;
+      }
+      if (filterStart !== null) {
+        // Only filter start is set, include tasks that start on or after filter start
+        return taskStartDate >= filterStart;
+      }
+      // No filter start, only end - include all tasks without end date
+      return true;
+    }
+
+    // Task has both start and end dates - use overlap logic
     // Overlap-based filtering: a task is included if there's any overlap between
     // [taskStartDate, taskEndDate] and [filterStart, filterEnd]
     // Overlap exists if: max(taskStart, filterStart) <= min(taskEnd, filterEnd)
     
     // Scenario: Filter with both dates
-    if (filterStart && filterEnd) {
+    if (filterStart !== null && filterEnd !== null) {
       const overlapStart = taskStartDate > filterStart ? taskStartDate : filterStart;
       const overlapEnd = taskEndDate < filterEnd ? taskEndDate : filterEnd;
       return overlapStart <= overlapEnd;
     }
 
     // Scenario: Filter with only start date
-    if (filterStart && !filterEnd) {
+    if (filterStart !== null && filterEnd === null) {
       // Show tasks where taskEndDate >= filterStart (any task that ends on or after filterStart)
       return taskEndDate >= filterStart;
     }
 
     // Scenario: Filter with only end date
-    if (!filterStart && filterEnd) {
+    if (filterStart === null && filterEnd !== null) {
       // Show tasks where taskStartDate <= filterEnd (any task that starts on or before filterEnd)
       return taskStartDate <= filterEnd;
     }
