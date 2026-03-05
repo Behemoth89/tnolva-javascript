@@ -232,7 +232,7 @@ async function loadTasks(): Promise<void> {
     taskSorter = new TableSorter<IBllTaskDto>(allTasks);
 
     // Render filter inputs
-    renderFilterInputs();
+    await renderFilterInputs();
 
     // Render statistics panel
     renderStatisticsPanel();
@@ -266,17 +266,35 @@ async function loadTasks(): Promise<void> {
 /**
  * Render filter inputs for each column
  */
-function renderFilterInputs(): void {
+async function renderFilterInputs(): Promise<void> {
   const filtersContainer = document.getElementById('index-filters');
   if (!filtersContainer) return;
+
+  // Fetch categories for dropdown
+  const categories = await bridge.getAllCategories();
 
   filtersContainer.innerHTML = `
     <div class="table-filters">
       <div class="filter-row">
         <input type="text" class="filter-input" id="filter-title" placeholder="Filter by title..." data-column="title">
-        <input type="text" class="filter-input" id="filter-status" placeholder="Filter by status..." data-column="status">
-        <input type="text" class="filter-input" id="filter-priority" placeholder="Filter by priority..." data-column="priority">
-        <input type="text" class="filter-input" id="filter-category" placeholder="Filter by category..." data-column="categoryName">
+        <select class="filter-select" id="filter-status" data-column="status">
+          <option value="">All Statuses</option>
+          <option value="TODO">TODO</option>
+          <option value="IN_PROGRESS">IN_PROGRESS</option>
+          <option value="DONE">DONE</option>
+          <option value="CANCELLED">CANCELLED</option>
+        </select>
+        <select class="filter-select" id="filter-priority" data-column="priority">
+          <option value="">All Priorities</option>
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+          <option value="URGENT">URGENT</option>
+        </select>
+        <select class="filter-select" id="filter-category" data-column="categoryName">
+          <option value="">All Categories</option>
+          ${categories.map(cat => `<option value="${escapeHtml(cat.name)}">${escapeHtml(cat.name)}</option>`).join('')}
+        </select>
         <input type="text" class="filter-input" id="filter-tags" placeholder="Filter by tags..." data-column="tags">
         <input type="text" class="filter-input" id="filter-description" placeholder="Filter by description..." data-column="description">
       </div>
@@ -301,15 +319,29 @@ function renderFilterInputs(): void {
     </div>
   `;
 
-  // Add event listeners for all text filter inputs
-  const filterInputs = filtersContainer.querySelectorAll('.filter-input:not(.filter-date)');
-  filterInputs.forEach(input => {
+  // Add event listeners for text filter inputs
+  const textFilterInputs = filtersContainer.querySelectorAll('.filter-input:not(.filter-date)');
+  textFilterInputs.forEach(input => {
     const inputEl = input as HTMLInputElement;
     const column = inputEl.dataset.column;
 
     if (column) {
       inputEl.addEventListener('input', () => {
         columnFilters[column] = inputEl.value;
+        applyFiltersAndRender();
+      });
+    }
+  });
+
+  // Add event listeners for dropdown filter inputs (status, priority, category)
+  const dropdownFilterInputs = filtersContainer.querySelectorAll('.filter-select:not(#filter-preset)');
+  dropdownFilterInputs.forEach(input => {
+    const selectEl = input as HTMLSelectElement;
+    const column = selectEl.dataset.column;
+
+    if (column) {
+      selectEl.addEventListener('change', () => {
+        columnFilters[column] = selectEl.value;
         applyFiltersAndRender();
       });
     }
