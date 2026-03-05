@@ -4,6 +4,7 @@
  */
 
 import { UiBridge } from '../services/ui-bridge.js';
+import { ensureSettingsLayout } from '../scripts/router.js';
 import type { ITaskCategoryEntity } from '../../interfaces/index.js';
 import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 
@@ -36,7 +37,8 @@ export async function renderCategoriesCrud(): Promise<void> {
   // Update sidebar active state
   updateSidebarActive('/settings/categories');
   
-  const content = document.getElementById('settings-content');
+  // Ensure settings layout exists
+  const content = ensureSettingsLayout();
   if (!content) return;
   
   content.innerHTML = `

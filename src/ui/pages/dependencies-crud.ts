@@ -4,6 +4,7 @@
  */
 
 import { UiBridge, EDependencyType } from '../services/ui-bridge.js';
+import { ensureSettingsLayout } from '../scripts/router.js';
 import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 
 interface Dependency {
@@ -43,7 +44,8 @@ export async function renderDependenciesCrud(): Promise<void> {
   // Update sidebar active state
   updateSidebarActive('/settings/dependencies');
   
-  const content = document.getElementById('settings-content');
+  // Ensure settings layout exists
+  const content = ensureSettingsLayout();
   if (!content) return;
   
   content.innerHTML = `

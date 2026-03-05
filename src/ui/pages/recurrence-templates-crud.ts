@@ -4,6 +4,7 @@
  */
 
 import { UiBridge } from '../services/ui-bridge.js';
+import { ensureSettingsLayout } from '../scripts/router.js';
 import type { IRecurrenceTemplateEntity } from '../../interfaces/index.js';
 
 /**
@@ -15,7 +16,8 @@ export async function renderTemplatesCrud(): Promise<void> {
   // Update sidebar active state
   updateSidebarActive('/settings/templates');
   
-  const content = document.getElementById('settings-content');
+  // Ensure settings layout exists
+  const content = ensureSettingsLayout();
   if (!content) return;
   
   content.innerHTML = `

@@ -99,9 +99,39 @@ function renderSettings(): void {
   
   // Initialize sidebar toggle
   initSidebar();
+}
+
+/**
+ * Ensure settings layout exists, create if needed
+ * Returns the content element
+ */
+export function ensureSettingsLayout(): HTMLElement | null {
+  let content = document.getElementById('settings-content');
   
-  // Navigate to categories by default
-  router.navigate('/settings/categories');
+  if (!content) {
+    // Layout doesn't exist, create it
+    const appElement = document.getElementById('app');
+    if (!appElement) return null;
+    
+    const currentPath = router.getPath();
+    
+    appElement.innerHTML = `
+      <div class="settings-layout">
+        ${renderSidebar(currentPath)}
+        <main class="settings-content" id="settings-content">
+          <!-- Content loaded dynamically -->
+        </main>
+      </div>
+      <div class="toast-container" id="toast-container"></div>
+    `;
+    
+    // Initialize sidebar toggle
+    initSidebar();
+    
+    content = document.getElementById('settings-content');
+  }
+  
+  return content;
 }
 
 export { };

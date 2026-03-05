@@ -4,6 +4,7 @@
  */
 
 import { UiBridge, ERecurringTaskStatus, EPriority } from '../services/ui-bridge.js';
+import { ensureSettingsLayout } from '../scripts/router.js';
 import type { IRecurringTaskEntity } from '../../interfaces/index.js';
 import { TableSorter, getSortHeaderHtml } from '../../utils/sorting.js';
 
@@ -36,7 +37,8 @@ export async function renderRecurringTasksCrud(): Promise<void> {
   // Update sidebar active state
   updateSidebarActive('/settings/recurring-tasks');
   
-  const content = document.getElementById('settings-content');
+  // Ensure settings layout exists
+  const content = ensureSettingsLayout();
   if (!content) return;
   
   content.innerHTML = `
