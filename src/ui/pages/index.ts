@@ -1293,10 +1293,27 @@ async function showEditTaskModal(taskId: string): Promise<void> {
       completionDate = undefined;
     }
     
+    // Get the new status from form
+    const newStatus = formData.get('status') as EStatus;
+    
+    // Check if user set completionDate but status is not DONE
+    // If so, show a warning prompt
+    if (completionDate && newStatus !== EStatus.DONE) {
+      const shouldSetDone = confirm(
+        `You have set a completion date but the status is not set to DONE.\n\n` +
+        `Would you like to mark this task as DONE?`
+      );
+      if (!shouldSetDone) {
+        // User cancelled - return without saving
+        return;
+      }
+      // User confirmed - status will be set to DONE below
+    }
+    
     const data = {
       title: title.trim(),
       description: formData.get('description') as string || undefined,
-      status: formData.get('status') as EStatus,
+      status: (completionDate && newStatus !== EStatus.DONE) ? EStatus.DONE : newStatus,
       priority: formData.get('priority') as EPriority,
       startDate: formData.get('startDate') ? new Date(formData.get('startDate') as string) : undefined,
       dueDate: formData.get('dueDate') ? new Date(formData.get('dueDate') as string) : undefined,

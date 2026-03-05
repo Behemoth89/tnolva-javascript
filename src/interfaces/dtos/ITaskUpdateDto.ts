@@ -20,8 +20,8 @@ export interface ITaskUpdateDto {
   startDate?: Date;
   /** Due date for the task */
   dueDate?: Date;
-  /** Completion date for the task */
-  completionDate?: Date;
+  /** Completion date for the task (use null to explicitly clear, omit to keep existing) */
+  completionDate?: Date | null;
   /** Tags associated with the task */
   tags?: string[];
   /** Last update timestamp in ISO 8601 format (optional, set by repository if not provided) */

@@ -132,12 +132,16 @@ export class TaskService implements ITaskService {
     // Check done lock - cannot modify completed tasks except to change status away from DONE
     if (task.status === EStatus.DONE) {
       // Allow changing status away from DONE (to clear completionDate)
-      const isOnlyChangingStatusAwayFromDone = 
-        Object.keys(dto).length === 1 && 
+      // Also allow modifying completionDate while keeping status as DONE
+      const isChangingStatusAwayFromDone = 
         dto.status !== undefined && 
         dto.status !== EStatus.DONE;
+      // Allow if status remains DONE (whether sent from UI or not) and completionDate is being modified
+      const isModifyingCompletionDateAndStatusStaysDone = 
+        dto.completionDate !== undefined && 
+        (dto.status === undefined || dto.status === EStatus.DONE);
       
-      if (!isOnlyChangingStatusAwayFromDone) {
+      if (!isChangingStatusAwayFromDone && !isModifyingCompletionDateAndStatusStaysDone) {
         throw new Error('Cannot modify completed task');
       }
     }
@@ -205,11 +209,18 @@ export class TaskService implements ITaskService {
     // Case 1: Status is set to DONE (explicitly or via auto-DONE)
     if (effectiveStatus !== undefined && isNowDone) {
       if (completionDateExplicitlyCleared) {
-        // User explicitly cleared completionDate - respect this intent even when setting status to DONE
-        completionDate = undefined;
+        // Prevent clearing completionDate while setting status to DONE - this creates inconsistent state
+        throw new Error('Cannot clear completionDate while setting status to DONE. Either keep the completion date or change status first.');
       } else if (completionDateSetToValue) {
-        // User explicitly set a completion date - use that value
-        completionDate = dto.completionDate;
+        // User explicitly set a completion date - use that value (type-safe check)
+        // Handle both Date objects and date strings (from JSON)
+        if (dto.completionDate instanceof Date) {
+          completionDate = dto.completionDate;
+        } else if (typeof dto.completionDate === 'string') {
+          completionDate = new Date(dto.completionDate);
+        } else {
+          throw new Error('Invalid completionDate value');
+        }
       } else if (!completionDateProvided) {
         // User didn't provide completionDate - default to current date
         completionDate = new Date();
@@ -219,11 +230,22 @@ export class TaskService implements ITaskService {
       completionDate = undefined;
     } else if (completionDateExplicitlyCleared) {
       // Case 3: User explicitly cleared completionDate (set to null) without changing status
+      // Prevent clearing completionDate when task is already DONE (creates inconsistent state)
+      if (task.status === EStatus.DONE) {
+        throw new Error('Cannot clear completionDate while task status is DONE. Change status first.');
+      }
       completionDate = undefined;
     } else if (completionDateSetToValue) {
       // Case 4: User explicitly set a completion date value (but status might not be done)
       // The auto-DONE logic above already handles this case, so this is a fallback
-      completionDate = dto.completionDate;
+      // Handle both Date objects and date strings (from JSON)
+      if (dto.completionDate instanceof Date) {
+        completionDate = dto.completionDate;
+      } else if (typeof dto.completionDate === 'string') {
+        completionDate = new Date(dto.completionDate);
+      } else {
+        throw new Error('Invalid completionDate value');
+      }
     } else if (!wasDone && isNowDone) {
       // Case 5: Status changed to DONE without explicit completionDate (defensive, covered by Case 1)
       completionDate = new Date();

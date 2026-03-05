@@ -111,6 +111,7 @@ export class UiBridge {
     priority?: EPriority;
     startDate?: Date;
     dueDate?: Date;
+    completionDate?: Date | null;
     tags?: string[];
     categoryId?: string | null;
   }): Promise<IBllTaskDto | null> {
@@ -121,6 +122,7 @@ export class UiBridge {
       priority: data.priority,
       startDate: data.startDate,
       dueDate: data.dueDate,
+      completionDate: data.completionDate,
       tags: data.tags,
       categoryId: data.categoryId,
     };
