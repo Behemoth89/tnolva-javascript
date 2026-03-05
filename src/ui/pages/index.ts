@@ -712,7 +712,7 @@ async function showAddTaskModal(): Promise<void> {
   // Add New Category button handler
   document.getElementById('add-new-category-btn')?.addEventListener('click', async () => {
     await showCategoryCreateDialog(categories, (newCategory) => {
-      // Add new category to dropdown and select it
+      // Add new category to native select
       const categorySelect = document.getElementById('task-category') as HTMLSelectElement;
       if (categorySelect) {
         const option = document.createElement('option');
@@ -720,6 +720,50 @@ async function showAddTaskModal(): Promise<void> {
         option.textContent = newCategory.name;
         categorySelect.appendChild(option);
         categorySelect.value = newCategory.id;
+
+        // Add new category to custom searchable dropdown
+        const container = categorySelect.previousElementSibling as HTMLElement;
+        if (container && container.classList.contains('searchable-select')) {
+          const optionsContainer = container.querySelector('.searchable-select-options');
+          if (optionsContainer) {
+            const optEl = document.createElement('div');
+            optEl.className = 'searchable-select-option';
+            optEl.textContent = newCategory.name;
+            optEl.setAttribute('data-value', newCategory.id);
+            optEl.style.padding = '8px 12px';
+            optEl.style.cursor = 'pointer';
+            optEl.style.whiteSpace = 'nowrap';
+            optEl.style.overflow = 'hidden';
+            optEl.style.textOverflow = 'ellipsis';
+            optEl.style.backgroundColor = '';
+            
+            // Hover effects
+            optEl.addEventListener('mouseenter', () => {
+              optEl.style.backgroundColor = '#f5f5f5';
+            });
+            optEl.addEventListener('mouseleave', () => {
+              optEl.style.backgroundColor = '';
+            });
+            
+            // Click handler
+            optEl.addEventListener('click', () => {
+              const value = optEl.getAttribute('data-value') || '';
+              const text = optEl.textContent || '';
+              categorySelect.value = value;
+              const input = container.querySelector('input');
+              if (input) input.value = text;
+              const dropdown = container.querySelector('.searchable-select-dropdown') as HTMLElement;
+              if (dropdown) dropdown.style.display = 'none';
+              categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            
+            optionsContainer.appendChild(optEl);
+            
+            // Update the input to show the newly selected category
+            const input = container.querySelector('input');
+            if (input) input.value = newCategory.name;
+          }
+        }
       }
     });
   });
@@ -1094,7 +1138,7 @@ async function showEditTaskModal(taskId: string): Promise<void> {
   // Add New Category button handler
   document.getElementById('add-new-category-btn')?.addEventListener('click', async () => {
     await showCategoryCreateDialog(categories, (newCategory) => {
-      // Add new category to dropdown and select it
+      // Add new category to native select
       const categorySelect = document.getElementById('edit-task-category') as HTMLSelectElement;
       if (categorySelect) {
         const option = document.createElement('option');
@@ -1102,6 +1146,50 @@ async function showEditTaskModal(taskId: string): Promise<void> {
         option.textContent = newCategory.name;
         categorySelect.appendChild(option);
         categorySelect.value = newCategory.id;
+
+        // Add new category to custom searchable dropdown
+        const container = categorySelect.previousElementSibling as HTMLElement;
+        if (container && container.classList.contains('searchable-select')) {
+          const optionsContainer = container.querySelector('.searchable-select-options');
+          if (optionsContainer) {
+            const optEl = document.createElement('div');
+            optEl.className = 'searchable-select-option';
+            optEl.textContent = newCategory.name;
+            optEl.setAttribute('data-value', newCategory.id);
+            optEl.style.padding = '8px 12px';
+            optEl.style.cursor = 'pointer';
+            optEl.style.whiteSpace = 'nowrap';
+            optEl.style.overflow = 'hidden';
+            optEl.style.textOverflow = 'ellipsis';
+            optEl.style.backgroundColor = '';
+            
+            // Hover effects
+            optEl.addEventListener('mouseenter', () => {
+              optEl.style.backgroundColor = '#f5f5f5';
+            });
+            optEl.addEventListener('mouseleave', () => {
+              optEl.style.backgroundColor = '';
+            });
+            
+            // Click handler
+            optEl.addEventListener('click', () => {
+              const value = optEl.getAttribute('data-value') || '';
+              const text = optEl.textContent || '';
+              categorySelect.value = value;
+              const input = container.querySelector('input');
+              if (input) input.value = text;
+              const dropdown = container.querySelector('.searchable-select-dropdown') as HTMLElement;
+              if (dropdown) dropdown.style.display = 'none';
+              categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            
+            optionsContainer.appendChild(optEl);
+            
+            // Update the input to show the newly selected category
+            const input = container.querySelector('input');
+            if (input) input.value = newCategory.name;
+          }
+        }
       }
     });
   });
