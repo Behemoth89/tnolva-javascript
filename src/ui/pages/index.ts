@@ -369,7 +369,10 @@ function applyAllColumnFilters(tasks: IBllTaskDto[]): IBllTaskDto[] {
 
 /**
  * Apply date range filter to tasks
- * Filters tasks where the task's date falls within the selected start and end dates (inclusive on both ends)
+ * Uses overlap-based filtering:
+ * - For DONE tasks: uses completionDate as end date
+ * - For non-DONE tasks: uses dueDate (or 01.01.3000 if not set) as end date
+ * A task is included if its date range overlaps with the filter range
  */
 function applyDateRangeFilter(tasks: IBllTaskDto[]): IBllTaskDto[] {
   const { startDate, endDate } = dateRangeFilter;
@@ -383,12 +386,21 @@ function applyDateRangeFilter(tasks: IBllTaskDto[]): IBllTaskDto[] {
     // Parse task dates
     const taskStartDate = task.startDate ? new Date(task.startDate) : null;
     const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
+    const taskCompletionDate = task.completionDate ? new Date(task.completionDate) : null;
     
-    // Use the earliest date available (startDate or dueDate) for comparison
-    const taskDate = taskStartDate || taskDueDate;
+    // Determine end date based on task status
+    // For DONE tasks: use completionDate
+    // For non-DONE tasks: use dueDate (or 01.01.3000 if not set)
+    let taskEndDate: Date | null;
+    if (task.status === 'DONE') {
+      taskEndDate = taskCompletionDate || taskDueDate;
+    } else {
+      // For non-DONE tasks, use dueDate or 01.01.3000 as placeholder
+      taskEndDate = taskDueDate || new Date('3000-01-01');
+    }
     
-    if (!taskDate) {
-      // If task has no dates, exclude it from date filtering
+    if (!taskStartDate || !taskEndDate) {
+      // If task has no start date, exclude it from date filtering
       return false;
     }
 
@@ -396,33 +408,27 @@ function applyDateRangeFilter(tasks: IBllTaskDto[]): IBllTaskDto[] {
     const filterStart = startDate ? new Date(startDate + 'T00:00:00') : null;
     const filterEnd = endDate ? new Date(endDate + 'T23:59:59') : null;
 
+    // Overlap-based filtering: a task is included if there's any overlap between
+    // [taskStartDate, taskEndDate] and [filterStart, filterEnd]
+    // Overlap exists if: max(taskStart, filterStart) <= min(taskEnd, filterEnd)
+    
     // Scenario: Filter with both dates
     if (filterStart && filterEnd) {
-      // Show tasks where startDate >= filterStart AND dueDate <= filterEnd
-      // If task has no startDate, use dueDate for start comparison
-      const taskStart = taskStartDate || taskDueDate;
-      const taskEnd = taskDueDate || taskStartDate;
-      
-      if (taskStart && taskEnd) {
-        return taskStart >= filterStart && taskEnd <= filterEnd;
-      }
-      return false;
+      const overlapStart = taskStartDate > filterStart ? taskStartDate : filterStart;
+      const overlapEnd = taskEndDate < filterEnd ? taskEndDate : filterEnd;
+      return overlapStart <= overlapEnd;
     }
 
     // Scenario: Filter with only start date
     if (filterStart && !filterEnd) {
-      // Show tasks where startDate >= filterStart
-      const taskStart = taskStartDate || taskDueDate;
-      if (!taskStart) return false;
-      return taskStart >= filterStart;
+      // Show tasks where taskEndDate >= filterStart (any task that ends on or after filterStart)
+      return taskEndDate >= filterStart;
     }
 
     // Scenario: Filter with only end date
     if (!filterStart && filterEnd) {
-      // Show tasks where dueDate <= filterEnd (or startDate if no dueDate)
-      const taskEnd = taskDueDate || taskStartDate;
-      if (!taskEnd) return false;
-      return taskEnd <= filterEnd;
+      // Show tasks where taskStartDate <= filterEnd (any task that starts on or before filterEnd)
+      return taskStartDate <= filterEnd;
     }
 
     return true;
@@ -625,6 +631,10 @@ function renderTaskRow(task: IBllTaskDto): string {
             <div class="detail-item">
               <strong>Last Updated:</strong> ${formatDate(task.updatedAt)}
             </div>
+            ${task.completionDate ? `
+            <div class="detail-item">
+              <strong>Completed:</strong> ${formatDate(task.completionDate)}
+            </div>` : ''}
             ${task.isSystemCreated ? '<div class="detail-item"><span class="badge badge-system">System Created</span></div>' : ''}
           </div>
           <div class="detail-actions">
@@ -753,6 +763,13 @@ async function showAddTaskModal(): Promise<void> {
           <input type="date" class="form-input" id="task-due-date" name="dueDate">
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="task-completion-date">Completion Date (optional)</label>
+          <input type="date" class="form-input" id="task-completion-date" name="completionDate">
+          <div class="form-hint">Set planned completion date or leave empty</div>
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label" for="task-tags">Tags (comma separated)</label>
         <input type="text" class="form-input" id="task-tags" name="tags" placeholder="tag1, tag2, tag3">
@@ -879,6 +896,7 @@ async function showAddTaskModal(): Promise<void> {
       priority: formData.get('priority') as EPriority,
       startDate: formData.get('startDate') ? new Date(formData.get('startDate') as string) : undefined,
       dueDate: formData.get('dueDate') ? new Date(formData.get('dueDate') as string) : undefined,
+      completionDate: formData.get('completionDate') ? new Date(formData.get('completionDate') as string) : undefined,
       tags,
       categoryId: categoryId || undefined,
       parentTaskId: parentTaskId || undefined,
@@ -1125,6 +1143,14 @@ async function showEditTaskModal(taskId: string): Promise<void> {
           <input type="date" class="form-input" id="edit-task-due-date" name="dueDate" value="${task.dueDate ? formatDateForInput(task.dueDate) : ''}">
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="edit-task-completion-date">Completion Date (optional)</label>
+          <input type="date" class="form-input" id="edit-task-completion-date" name="completionDate" value="${task.completionDate ? formatDateForInput(task.completionDate) : ''}">
+          <input type="hidden" id="edit-task-original-completion-date" name="originalCompletionDate" value="${task.completionDate ? formatDateForInput(task.completionDate) : ''}">
+          <div class="form-hint">Set planned completion date or leave empty to keep existing</div>
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label" for="edit-task-tags">Tags (comma separated)</label>
         <input type="text" class="form-input" id="edit-task-tags" name="tags" value="${task.tags ? task.tags.join(', ') : ''}" placeholder="tag1, tag2, tag3">
@@ -1248,6 +1274,25 @@ async function showEditTaskModal(taskId: string): Promise<void> {
     const newParentTaskId = formData.get('parentTaskId') as string || undefined;
 
     // Update task (without parentTaskId - that's handled separately)
+    const completionDateStr = formData.get('completionDate') as string;
+    const originalCompletionDateStr = formData.get('originalCompletionDate') as string;
+    
+    // Determine completionDate value:
+    // - If user provided a date -> use that date
+    // - If user cleared the field (empty) but there was an original date -> explicitly clear (null)
+    // - If user didn't change the field -> undefined (preserve existing)
+    let completionDate: Date | undefined | null;
+    if (completionDateStr) {
+      // User provided a date
+      completionDate = new Date(completionDateStr);
+    } else if (originalCompletionDateStr && !completionDateStr) {
+      // User cleared the field - explicitly set to null to clear
+      completionDate = null;
+    } else {
+      // User didn't change anything or no original value - preserve existing
+      completionDate = undefined;
+    }
+    
     const data = {
       title: title.trim(),
       description: formData.get('description') as string || undefined,
@@ -1255,6 +1300,7 @@ async function showEditTaskModal(taskId: string): Promise<void> {
       priority: formData.get('priority') as EPriority,
       startDate: formData.get('startDate') ? new Date(formData.get('startDate') as string) : undefined,
       dueDate: formData.get('dueDate') ? new Date(formData.get('dueDate') as string) : undefined,
+      completionDate,
       tags,
       categoryId: categoryId || undefined,
     };

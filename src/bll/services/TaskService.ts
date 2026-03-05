@@ -57,6 +57,7 @@ export class TaskService implements ITaskService {
       priority: task.priority,
       startDate: task.startDate,
       dueDate: task.dueDate,
+      completionDate: task.completionDate,
       tags: task.tags,
       categoryId,
       categoryName,
@@ -98,6 +99,7 @@ export class TaskService implements ITaskService {
       // startDate defaults to current timestamp if not specified
       startDate: dto.startDate ?? new Date(),
       dueDate: dto.dueDate,
+      completionDate: dto.completionDate,
       tags: dto.tags ? [...dto.tags] : [],
       isSystemCreated: dto.isSystemCreated ?? false,
       createdAt: dto.createdAt ?? now,
@@ -127,9 +129,17 @@ export class TaskService implements ITaskService {
       return null;
     }
 
-    // Check done lock - cannot modify completed tasks
+    // Check done lock - cannot modify completed tasks except to change status away from DONE
     if (task.status === EStatus.DONE) {
-      throw new Error('Cannot modify completed task');
+      // Allow changing status away from DONE (to clear completionDate)
+      const isOnlyChangingStatusAwayFromDone = 
+        Object.keys(dto).length === 1 && 
+        dto.status !== undefined && 
+        dto.status !== EStatus.DONE;
+      
+      if (!isOnlyChangingStatusAwayFromDone) {
+        throw new Error('Cannot modify completed task');
+      }
     }
 
     // Validate title if provided
@@ -150,8 +160,20 @@ export class TaskService implements ITaskService {
       }
     }
 
+    // Determine effective status - handle case where user sets completionDate but not status
+    let effectiveStatus = dto.status;
+    const userProvidedCompletionDate = dto.completionDate !== undefined;
+    
+    // If user provides completionDate but not status, and task is not already done,
+    // auto-set status to DONE
+    if (effectiveStatus === undefined && userProvidedCompletionDate && dto.completionDate !== null) {
+      if (task.status !== EStatus.DONE) {
+        effectiveStatus = EStatus.DONE;
+      }
+    }
+
     // Check dependency validation if status is being set to DONE
-    if (dto.status !== undefined && dto.status === EStatus.DONE) {
+    if (effectiveStatus !== undefined && effectiveStatus === EStatus.DONE) {
       const canComplete = await this.taskDependencyService.canCompleteMainTaskAsync(id);
       if (!canComplete) {
         const subtasks = await this.taskDependencyService.getSubtasksAsync(id);
@@ -165,14 +187,58 @@ export class TaskService implements ITaskService {
 
     const now = new Date().toISOString();
 
+    // Handle completionDate logic
+    // We need to distinguish between:
+    // - undefined: user didn't provide completionDate
+    // - null: user explicitly wants to clear completionDate
+    // - Date: user explicitly set a completion date
+    const completionDateProvided = dto.completionDate !== undefined;
+    const completionDateExplicitlyCleared = dto.completionDate === null;
+    // Use proper type check that works for both Date objects and date strings (from JSON deserialization)
+    const completionDateSetToValue = dto.completionDate !== null && dto.completionDate !== undefined;
+    
+    let completionDate: Date | undefined = task.completionDate;
+    const newStatus = effectiveStatus !== undefined ? effectiveStatus : task.status;
+    const wasDone = task.status === EStatus.DONE;
+    const isNowDone = newStatus === EStatus.DONE;
+    
+    // Case 1: Status is set to DONE (explicitly or via auto-DONE)
+    if (effectiveStatus !== undefined && isNowDone) {
+      if (completionDateExplicitlyCleared) {
+        // User explicitly cleared completionDate - respect this intent even when setting status to DONE
+        completionDate = undefined;
+      } else if (completionDateSetToValue) {
+        // User explicitly set a completion date - use that value
+        completionDate = dto.completionDate;
+      } else if (!completionDateProvided) {
+        // User didn't provide completionDate - default to current date
+        completionDate = new Date();
+      }
+    } else if (effectiveStatus !== undefined && !isNowDone && wasDone) {
+      // Case 2: Status is changing from DONE to something else - clear completionDate
+      completionDate = undefined;
+    } else if (completionDateExplicitlyCleared) {
+      // Case 3: User explicitly cleared completionDate (set to null) without changing status
+      completionDate = undefined;
+    } else if (completionDateSetToValue) {
+      // Case 4: User explicitly set a completion date value (but status might not be done)
+      // The auto-DONE logic above already handles this case, so this is a fallback
+      completionDate = dto.completionDate;
+    } else if (!wasDone && isNowDone) {
+      // Case 5: Status changed to DONE without explicit completionDate (defensive, covered by Case 1)
+      completionDate = new Date();
+    }
+    // Case 6: If none of the above and user didn't provide completionDate, keep existing
+
     const updatedTask: ITaskEntity = {
       ...task,
       title: dto.title !== undefined ? dto.title.trim() : task.title,
       description: dto.description !== undefined ? dto.description?.trim() : task.description,
-      status: dto.status !== undefined ? dto.status : task.status,
+      status: effectiveStatus !== undefined ? effectiveStatus : task.status,
       priority: dto.priority !== undefined ? dto.priority : task.priority,
       startDate: dto.startDate !== undefined ? dto.startDate : task.startDate,
       dueDate: dto.dueDate !== undefined ? dto.dueDate : task.dueDate,
+      completionDate,
       tags: dto.tags !== undefined ? [...dto.tags] : task.tags,
       updatedAt: now,
     };
@@ -310,6 +376,7 @@ export class TaskService implements ITaskService {
     const updatedTask: ITaskEntity = {
       ...task,
       status: EStatus.DONE,
+      completionDate: new Date(),
       updatedAt: now,
     };
 

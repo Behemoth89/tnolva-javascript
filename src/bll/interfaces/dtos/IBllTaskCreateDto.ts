@@ -20,6 +20,8 @@ export interface IBllTaskCreateDto {
   startDate?: Date;
   /** Due date for the task (optional) */
   dueDate?: Date;
+  /** Completion date for the task (optional) */
+  completionDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
   /** Category ID to assign to the task (optional) */

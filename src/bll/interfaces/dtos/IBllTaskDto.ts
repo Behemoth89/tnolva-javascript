@@ -20,6 +20,8 @@ export interface IBllTaskDto {
   startDate: Date;
   /** Due date for the task */
   dueDate?: Date;
+  /** Completion date for the task (set when task is marked as DONE) */
+  completionDate?: Date;
   /** Tags associated with the task */
   tags?: string[];
   /** Category ID assigned to the task */

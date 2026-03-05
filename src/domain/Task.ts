@@ -14,6 +14,7 @@ export class Task implements ITaskEntity {
   priority: EPriority;
   startDate: Date;
   dueDate?: Date;
+  completionDate?: Date;
   tags: string[];
   /** Indicates whether the task was created by the system (e.g., recurring task generator) */
   isSystemCreated?: boolean;
@@ -34,6 +35,7 @@ export class Task implements ITaskEntity {
     // startDate defaults to creation timestamp if not specified
     this.startDate = dto.startDate ?? new Date();
     this.dueDate = dto.dueDate;
+    this.completionDate = dto.completionDate;
     this.tags = dto.tags ? [...dto.tags] : [];
     this.isSystemCreated = dto.isSystemCreated ?? false;
     // Handle timestamps - use provided or set to now
@@ -54,6 +56,7 @@ export class Task implements ITaskEntity {
       priority: this.priority,
       startDate: this.startDate,
       dueDate: this.dueDate,
+      completionDate: this.completionDate,
       tags: [...this.tags],
       isSystemCreated: this.isSystemCreated,
       createdAt: this.createdAt,

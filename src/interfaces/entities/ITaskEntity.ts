@@ -20,6 +20,8 @@ export interface ITaskEntity extends IBaseEntity {
   startDate: Date;
   /** Due date for the task (optional) */
   dueDate?: Date;
+  /** Completion date for the task (optional, set when task is marked as DONE) */
+  completionDate?: Date;
   /** Tags associated with the task (optional) */
   tags?: string[];
   /** Indicates whether the task was created by the system (e.g., recurring task generator) */

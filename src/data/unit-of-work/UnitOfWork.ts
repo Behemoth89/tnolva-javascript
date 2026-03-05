@@ -123,6 +123,7 @@ export class UnitOfWork implements IUnitOfWork {
 
     // Mark task as completed - use change tracking
     taskData.status = EStatus.DONE;
+    taskData.completionDate = new Date();
     taskData.updatedAt = new Date().toISOString();
     this.registerModified(taskData, 'task');
 
