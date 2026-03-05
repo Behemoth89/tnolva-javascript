@@ -15,6 +15,9 @@ let taskSorter: TableSorter<IBllTaskDto> | null = null;
 let allTasks: IBllTaskDto[] = [];
 let filterController: FilterController;
 
+// Expandable row state
+let expandedTaskIds: Set<string> = new Set();
+
 // Column filter values
 const columnFilters: Record<string, string> = {};
 
@@ -552,7 +555,6 @@ function renderTasksTable(tasks: IBllTaskDto[]): void {
             ${getSortHeaderHtml({ key: 'tags', label: 'Tags' }, sortState, 'handleIndexSort')}
             ${getSortHeaderHtml({ key: 'startDate', label: 'Start Date' }, sortState, 'handleIndexSort')}
             ${getSortHeaderHtml({ key: 'dueDate', label: 'Due Date' }, sortState, 'handleIndexSort')}
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="tasks-tbody">
@@ -571,9 +573,13 @@ function renderTasksTable(tasks: IBllTaskDto[]): void {
 }
 
 /**
- * Render a single task row
+ * Render a single task row with expandable detail
  */
 function renderTaskRow(task: IBllTaskDto): string {
+  const isExpanded = expandedTaskIds.has(task.id);
+  const detailClass = isExpanded ? '' : 'hidden';
+  const expandIcon = isExpanded ? '▼' : '▶';
+
   const statusClass = `badge-${task.status.toLowerCase().replace('_', '-')}`;
   const priorityClass = `badge-${task.priority.toLowerCase()}`;
 
@@ -589,9 +595,14 @@ function renderTaskRow(task: IBllTaskDto): string {
     ? `<span class="cell-truncate" title="${escapeHtml(task.description)}">${escapeHtml(task.description)}</span>`
     : '-';
 
+  // Only show Done button if task is not already DONE
+  const doneButton = task.status !== EStatus.DONE 
+    ? `<button class="btn btn-success btn-sm done-task-btn" data-id="${task.id}" title="Mark as Done">Done</button>`
+    : '';
+
   return `
-    <tr>
-      <td>${escapeHtml(task.title)}</td>
+    <tr class="task-row" data-task-id="${task.id}">
+      <td><span class="task-expand-icon">${expandIcon}</span> <span class="task-title">${escapeHtml(task.title)}</span></td>
       <td><span class="badge ${statusClass}">${task.status}</span></td>
       <td><span class="badge ${priorityClass}">${task.priority}</span></td>
       <td>${categoryDisplay}</td>
@@ -599,10 +610,29 @@ function renderTaskRow(task: IBllTaskDto): string {
       <td>${tagsDisplay}</td>
       <td>${task.startDate ? formatDate(task.startDate) : '-'}</td>
       <td>${task.dueDate ? formatDate(task.dueDate) : '-'}</td>
-      <td class="table-actions">
-        <button class="btn btn-ghost btn-sm view-task-btn" data-id="${task.id}" title="View">View</button>
-        <button class="btn btn-ghost btn-sm edit-task-btn" data-id="${task.id}" title="Edit">Edit</button>
-        <button class="btn btn-ghost btn-sm delete-task-btn" data-id="${task.id}" title="Delete">Delete</button>
+    </tr>
+    <tr class="task-detail-row ${detailClass}" data-detail-for="${task.id}">
+      <td colspan="8">
+        <div class="task-detail-content">
+          <div class="detail-section">
+            <strong>Full Description:</strong>
+            <p>${task.description ? escapeHtml(task.description) : 'No description provided'}</p>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <strong>Created:</strong> ${formatDate(task.createdAt)}
+            </div>
+            <div class="detail-item">
+              <strong>Last Updated:</strong> ${formatDate(task.updatedAt)}
+            </div>
+            ${task.isSystemCreated ? '<div class="detail-item"><span class="badge badge-system">System Created</span></div>' : ''}
+          </div>
+          <div class="detail-actions">
+            ${doneButton}
+            <button class="btn btn-primary btn-sm edit-task-btn" data-id="${task.id}" title="Edit">Edit</button>
+            <button class="btn btn-danger btn-sm delete-task-btn" data-id="${task.id}" title="Delete">Delete</button>
+          </div>
+        </div>
       </td>
     </tr>
   `;
@@ -614,6 +644,52 @@ function renderTaskRow(task: IBllTaskDto): string {
 function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString();
+}
+
+/**
+ * Toggle task detail expansion
+ */
+function toggleTaskDetail(taskId: string): void {
+  if (expandedTaskIds.has(taskId)) {
+    expandedTaskIds.delete(taskId);
+  } else {
+    expandedTaskIds.add(taskId);
+  }
+  
+  // Toggle visibility using CSS classes - no re-rendering needed
+  const detailRow = document.querySelector(`tr[data-detail-for="${taskId}"]`);
+  if (detailRow) {
+    if (expandedTaskIds.has(taskId)) {
+      detailRow.classList.remove('hidden');
+    } else {
+      detailRow.classList.add('hidden');
+    }
+  }
+  
+  // Update expand icons in the task row
+  updateExpandIcons();
+}
+
+/**
+ * Update expand/collapse icons for all visible rows
+ */
+function updateExpandIcons(): void {
+  document.querySelectorAll('.task-row').forEach(row => {
+    const taskId = row.getAttribute('data-task-id');
+    if (!taskId) return;
+    
+    const firstCell = row.querySelector('td');
+    if (!firstCell) return;
+    
+    const isExpanded = expandedTaskIds.has(taskId);
+    const expandIcon = isExpanded ? '▼' : '▶';
+    
+    // Update just the icon span
+    const iconSpan = firstCell.querySelector('.task-expand-icon');
+    if (iconSpan) {
+      iconSpan.textContent = expandIcon;
+    }
+  });
 }
 
 /**
@@ -930,15 +1006,33 @@ function createModal(title: string, content: string): HTMLElement {
 }
 
 /**
- * Attach event listeners for action buttons (View, Edit, Delete)
+ * Attach event listeners for action buttons (Edit, Delete, Done)
  */
 function attachActionButtonListeners(): void {
-  // View button handlers
-  document.querySelectorAll('.view-task-btn').forEach(btn => {
+  // Task row click handler for expanding/collapsing details
+  document.querySelectorAll('.task-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      // Stop propagation to prevent any interference with sorting
+      e.stopPropagation();
+      
+      const target = e.target as HTMLElement;
+      // Don't expand if clicking on detail actions
+      if (target.closest('.detail-actions') || target.closest('button')) {
+        return;
+      }
+      const taskId = row.getAttribute('data-task-id');
+      if (taskId) {
+        toggleTaskDetail(taskId);
+      }
+    });
+  });
+
+  // Done button handlers
+  document.querySelectorAll('.done-task-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const id = (e.target as HTMLElement).dataset.id;
       if (id) {
-        await showViewTaskModal(id);
+        await markTaskDone(id);
       }
     });
   });
@@ -962,78 +1056,6 @@ function attachActionButtonListeners(): void {
       }
     });
   });
-}
-
-/**
- * Show view task details modal
- */
-async function showViewTaskModal(taskId: string): Promise<void> {
-  const task = allTasks.find(t => t.id === taskId);
-  if (!task) return;
-
-  // Get parent task info if there's a dependency
-  let parentTaskTitle = '';
-  try {
-    const parentTask = await bridge.getParentTask(taskId);
-    if (parentTask) {
-      parentTaskTitle = parentTask.title;
-    }
-  } catch (e) {
-    // Ignore errors - task may not have a parent
-  }
-
-  const categories = await bridge.getAllCategories();
-  const category = categories.find(c => c.id === task.categoryId);
-
-  const modal = createModal('Task Details', `
-    <div class="task-details">
-      <div class="detail-row">
-        <span class="detail-label">Title:</span>
-        <span class="detail-value">${escapeHtml(task.title)}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Status:</span>
-        <span class="badge badge-${task.status.toLowerCase().replace('_', '-')}">${task.status}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Priority:</span>
-        <span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span>
-      </div>
-      ${category ? `
-      <div class="detail-row">
-        <span class="detail-label">Category:</span>
-        <span class="badge" style="background-color: ${category.color}">${escapeHtml(category.name)}</span>
-      </div>
-      ` : ''}
-      <div class="detail-row">
-        <span class="detail-label">Description:</span>
-        <span class="detail-value">${task.description ? escapeHtml(task.description) : '-'}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Tags:</span>
-        <span class="detail-value">${task.tags && task.tags.length > 0 ? task.tags.map(tag => `<span class="badge badge-tags">${escapeHtml(tag)}</span>`).join(' ') : '-'}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Start Date:</span>
-        <span class="detail-value">${task.startDate ? formatDate(task.startDate) : '-'}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Due Date:</span>
-        <span class="detail-value">${task.dueDate ? formatDate(task.dueDate) : '-'}</span>
-      </div>
-      ${parentTaskTitle ? `
-      <div class="detail-row">
-        <span class="detail-label">Depends On:</span>
-        <span class="detail-value">${escapeHtml(parentTaskTitle)}</span>
-      </div>
-      ` : ''}
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="close-view-btn">Close</button>
-      </div>
-    </div>
-  `);
-
-  document.getElementById('close-view-btn')?.addEventListener('click', () => modal.remove());
 }
 
 /**
@@ -1272,6 +1294,21 @@ async function showEditTaskModal(taskId: string): Promise<void> {
       alert('Error updating task. Please try again.');
     }
   });
+}
+
+/**
+ * Mark task as done
+ */
+async function markTaskDone(taskId: string): Promise<void> {
+  try {
+    await bridge.updateTask(taskId, { status: EStatus.DONE });
+    showToast('Task marked as done', 'success');
+    // Reload tasks to update the table
+    await loadTasks();
+  } catch (error) {
+    console.error('Error marking task as done:', error);
+    alert('Error marking task as done. Please try again.');
+  }
 }
 
 /**
