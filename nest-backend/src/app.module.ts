@@ -10,7 +10,9 @@ import { UsersModule } from './users/users.module';
 import { HealthModule } from './health/health.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
+import { UserCompany } from './users/entities/user-company.entity';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { SoftDeleteSubscriber } from './common/subscribers/soft-delete.subscriber';
 
 @Module({
   imports: [
@@ -49,7 +51,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || 'postgres',
         database: configService.get<string>('DB_DATABASE') || 'nest_backend',
-        entities: [User],
+        entities: [User, UserCompany],
         // Disable synchronize in all environments - use migrations instead
         // This prevents issues with tables already existing
         synchronize: false,
@@ -58,6 +60,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
         migrationsTableName: 'migrations',
         migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
         logging: configService.get<string>('NODE_ENV') !== 'production',
+        subscribers: [SoftDeleteSubscriber],
       }),
       inject: [ConfigService],
     }),

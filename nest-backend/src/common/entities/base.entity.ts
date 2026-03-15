@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   Index,
 } from 'typeorm';
 
@@ -19,4 +20,8 @@ export abstract class BaseEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at' })
+  @Index('IDX_deleted_at')
+  deletedAt?: Date;
 }

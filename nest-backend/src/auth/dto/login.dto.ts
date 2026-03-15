@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -15,4 +15,13 @@ export class LoginDto {
   })
   @IsString()
   password!: string;
+
+  @ApiProperty({
+    example: '00000000-0000-0000-0000-000000000000',
+    description: 'Optional company ID for multi-company login',
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID()
+  companyId?: string;
 }
