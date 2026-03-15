@@ -32,7 +32,10 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user', description: 'Create a new user account with email and password' })
+  @ApiOperation({
+    summary: 'Register a new user',
+    description: 'Create a new user account with email and password',
+  })
   @ApiResponse({
     status: 201,
     description: 'User successfully registered',
@@ -55,7 +58,10 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'User login', description: 'Authenticate user with email and password' })
+  @ApiOperation({
+    summary: 'User login',
+    description: 'Authenticate user with email and password',
+  })
   @ApiResponse({
     status: 200,
     description: 'User successfully logged in',

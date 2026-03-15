@@ -1,9 +1,5 @@
 import { Controller, Get, HttpStatus, HttpCode } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
 import { Public } from '../auth/decorators/public.decorator';
 
@@ -15,7 +11,10 @@ export class HealthController {
   @Public()
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Health check', description: 'Check application and database health' })
+  @ApiOperation({
+    summary: 'Health check',
+    description: 'Check application and database health',
+  })
   @ApiResponse({ status: 200, description: 'Application is healthy' })
   @ApiResponse({ status: 503, description: 'Application is unhealthy' })
   async check() {

@@ -32,13 +32,13 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
         limit: 100,
       },
     ]),
-    
+
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
+
     // TypeORM
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -61,7 +61,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       }),
       inject: [ConfigService],
     }),
-    
+
     // Application modules
     CommonModule,
     AuthModule,

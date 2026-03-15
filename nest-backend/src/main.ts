@@ -4,6 +4,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
+const logger = new Logger('Bootstrap');
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
@@ -11,7 +13,9 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     origin:
-      process.env.NODE_ENV === 'production' ? (process.env.CORS_ORIGIN || false) : true,
+      process.env.NODE_ENV === 'production'
+        ? process.env.CORS_ORIGIN || false
+        : true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
@@ -31,7 +35,10 @@ async function bootstrap() {
   // Swagger configuration
   const swaggerConfig = new DocumentBuilder()
     .setTitle(process.env.SWAGGER_TITLE || 'NestJS SaaS Backend API')
-    .setDescription(process.env.SWAGGER_DESCRIPTION || 'SaaS Platform Backend API Documentation')
+    .setDescription(
+      process.env.SWAGGER_DESCRIPTION ||
+        'SaaS Platform Backend API Documentation',
+    )
     .setVersion(process.env.SWAGGER_VERSION || '1.0')
     .addBearerAuth(
       {
@@ -58,4 +65,7 @@ async function bootstrap() {
   logger.log(`Application is running on: http://localhost:${port}`);
   logger.log(`Swagger UI is available at: http://localhost:${port}/api/docs`);
 }
-bootstrap();
+bootstrap().catch((err: Error) => {
+  logger.error('Failed to bootstrap application', err.stack);
+  process.exit(1);
+});
