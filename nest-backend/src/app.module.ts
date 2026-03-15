@@ -50,8 +50,13 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
         password: configService.get<string>('DB_PASSWORD') || 'postgres',
         database: configService.get<string>('DB_DATABASE') || 'nest_backend',
         entities: [User],
-        // WARNING: synchronize:true auto-migrates schema - use migrations in production
-        synchronize: configService.get<string>('NODE_ENV') === 'development',
+        // Disable synchronize in all environments - use migrations instead
+        // This prevents issues with tables already existing
+        synchronize: false,
+        // Run migrations on startup in both development and production
+        migrationsRun: true,
+        migrationsTableName: 'migrations',
+        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
         logging: configService.get<string>('NODE_ENV') !== 'production',
       }),
       inject: [ConfigService],

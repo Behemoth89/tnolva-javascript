@@ -1,21 +1,42 @@
-# Builder stage
-FROM node:20-alpine AS builder
+# Multi-stage build for development and production
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install all dependencies (including dev dependencies for building)
 RUN npm ci
 
 # Copy source code
 COPY . .
 
+# ============================================
+# Development stage
+# ============================================
+FROM base AS development
+
+# Set development environment
+ENV NODE_ENV=development
+
+# Expose port for hot reload
+EXPOSE 3000
+
+# Use ts-node for development with watch mode
+CMD ["npm", "run", "start:dev"]
+
+# ============================================
+# Builder stage (for production)
+# ============================================
+FROM base AS builder
+
 # Build the application
 RUN npm run build
 
+# ============================================
 # Production stage
+# ============================================
 FROM node:20-alpine AS production
 
 WORKDIR /app

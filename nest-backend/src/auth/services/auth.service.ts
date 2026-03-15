@@ -42,6 +42,7 @@ export class AuthService {
       password: hashedPassword,
       firstName,
       lastName,
+      companyId: registerDto.companyId || null,
     });
 
     // Generate JWT
