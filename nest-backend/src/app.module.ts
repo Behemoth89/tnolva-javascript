@@ -1,10 +1,75 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { HealthModule } from './health/health.module';
+import { CommonModule } from './common/common.module';
+import { User } from './users/entities/user.entity';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
-  imports: [],
+  imports: [
+    // Throttler rate limiting
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000,
+        limit: 3,
+      },
+      {
+        name: 'medium',
+        ttl: 10000,
+        limit: 20,
+      },
+      {
+        name: 'long',
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
+    
+    // Configuration
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    
+    // TypeORM
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST') || 'localhost',
+        port: configService.get<number>('DB_PORT') || 5432,
+        username: configService.get<string>('DB_USERNAME') || 'postgres',
+        password: configService.get<string>('DB_PASSWORD') || 'postgres',
+        database: configService.get<string>('DB_DATABASE') || 'nest_backend',
+        entities: [User],
+        // WARNING: synchronize:true auto-migrates schema - use migrations in production
+        synchronize: configService.get<string>('NODE_ENV') === 'development',
+        logging: configService.get<string>('NODE_ENV') !== 'production',
+      }),
+      inject: [ConfigService],
+    }),
+    
+    // Application modules
+    CommonModule,
+    AuthModule,
+    UsersModule,
+    HealthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

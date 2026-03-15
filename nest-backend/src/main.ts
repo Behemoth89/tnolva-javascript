@@ -1,17 +1,61 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
-  const config = new DocumentBuilder()
-    .setTitle('Nest Backend API')
-    .setDescription('API description')
-    .setVersion('1.0')
-    .addTag('api')
+
+  // Enable CORS
+  app.enableCors({
+    origin:
+      process.env.NODE_ENV === 'production' ? (process.env.CORS_ORIGIN || false) : true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
+  // Configure validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  // Configure global exception filter
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Swagger configuration
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle(process.env.SWAGGER_TITLE || 'NestJS SaaS Backend API')
+    .setDescription(process.env.SWAGGER_DESCRIPTION || 'SaaS Platform Backend API Documentation')
+    .setVersion(process.env.SWAGGER_VERSION || '1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-  await app.listen(process.env.PORT ?? 3000);
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`Swagger UI is available at: http://localhost:${port}/api/docs`);
 }
 bootstrap();
