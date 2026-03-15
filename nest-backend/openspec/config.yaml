@@ -1,20 +1,56 @@
+# OpenSpec Configuration for NestJS SaaS Backend
+# This file provides project context and rules for AI-generated artifacts
+
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# ============================================
+# PROJECT CONTEXT
+# Shown to AI when creating artifacts
+# ============================================
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+context: |
+  Tech stack: TypeScript, NestJS, TypeORM, PostgreSQL
+  Authentication: JWT (Bearer tokens) with bcrypt password hashing (12 rounds)
+  Architecture: Multi-tenant SaaS with companyId-based row-level isolation
+  API Documentation: Swagger/OpenAPI 3.0 at /api/docs (auto-generated from decorators)
+  Security: Rate limiting (@nestjs/throttler), CORS, global exception filter
+  Validation: class-validator DTOs with class-transformer
+  
+  Domain: SaaS Platform Backend
+  Key conventions:
+    - RESTful API design with NestJS controllers
+    - Repository pattern for data access
+    - Request-scoped TenantService for tenant context
+    - @Public() decorator marks public endpoints
+    - JWT payload includes: sub (userId), email, companyId
+    - All entities extend BaseEntity with id (UUID), companyId, timestamps
+    - Use Gherkin syntax for spec scenarios
+    - Reference actual source files in spec.md files
+
+# ============================================
+# PER-ARTIFACT RULES
+# ============================================
+
+rules:
+  proposal:
+    - Keep proposals under 500 words
+    - Always include a "Non-goals" section
+    - Reference existing OpenSpec specs when relevant
+    - Include architecture diagrams for complex features
+
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Include testing tasks for each feature
+    - Reference source code files accurately
+
+  spec:
+    - Use Gherkin syntax for scenarios (Given/When/Then)
+    - Include happy path AND error scenarios
+    - Reference actual implementation files
+    - Keep specs focused on ONE feature/requirement
+
+  design:
+    - Include code examples from existing patterns
+    - Reference existing guards, services, decorators
+    - Consider backwards compatibility
+    - Document API changes if applicable
