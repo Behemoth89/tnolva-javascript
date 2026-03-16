@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException, ConflictException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { UserCompanyRepository } from '../../users/repositories/user-company.repository';
@@ -16,10 +15,17 @@ jest.mock('bcrypt', () => ({
 
 describe('AuthService - JWT Companies Array Generation', () => {
   let authService: AuthService;
-  let mockUserRepository: any;
-  let mockUserCompanyRepository: any;
-  let mockJwtService: any;
-  let mockCompaniesService: any;
+  let mockUserRepository: jest.Mocked<{
+    findByEmail: jest.Mock;
+    findById: jest.Mock;
+    create: jest.Mock;
+  }>;
+  let mockUserCompanyRepository: jest.Mocked<{
+    getCompaniesForUser: jest.Mock;
+    addUserToCompany: jest.Mock;
+  }>;
+  let mockJwtService: jest.Mocked<{ sign: jest.Mock }>;
+  let mockCompaniesService: jest.Mocked<{ createWithUser: jest.Mock }>;
 
   beforeEach(async () => {
     mockUserRepository = {
@@ -81,9 +87,7 @@ describe('AuthService - JWT Companies Array Generation', () => {
         companyId: null,
       };
 
-      const mockCompanies = [
-        { companyId: 'company-1', role: 'admin' },
-      ];
+      const mockCompanies = [{ companyId: 'company-1', role: 'admin' }];
 
       mockUserRepository.findByEmail.mockResolvedValue(mockUser);
       mockUserRepository.findById.mockResolvedValue(mockUser);
@@ -163,7 +167,9 @@ describe('AuthService - JWT Companies Array Generation', () => {
       );
       mockJwtService.sign.mockReturnValue('mock-jwt-token');
 
-      const result = await authService.login(loginDtoWithCompany);
+      mockJwtService.sign.mockReturnValue('mock-jwt-token');
+
+      await authService.login(loginDtoWithCompany);
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -187,9 +193,7 @@ describe('AuthService - JWT Companies Array Generation', () => {
         companyId: null,
       };
 
-      const mockCompanies = [
-        { companyId: 'company-1', role: 'admin' },
-      ];
+      const mockCompanies = [{ companyId: 'company-1', role: 'admin' }];
 
       mockUserRepository.findByEmail.mockResolvedValue(mockUser);
       mockUserCompanyRepository.getCompaniesForUser.mockResolvedValue(
@@ -273,9 +277,7 @@ describe('AuthService - JWT Companies Array Generation', () => {
         isActive: true,
       };
 
-      const remainingCompanies = [
-        { companyId: 'company-1', role: 'admin' },
-      ];
+      const remainingCompanies = [{ companyId: 'company-1', role: 'admin' }];
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
       mockUserCompanyRepository.getCompaniesForUser.mockResolvedValue(
@@ -283,7 +285,7 @@ describe('AuthService - JWT Companies Array Generation', () => {
       );
       mockJwtService.sign.mockReturnValue('new-jwt-token');
 
-      const result = await authService.refreshToken(userId, currentCompanyId);
+      await authService.refreshToken(userId, currentCompanyId);
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -337,18 +339,16 @@ describe('AuthService - JWT Companies Array Generation', () => {
         companyId: null,
       };
 
-      const mockCompanies = [
-        { companyId: 'company-1', role: 'admin' },
-      ];
+      const mockCompanies = [{ companyId: 'company-1', role: 'admin' }];
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
       mockUserCompanyRepository.getCompaniesForUser.mockResolvedValue(
         mockCompanies,
       );
 
-      await expect(authService.switchCompany(userId, newCompanyId)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        authService.switchCompany(userId, newCompanyId),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 });

@@ -5,7 +5,6 @@ import { UserRole } from '../../auth/guards/roles/role.guard';
 
 describe('RolesService', () => {
   let service: RolesService;
-  let userCompanyRepository: jest.Mocked<UserCompanyRepository>;
 
   const mockUserCompanyRepository = {
     findByUserAndCompany: jest.fn(),
@@ -21,7 +20,6 @@ describe('RolesService', () => {
     }).compile();
 
     service = module.get<RolesService>(RolesService);
-    userCompanyRepository = module.get(UserCompanyRepository);
 
     jest.clearAllMocks();
   });

@@ -227,43 +227,51 @@ export class CompaniesService {
     newOwnerEmail: string,
   ): Promise<void> {
     // Verify current user is owner
-    const currentOwnerShip = await this.userCompanyRepository.findByUserAndCompany(
-      currentOwnerId,
-      companyId,
-    );
+    const currentOwnerShip =
+      await this.userCompanyRepository.findByUserAndCompany(
+        currentOwnerId,
+        companyId,
+      );
 
     if (!currentOwnerShip || currentOwnerShip.role !== 'owner') {
       throw new ForbiddenException('Only the owner can transfer ownership');
     }
 
-    // Find the new owner by email (need to query user repository)
-    // This requires access to UserRepository - let's use DataSource for now
-    // For now, we'll search by userId passed from controller
+    // TODO: Implement transfer ownership logic
+    // This method needs to:
+    // 1. Find the new owner user by email
+    // 2. Update the current owner's role to 'admin'
+    // 3. Update the new owner's role to 'owner'
+
+    void newOwnerEmail;
   }
 
   /**
    * Get all users in a company with their roles
    */
-  async getCompanyUsers(companyId: string): Promise<Array<{
-    userId: string;
-    email: string;
-    role: string;
-    firstName: string | null;
-    lastName: string | null;
-  }>> {
-    const userCompanies = await this.userCompanyRepository.findByCompanyId(companyId);
-    
+  async getCompanyUsers(companyId: string): Promise<
+    Array<{
+      userId: string;
+      email: string;
+      role: string;
+      firstName: string | null;
+      lastName: string | null;
+    }>
+  > {
+    const userCompanies =
+      await this.userCompanyRepository.findByCompanyId(companyId);
+
     // Get user details by querying through the company repository or directly
-    const userIds = userCompanies.map(uc => uc.userId);
-    
+    const userIds = userCompanies.map((uc) => uc.userId);
+
     if (userIds.length === 0) {
       return [];
     }
-    
+
     // Get user details from user repository
     const users = await this.companyRepository.getUsersByIds(userIds);
-    const userMap = new Map(users.map(u => [u.id, u]));
-    
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
     return userCompanies.map((uc) => {
       const user = userMap.get(uc.userId);
       return {

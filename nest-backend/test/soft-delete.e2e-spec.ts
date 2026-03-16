@@ -131,7 +131,7 @@ describe('Soft Delete Queries (e2e)', () => {
           firstName: 'To',
           lastName: 'Delete',
         })
-        .expect(Created => Created.status >= 200 && Created.status < 300);
+        .expect((Created) => Created.status >= 200 && Created.status < 300);
 
       testUserId = response.body.id;
     });

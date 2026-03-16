@@ -225,16 +225,19 @@ export class CompaniesController {
     }
 
     // Find the new owner user by email
-    const newOwnerUser = await this.userRepository.findByEmail(body.newOwnerEmail);
+    const newOwnerUser = await this.userRepository.findByEmail(
+      body.newOwnerEmail,
+    );
     if (!newOwnerUser) {
       throw new NotFoundException('User not found with this email');
     }
 
     // Check if new owner is already a member of the company
-    const newOwnerMembership = await this.userCompanyRepository.findByUserAndCompany(
-      newOwnerUser.id,
-      id,
-    );
+    const newOwnerMembership =
+      await this.userCompanyRepository.findByUserAndCompany(
+        newOwnerUser.id,
+        id,
+      );
     if (!newOwnerMembership) {
       throw new NotFoundException('User is not a member of this company');
     }
@@ -293,10 +296,8 @@ export class CompaniesController {
     }
 
     // Check if target user is owner - cannot modify owner role
-    const targetMembership = await this.userCompanyRepository.findByUserAndCompany(
-      userId,
-      id,
-    );
+    const targetMembership =
+      await this.userCompanyRepository.findByUserAndCompany(userId, id);
     if (!targetMembership) {
       throw new NotFoundException('User is not a member of this company');
     }
@@ -344,10 +345,8 @@ export class CompaniesController {
     }
 
     // Check if target user is owner - cannot remove owner
-    const targetMembership = await this.userCompanyRepository.findByUserAndCompany(
-      userId,
-      id,
-    );
+    const targetMembership =
+      await this.userCompanyRepository.findByUserAndCompany(userId, id);
     if (!targetMembership) {
       throw new NotFoundException('User is not a member of this company');
     }
@@ -356,7 +355,9 @@ export class CompaniesController {
       const allOwners = await this.userCompanyRepository.findByCompanyId(id);
       const ownerCount = allOwners.filter((uc) => uc.role === 'owner').length;
       if (ownerCount === 1) {
-        throw new ForbiddenException('Cannot remove the last owner from the company');
+        throw new ForbiddenException(
+          'Cannot remove the last owner from the company',
+        );
       }
     }
 

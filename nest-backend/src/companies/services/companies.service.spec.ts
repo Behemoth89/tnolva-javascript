@@ -14,8 +14,6 @@ import { Company } from '../../companies/entities/company.entity';
 
 describe('CompaniesService', () => {
   let service: CompaniesService;
-  let companyRepository: jest.Mocked<CompanyRepository>;
-  let userCompanyRepository: jest.Mocked<UserCompanyRepository>;
 
   const mockCompanyRepository = {
     findActiveByIds: jest.fn(),
@@ -45,8 +43,6 @@ describe('CompaniesService', () => {
     }).compile();
 
     service = module.get<CompaniesService>(CompaniesService);
-    companyRepository = module.get(CompanyRepository);
-    userCompanyRepository = module.get(UserCompanyRepository);
 
     jest.clearAllMocks();
   });

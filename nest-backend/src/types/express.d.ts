@@ -5,10 +5,15 @@ export interface AuthUserPayload {
   userId: string;
   email: string;
   companyId: string | null;
-  companies: Array<{
-    companyId: string;
-    role: string;
-  }>;
+  companies: CompanyUser[];
+}
+
+/**
+ * Company user relationship type
+ */
+export interface CompanyUser {
+  companyId: string;
+  role: string;
 }
 
 declare global {

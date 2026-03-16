@@ -6,13 +6,12 @@ import { AppModule } from './../src/app.module';
 describe('Invitations Flow (e2e)', () => {
   let app: INestApplication;
   let server: any;
-  
+
   // Test tokens and IDs (would be real in actual e2e with db)
   const ownerToken = 'Bearer mock-owner-token';
   const adminToken = 'Bearer mock-admin-token';
   const memberToken = 'Bearer mock-member-token';
   const testCompanyId = '00000000-0000-0000-0000-000000000001';
-  const testUserId = '00000000-0000-0000-0000-000000000010';
   const testInvitationId = '00000000-0000-0000-0000-000000000020';
 
   beforeAll(async () => {
@@ -97,7 +96,9 @@ describe('Invitations Flow (e2e)', () => {
   describe('DELETE /api/v1/companies/:companyId/invitations/:id', () => {
     it('should cancel invitation as owner', () => {
       return request(server)
-        .delete(`/api/v1/companies/${testCompanyId}/invitations/${testInvitationId}`)
+        .delete(
+          `/api/v1/companies/${testCompanyId}/invitations/${testInvitationId}`,
+        )
         .set('Authorization', ownerToken)
         .set('x-company-id', testCompanyId)
         .expect(200);
@@ -105,7 +106,9 @@ describe('Invitations Flow (e2e)', () => {
 
     it('should cancel invitation as admin', () => {
       return request(server)
-        .delete(`/api/v1/companies/${testCompanyId}/invitations/${testInvitationId}`)
+        .delete(
+          `/api/v1/companies/${testCompanyId}/invitations/${testInvitationId}`,
+        )
         .set('Authorization', adminToken)
         .set('x-company-id', testCompanyId)
         .expect(200);
@@ -113,7 +116,9 @@ describe('Invitations Flow (e2e)', () => {
 
     it('should reject cancellation as member', () => {
       return request(server)
-        .delete(`/api/v1/companies/${testCompanyId}/invitations/${testInvitationId}`)
+        .delete(
+          `/api/v1/companies/${testCompanyId}/invitations/${testInvitationId}`,
+        )
         .set('Authorization', memberToken)
         .set('x-company-id', testCompanyId)
         .expect(403);
@@ -124,10 +129,10 @@ describe('Invitations Flow (e2e)', () => {
     it('should accept valid invitation', () => {
       return request(server)
         .post(`/api/v1/companies/${testCompanyId}/invitations/accept`)
-        .send({ 
+        .send({
           token: 'valid-invitation-token',
           companyId: testCompanyId,
-          email: 'newuser@example.com' 
+          email: 'newuser@example.com',
         })
         .expect(201);
     });
@@ -135,10 +140,10 @@ describe('Invitations Flow (e2e)', () => {
     it('should reject invalid token', () => {
       return request(server)
         .post(`/api/v1/companies/${testCompanyId}/invitations/accept`)
-        .send({ 
+        .send({
           token: 'invalid-token',
           companyId: testCompanyId,
-          email: 'user@example.com' 
+          email: 'user@example.com',
         })
         .expect(404);
     });
@@ -146,10 +151,10 @@ describe('Invitations Flow (e2e)', () => {
     it('should reject invitation for different company', () => {
       return request(server)
         .post(`/api/v1/companies/${testCompanyId}/invitations/accept`)
-        .send({ 
+        .send({
           token: 'valid-token',
           companyId: 'different-company-id',
-          email: 'user@example.com' 
+          email: 'user@example.com',
         })
         .expect(400);
     });

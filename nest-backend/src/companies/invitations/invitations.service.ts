@@ -39,7 +39,8 @@ export class InvitationsService {
     private userCompanyRepository: UserCompanyRepository,
     private userRepository: UserRepository,
   ) {
-    this.invitationRepository = this.dataSource.getRepository(CompanyInvitation);
+    this.invitationRepository =
+      this.dataSource.getRepository(CompanyInvitation);
   }
 
   /**
@@ -57,10 +58,11 @@ export class InvitationsService {
     // Note: We need to find the user by email first
     const user = await this.userRepository.findByEmail(dto.email);
     if (user) {
-      const existingMember = await this.userCompanyRepository.findByUserAndCompany(
-        user.id,
-        dto.companyId,
-      );
+      const existingMember =
+        await this.userCompanyRepository.findByUserAndCompany(
+          user.id,
+          dto.companyId,
+        );
       if (existingMember) {
         throw new ConflictException('User is already a member of this company');
       }
@@ -78,7 +80,9 @@ export class InvitationsService {
     if (existingInvitation) {
       // Check if the existing invitation is still valid
       if (new Date(existingInvitation.expiresAt) > new Date()) {
-        throw new ConflictException('An invitation is already pending for this email');
+        throw new ConflictException(
+          'An invitation is already pending for this email',
+        );
       }
       // Delete the expired invitation
       await this.invitationRepository.delete(existingInvitation.id);
@@ -173,7 +177,10 @@ export class InvitationsService {
   /**
    * Cancel an invitation
    */
-  async cancelInvitation(invitationId: string, companyId: string): Promise<void> {
+  async cancelInvitation(
+    invitationId: string,
+    companyId: string,
+  ): Promise<void> {
     const invitation = await this.invitationRepository.findOne({
       where: { id: invitationId },
     });
@@ -183,11 +190,15 @@ export class InvitationsService {
     }
 
     if (invitation.companyId !== companyId) {
-      throw new ForbiddenException('Invitation does not belong to this company');
+      throw new ForbiddenException(
+        'Invitation does not belong to this company',
+      );
     }
 
     if (invitation.status !== InvitationStatus.PENDING) {
-      throw new BadRequestException('Only pending invitations can be cancelled');
+      throw new BadRequestException(
+        'Only pending invitations can be cancelled',
+      );
     }
 
     await this.invitationRepository.update(invitationId, {

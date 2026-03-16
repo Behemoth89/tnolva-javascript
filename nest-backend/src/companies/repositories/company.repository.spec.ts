@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { CompanyRepository } from '../../companies/repositories/company.repository';
 import { Company } from '../../companies/entities/company.entity';
 
 describe('CompanyRepository', () => {
   let repository: CompanyRepository;
-  let companyRepository: jest.Mocked<Repository<Company>>;
-  let dataSource: jest.Mocked<DataSource>;
 
   const mockCompanyRepository = {
     create: jest.fn(),
@@ -39,8 +37,6 @@ describe('CompanyRepository', () => {
     }).compile();
 
     repository = module.get<CompanyRepository>(CompanyRepository);
-    companyRepository = module.get(getRepositoryToken(Company));
-    dataSource = module.get(DataSource);
 
     jest.clearAllMocks();
   });

@@ -1,14 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
-import { ExecutionContext, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { RoleGuard, UserRole, getRoleLevel, hasRolePermission } from '../../../auth/guards/roles/role.guard';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
+import {
+  RoleGuard,
+  UserRole,
+  getRoleLevel,
+  hasRolePermission,
+} from '../../../auth/guards/roles/role.guard';
+import { AuthUserPayload } from '../../../types/express.d';
 
 describe('RoleGuard', () => {
   let guard: RoleGuard;
   let reflector: Reflector;
 
   const createMockExecutionContext = (
-    user: any,
+    user: AuthUserPayload | undefined,
     headers: Record<string, string> = {},
   ): ExecutionContext => {
     return {
@@ -79,21 +89,25 @@ describe('RoleGuard', () => {
   describe('canActivate', () => {
     it('should throw BadRequestException when x-company-id header is missing', () => {
       const context = createMockExecutionContext({});
-      
+
       expect(() => guard.canActivate(context)).toThrow(BadRequestException);
     });
 
-    it('should allow access when no user is present (let AuthGuard handle it)', async () => {
-      const context = createMockExecutionContext(undefined, { 'x-company-id': 'company-123' });
+    it('should allow access when no user is present (let AuthGuard handle it)', () => {
+      const context = createMockExecutionContext(undefined, {
+        'x-company-id': 'company-123',
+      });
       jest.spyOn(reflector, 'get').mockReturnValue(undefined);
 
-      const result = await guard.canActivate(context);
+      const result = guard.canActivate(context);
       expect(result).toBe(true);
     });
 
     it('should throw ForbiddenException when user has no company access', () => {
       const user = { id: 'user-1', companies: [] };
-      const context = createMockExecutionContext(user, { 'x-company-id': 'company-123' });
+      const context = createMockExecutionContext(user, {
+        'x-company-id': 'company-123',
+      });
       jest.spyOn(reflector, 'get').mockReturnValue('admin');
 
       expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
@@ -104,33 +118,39 @@ describe('RoleGuard', () => {
         id: 'user-1',
         companies: [{ companyId: 'company-123', role: 'member' }],
       };
-      const context = createMockExecutionContext(user, { 'x-company-id': 'company-123' });
+      const context = createMockExecutionContext(user, {
+        'x-company-id': 'company-123',
+      });
       jest.spyOn(reflector, 'get').mockReturnValue('owner');
 
       expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
     });
 
-    it('should allow access when user has required role', async () => {
+    it('should allow access when user has required role', () => {
       const user = {
         id: 'user-1',
         companies: [{ companyId: 'company-123', role: 'owner' }],
       };
-      const context = createMockExecutionContext(user, { 'x-company-id': 'company-123' });
+      const context = createMockExecutionContext(user, {
+        'x-company-id': 'company-123',
+      });
       jest.spyOn(reflector, 'get').mockReturnValue('admin');
 
-      const result = await guard.canActivate(context);
+      const result = guard.canActivate(context);
       expect(result).toBe(true);
     });
 
-    it('should allow access when no specific role is required', async () => {
+    it('should allow access when no specific role is required', () => {
       const user = {
         id: 'user-1',
         companies: [{ companyId: 'company-123', role: 'member' }],
       };
-      const context = createMockExecutionContext(user, { 'x-company-id': 'company-123' });
+      const context = createMockExecutionContext(user, {
+        'x-company-id': 'company-123',
+      });
       jest.spyOn(reflector, 'get').mockReturnValue(undefined);
 
-      const result = await guard.canActivate(context);
+      const result = guard.canActivate(context);
       expect(result).toBe(true);
     });
   });

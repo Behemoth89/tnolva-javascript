@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UserCompanyRepository } from '../../users/repositories/user-company.repository';
-import { UserRole, hasRolePermission } from '../../auth/guards/roles/role.guard';
+import {
+  UserRole,
+  hasRolePermission,
+} from '../../auth/guards/roles/role.guard';
 
 @Injectable()
 export class RolesService {
@@ -57,9 +60,10 @@ export class RolesService {
    * Get all owners for a company
    */
   async getCompanyOwners(companyId: string): Promise<string[]> {
-    const userCompanies = await this.userCompanyRepository.findByCompanyId(companyId);
+    const userCompanies =
+      await this.userCompanyRepository.findByCompanyId(companyId);
     return userCompanies
-      .filter((uc) => uc.role === UserRole.OWNER)
+      .filter((uc) => uc.role === (UserRole.OWNER as string))
       .map((uc) => uc.userId);
   }
 

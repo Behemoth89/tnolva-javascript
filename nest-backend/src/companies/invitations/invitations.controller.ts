@@ -20,7 +20,6 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../../auth/guards/roles/admin.guard';
 import { Public } from '../../auth/decorators/public.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { CurrentCompany } from '../../auth/decorators/current-company.decorator';
 import type { AuthUserPayload } from '../../types/express.d';
 import { InvitationsService } from './invitations.service';
 
@@ -84,10 +83,9 @@ export class InvitationsController {
     status: 403,
     description: 'Forbidden - Only admins can view invitations',
   })
-  async listInvitations(
-    @Param('companyId', ParseUUIDPipe) companyId: string,
-  ) {
-    const invitations = await this.invitationsService.listInvitations(companyId);
+  async listInvitations(@Param('companyId', ParseUUIDPipe) companyId: string) {
+    const invitations =
+      await this.invitationsService.listInvitations(companyId);
 
     // Return invitations without the token
     return invitations.map((invitation) => ({

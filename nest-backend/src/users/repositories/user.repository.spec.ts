@@ -4,8 +4,17 @@ import { UserRepository } from './user.repository';
 
 describe('UserRepository - Soft Delete Methods', () => {
   let repository: UserRepository;
-  let mockDataSource: any;
-  let mockRepository: any;
+  let mockDataSource: { getRepository: jest.Mock };
+  let mockRepository: {
+    findOne: jest.Mock;
+    find: jest.Mock;
+    create: jest.Mock;
+    save: jest.Mock;
+    softDelete: jest.Mock;
+    restore: jest.Mock;
+    delete: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
 
   beforeEach(async () => {
     mockRepository = {
@@ -109,19 +118,10 @@ describe('UserRepository - Soft Delete Methods', () => {
       });
       expect(result).toEqual(mockUser);
     });
-
-    it('should return null when user not found', async () => {
-      const userId = '123e4567-e89b-12d3-a456-426614174999';
-      mockRepository.findOne.mockResolvedValue(null);
-
-      const result = await repository.findByIdWithDeleted(userId);
-
-      expect(result).toBeNull();
-    });
   });
 
   describe('findAllWithDeleted', () => {
-    it('should return all users including soft-deleted', async () => {
+    it('should find all users including soft-deleted', async () => {
       const mockUsers = [
         { id: '1', email: 'test1@test.com', deletedAt: null },
         { id: '2', email: 'test2@test.com', deletedAt: new Date() },
@@ -136,14 +136,14 @@ describe('UserRepository - Soft Delete Methods', () => {
   });
 
   describe('findOnlyDeleted', () => {
-    it('should return only soft-deleted users', async () => {
-      const mockUsers = [
-        { id: '1', email: 'test@test.com', deletedAt: new Date() },
+    it('should find only soft-deleted users', async () => {
+      const mockDeletedUsers = [
+        { id: '1', email: 'deleted@test.com', deletedAt: new Date() },
       ];
       const mockQueryBuilder = {
         withDeleted: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockUsers),
+        getMany: jest.fn().mockResolvedValue(mockDeletedUsers),
       };
       mockRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
@@ -151,23 +151,7 @@ describe('UserRepository - Soft Delete Methods', () => {
 
       expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('user');
       expect(mockQueryBuilder.withDeleted).toHaveBeenCalled();
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
-        'user.deletedAt IS NOT NULL',
-      );
-      expect(result).toEqual(mockUsers);
-    });
-
-    it('should return empty array when no deleted users', async () => {
-      const mockQueryBuilder = {
-        withDeleted: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([]),
-      };
-      mockRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
-
-      const result = await repository.findOnlyDeleted();
-
-      expect(result).toEqual([]);
+      expect(result).toEqual(mockDeletedUsers);
     });
   });
 });

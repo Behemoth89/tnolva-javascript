@@ -91,19 +91,20 @@ export class CompanyRepository {
   /**
    * Get users by their IDs
    */
-  async getUsersByIds(userIds: string[]): Promise<Array<{
-    id: string;
-    email: string;
-    firstName: string | null;
-    lastName: string | null;
-  }>> {
+  async getUsersByIds(userIds: string[]): Promise<
+    Array<{
+      id: string;
+      email: string;
+      firstName: string | null;
+      lastName: string | null;
+    }>
+  > {
     if (userIds.length === 0) {
       return [];
     }
-    return this.dataSource
-      .query(
-        `SELECT id, email, "firstName", "lastName" FROM users WHERE id = ANY($1)`,
-        [userIds],
-      );
+    return this.dataSource.query(
+      `SELECT id, email, "firstName", "lastName" FROM users WHERE id = ANY($1)`,
+      [userIds],
+    );
   }
 }

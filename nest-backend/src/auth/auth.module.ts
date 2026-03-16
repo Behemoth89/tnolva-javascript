@@ -36,7 +36,22 @@ import { MemberGuard } from './guards/roles/member.guard';
     CompaniesModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RoleGuard, OwnerGuard, AdminGuard, MemberGuard],
-  exports: [AuthService, JwtStrategy, PassportModule, RoleGuard, OwnerGuard, AdminGuard, MemberGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RoleGuard,
+    OwnerGuard,
+    AdminGuard,
+    MemberGuard,
+  ],
+  exports: [
+    AuthService,
+    JwtStrategy,
+    PassportModule,
+    RoleGuard,
+    OwnerGuard,
+    AdminGuard,
+    MemberGuard,
+  ],
 })
 export class AuthModule {}

@@ -1,15 +1,21 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole, hasRolePermission } from './role.guard';
+import { AuthUserPayload, CompanyUser } from '../../../types/express.d';
 
 @Injectable()
 export class MemberGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
+    const http = context.switchToHttp();
+    const request = http.getRequest<{
+      user?: AuthUserPayload | null;
+      headers: Record<string, string>;
+      companyRole?: string;
+    }>();
     const user = request.user;
-    const companyId = request.headers['x-company-id'];
+    const companyId = request.headers['x-company-id'] as string | undefined;
 
     if (!companyId) {
       return false;
@@ -20,7 +26,7 @@ export class MemberGuard implements CanActivate {
     }
 
     const companyRole = user.companies.find(
-      (c: { companyId: string }) => c.companyId === companyId,
+      (c: CompanyUser) => c.companyId === companyId,
     );
 
     if (!companyRole) {

@@ -1,16 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DataSource, Repository } from 'typeorm';
-import { ConflictException, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { InvitationsService, CreateInvitationDto, AcceptInvitationDto } from '../../companies/invitations/invitations.service';
-import { CompanyInvitation, InvitationStatus } from '../../companies/entities/company-invitation.entity';
+import { DataSource } from 'typeorm';
+import {
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
+import {
+  InvitationsService,
+  CreateInvitationDto,
+  AcceptInvitationDto,
+} from '../../companies/invitations/invitations.service';
+import { InvitationStatus } from '../../companies/entities/company-invitation.entity';
 import { UserCompanyRepository } from '../../users/repositories/user-company.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 
 describe('InvitationsService', () => {
   let service: InvitationsService;
-  let invitationRepository: jest.Mocked<Repository<CompanyInvitation>>;
-  let userCompanyRepository: jest.Mocked<UserCompanyRepository>;
-  let userRepository: jest.Mocked<UserRepository>;
 
   const mockInvitationRepository = {
     findOne: jest.fn(),
@@ -34,16 +40,18 @@ describe('InvitationsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InvitationsService,
-        { provide: DataSource, useValue: { getRepository: jest.fn().mockReturnValue(mockInvitationRepository) } },
+        {
+          provide: DataSource,
+          useValue: {
+            getRepository: jest.fn().mockReturnValue(mockInvitationRepository),
+          },
+        },
         { provide: UserCompanyRepository, useValue: mockUserCompanyRepository },
         { provide: UserRepository, useValue: mockUserRepository },
       ],
     }).compile();
 
     service = module.get<InvitationsService>(InvitationsService);
-    invitationRepository = module.get(DataSource).getRepository = jest.fn().mockReturnValue(mockInvitationRepository);
-    userCompanyRepository = module.get(UserCompanyRepository);
-    userRepository = module.get(UserRepository);
 
     jest.clearAllMocks();
   });
@@ -56,10 +64,17 @@ describe('InvitationsService', () => {
     };
 
     it('should throw ConflictException if user is already a member', async () => {
-      mockUserRepository.findByEmail.mockResolvedValue({ id: 'user-1', email: 'test@example.com' } as any);
-      mockUserCompanyRepository.findByUserAndCompany.mockResolvedValue({ id: 'uc-1' } as any);
+      mockUserRepository.findByEmail.mockResolvedValue({
+        id: 'user-1',
+        email: 'test@example.com',
+      } as any);
+      mockUserCompanyRepository.findByUserAndCompany.mockResolvedValue({
+        id: 'uc-1',
+      } as any);
 
-      await expect(service.createInvitation(dto)).rejects.toThrow(ConflictException);
+      await expect(service.createInvitation(dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should throw ConflictException if pending invitation already exists', async () => {
@@ -73,7 +88,9 @@ describe('InvitationsService', () => {
         expiresAt: new Date(Date.now() + 86400000),
       } as any);
 
-      await expect(service.createInvitation(dto)).rejects.toThrow(ConflictException);
+      await expect(service.createInvitation(dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should create invitation successfully', async () => {
@@ -113,7 +130,9 @@ describe('InvitationsService', () => {
     it('should throw NotFoundException for invalid token', async () => {
       mockInvitationRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.acceptInvitation(dto)).rejects.toThrow(NotFoundException);
+      await expect(service.acceptInvitation(dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException for wrong company', async () => {
@@ -124,7 +143,9 @@ describe('InvitationsService', () => {
         expiresAt: new Date(Date.now() + 86400000),
       } as any);
 
-      await expect(service.acceptInvitation(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.acceptInvitation(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for already accepted invitation', async () => {
@@ -135,7 +156,9 @@ describe('InvitationsService', () => {
         expiresAt: new Date(Date.now() + 86400000),
       } as any);
 
-      await expect(service.acceptInvitation(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.acceptInvitation(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for cancelled invitation', async () => {
@@ -146,7 +169,9 @@ describe('InvitationsService', () => {
         expiresAt: new Date(Date.now() + 86400000),
       } as any);
 
-      await expect(service.acceptInvitation(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.acceptInvitation(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for expired invitation', async () => {
@@ -158,7 +183,9 @@ describe('InvitationsService', () => {
         expiresAt: new Date(Date.now() - 86400000),
       } as any);
 
-      await expect(service.acceptInvitation(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.acceptInvitation(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if user not found', async () => {
@@ -171,7 +198,9 @@ describe('InvitationsService', () => {
       } as any);
       mockUserRepository.findByEmail.mockResolvedValue(null);
 
-      await expect(service.acceptInvitation(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.acceptInvitation(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should accept invitation successfully', async () => {
@@ -182,7 +211,10 @@ describe('InvitationsService', () => {
         status: InvitationStatus.PENDING,
         expiresAt: new Date(Date.now() + 86400000),
       } as any);
-      mockUserRepository.findByEmail.mockResolvedValue({ id: 'user-1' } as any);
+      mockUserRepository.findByEmail.mockResolvedValue({
+        id: 'user-1',
+        email: 'test@example.com',
+      } as any);
       mockUserCompanyRepository.addUserToCompany.mockResolvedValue({} as any);
       mockInvitationRepository.update.mockResolvedValue({} as any);
 
@@ -221,7 +253,9 @@ describe('InvitationsService', () => {
     it('should throw NotFoundException if invitation not found', async () => {
       mockInvitationRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.cancelInvitation('inv-1', 'company-123')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.cancelInvitation('inv-1', 'company-123'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException if invitation belongs to different company', async () => {
@@ -231,7 +265,9 @@ describe('InvitationsService', () => {
         status: InvitationStatus.PENDING,
       } as any);
 
-      await expect(service.cancelInvitation('inv-1', 'company-123')).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.cancelInvitation('inv-1', 'company-123'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw BadRequestException if invitation is not pending', async () => {
@@ -241,7 +277,9 @@ describe('InvitationsService', () => {
         status: InvitationStatus.ACCEPTED,
       } as any);
 
-      await expect(service.cancelInvitation('inv-1', 'company-123')).rejects.toThrow(BadRequestException);
+      await expect(
+        service.cancelInvitation('inv-1', 'company-123'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should cancel invitation successfully', async () => {
@@ -264,7 +302,10 @@ describe('InvitationsService', () => {
     it('should return false if invitation not found', async () => {
       mockInvitationRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.validateToken('invalid-token', 'company-123');
+      const result = await service.validateToken(
+        'invalid-token',
+        'company-123',
+      );
 
       expect(result).toBe(false);
     });

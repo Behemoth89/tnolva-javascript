@@ -89,7 +89,7 @@ describe('Company CRUD (e2e)', () => {
 
     it('should reject duplicate slug', async () => {
       const slug = `duplicate-test-${Date.now()}`;
-      
+
       // First create
       await request(server)
         .post('/api/v1/companies')

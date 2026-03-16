@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthUserPayload } from '../../../types/express.d';
+import { AuthUserPayload, CompanyUser } from '../../../types/express.d';
 
 /**
  * Role hierarchy: OWNER > ADMIN > MEMBER
@@ -23,12 +23,13 @@ export enum UserRole {
  * Higher number = more permissions
  */
 export function getRoleLevel(role: string): number {
-  switch (role.toLowerCase()) {
-    case UserRole.OWNER:
+  const normalizedRole = role.toLowerCase();
+  switch (normalizedRole) {
+    case 'owner':
       return 3;
-    case UserRole.ADMIN:
+    case 'admin':
       return 2;
-    case UserRole.MEMBER:
+    case 'member':
       return 1;
     default:
       return 0;
@@ -38,7 +39,10 @@ export function getRoleLevel(role: string): number {
 /**
  * Check if a role has sufficient permissions for a required role
  */
-export function hasRolePermission(userRole: string, requiredRole: string): boolean {
+export function hasRolePermission(
+  userRole: string,
+  requiredRole: string,
+): boolean {
   const userLevel = getRoleLevel(userRole);
   const requiredLevel = getRoleLevel(requiredRole);
   return userLevel >= requiredLevel;
@@ -46,14 +50,18 @@ export function hasRolePermission(userRole: string, requiredRole: string): boole
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-  ) {}
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
-    const user: AuthUserPayload | undefined = request.user;
-    const companyId = request.headers['x-company-id'];
+    const http = context.switchToHttp();
+    const request = http.getRequest<{
+      user?: AuthUserPayload | null;
+      headers: Record<string, string>;
+      companyId?: string;
+      companyRole?: string;
+    }>();
+    const user = request.user as AuthUserPayload | undefined;
+    const companyId = request.headers['x-company-id'] as string | undefined;
 
     // X-Company-Id header is required for role-based access
     if (!companyId) {
@@ -66,7 +74,10 @@ export class RoleGuard implements CanActivate {
     }
 
     // Get the required role from the decorator
-    const requiredRole = this.reflector.get<string>('requiredRole', context.getHandler());
+    const requiredRole = this.reflector.get<string>(
+      'requiredRole',
+      context.getHandler(),
+    );
 
     if (!requiredRole) {
       // No specific role required, allow access
@@ -74,7 +85,9 @@ export class RoleGuard implements CanActivate {
     }
 
     // Find the user's role for this company
-    const companyRole = user.companies?.find((c) => c.companyId === companyId);
+    const companyRole = user.companies?.find(
+      (c: CompanyUser) => c.companyId === companyId,
+    );
 
     if (!companyRole) {
       throw new ForbiddenException('You do not have access to this company');
