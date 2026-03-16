@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { UserCompanyRepository } from '../../users/repositories/user-company.repository';
 import { CompaniesService } from '../../companies/services/companies.service';
+import { RefreshTokenService } from './refresh-token.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { User } from '../../users/entities/user.entity';
@@ -27,11 +28,13 @@ export class AuthService {
     private userCompanyRepository: UserCompanyRepository,
     private jwtService: JwtService,
     private companiesService: CompaniesService,
+    private refreshTokenService: RefreshTokenService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{
     user: { id: string; email: string; companies: CompanyInfo[] };
     accessToken: string;
+    refreshToken: string;
   }> {
     const { email, password, firstName, lastName, companyId, companyName } =
       registerDto;
@@ -92,6 +95,10 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload);
 
+    // Generate refresh token
+    const { token: refreshToken } =
+      await this.refreshTokenService.createRefreshToken(user.id);
+
     this.logger.log(`User registered: ${user.email}`);
 
     return {
@@ -101,12 +108,14 @@ export class AuthService {
         companies,
       },
       accessToken,
+      refreshToken,
     };
   }
 
   async login(loginDto: LoginDto): Promise<{
     user: { id: string; email: string; companies: CompanyInfo[] };
     accessToken: string;
+    refreshToken: string;
   }> {
     const { email, password, companyId } = loginDto;
 
@@ -160,6 +169,10 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload);
 
+    // Generate refresh token
+    const { token: refreshToken } =
+      await this.refreshTokenService.createRefreshToken(user.id);
+
     this.logger.log(`User logged in: ${user.email}`);
 
     return {
@@ -169,6 +182,7 @@ export class AuthService {
         companies,
       },
       accessToken,
+      refreshToken,
     };
   }
 
@@ -222,6 +236,57 @@ export class AuthService {
     return { accessToken };
   }
 
+  /**
+   * Refresh access token using refresh token (no JWT required)
+   */
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const refreshTokenEntity =
+      await this.refreshTokenService.validateRefreshToken(refreshToken);
+
+    if (!refreshTokenEntity) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    const user = await this.userRepository.findById(refreshTokenEntity.userId);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    // Get companies for the user
+    let companies = await this.userCompanyRepository.getCompaniesForUser(
+      user.id,
+    );
+
+    // If no companies, use legacy companyId
+    if (companies.length === 0 && user.companyId) {
+      companies = [{ companyId: user.companyId, role: 'member' }];
+    }
+
+    // Rotate the refresh token
+    const rotated = await this.refreshTokenService.rotateRefreshToken(refreshToken);
+    if (!rotated) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    // Generate new access token
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      companyId: companies.length > 0 ? companies[0].companyId : null,
+      companies,
+    };
+    const accessToken = this.jwtService.sign(payload);
+
+    this.logger.log(`Refresh token rotated for user: ${user.email}`);
+
+    return {
+      accessToken,
+      refreshToken: rotated.newToken,
+    };
+  }
+
   async validateUser(userId: string): Promise<User | null> {
     return this.userRepository.findById(userId);
   }
@@ -265,5 +330,23 @@ export class AuthService {
     this.logger.log(`User ${userId} switched to company ${newCompanyId}`);
 
     return { accessToken };
+  }
+
+  /**
+   * Logout - revoke a single refresh token
+   */
+  async logout(refreshToken?: string): Promise<{ message: string }> {
+    if (refreshToken) {
+      await this.refreshTokenService.revokeRefreshToken(refreshToken);
+    }
+    return { message: 'Logged out successfully' };
+  }
+
+  /**
+   * Logout from all devices - revoke all refresh tokens for a user
+   */
+  async logoutAll(userId: string): Promise<{ message: string; count: number }> {
+    const count = await this.refreshTokenService.revokeAllUserTokens(userId);
+    return { message: 'Logged out from all devices', count };
   }
 }

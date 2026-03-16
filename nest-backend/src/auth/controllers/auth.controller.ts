@@ -55,6 +55,7 @@ export class AuthController {
           companies: [{ companyId: 'uuid', role: 'admin' }],
         },
         accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'abc123def456...',
       },
     },
   })
@@ -82,6 +83,7 @@ export class AuthController {
           companies: [{ companyId: 'uuid', role: 'admin' }],
         },
         accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'abc123def456...',
       },
     },
   })
@@ -91,13 +93,79 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Refresh access token',
+    summary: 'Refresh access token using refresh token',
     description:
-      'Get a new access token with updated companies list. Token is obtained from Authorization header.',
+      'Get new access and refresh tokens. Does not require JWT - uses refresh token from request body.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    schema: {
+      example: {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'new-refresh-token...',
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'Refresh token is required' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token' })
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshAccessToken(dto.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Logout and invalidate refresh token',
+    description: 'Revoke the current refresh token',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logged out successfully',
+    schema: {
+      example: {
+        message: 'Logged out successfully',
+      },
+    },
+  })
+  async logout(@Body() dto: RefreshTokenDto) {
+    return this.authService.logout(dto.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout-all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Logout from all devices',
+    description: 'Revoke all refresh tokens for the current user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logged out from all devices',
+    schema: {
+      example: {
+        message: 'Logged out from all devices',
+        count: 5,
+      },
+    },
+  })
+  async logoutAll(@Req() req: Request) {
+    const user = req.user as { userId: string };
+    return this.authService.logoutAll(user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('refresh-jwt')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Refresh JWT access token',
+    description:
+      'Get a new access token with updated companies list using JWT from Authorization header.',
   })
   @ApiResponse({
     status: 200,
@@ -109,19 +177,14 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
-  async refresh(
-    @Req() req: Request,
-    // DTO for future use when implementing body-based token refresh
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Body() _refreshTokenDto: RefreshTokenDto,
-  ) {
+  async refreshJwt(@Req() req: Request) {
     const user = req.user as { userId: string };
     return this.authService.refreshToken(user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('switch-company')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Switch active company',
     description:

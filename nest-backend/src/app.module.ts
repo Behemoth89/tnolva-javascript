@@ -14,6 +14,7 @@ import { User } from './users/entities/user.entity';
 import { UserCompany } from './users/entities/user-company.entity';
 import { Company } from './companies/entities/company.entity';
 import { CompanyInvitation } from './companies/entities/company-invitation.entity';
+import { RefreshToken } from './auth/entities/refresh-token.entity';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { SoftDeleteSubscriber } from './common/subscribers/soft-delete.subscriber';
 
@@ -54,7 +55,7 @@ import { SoftDeleteSubscriber } from './common/subscribers/soft-delete.subscribe
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || 'postgres',
         database: configService.get<string>('DB_DATABASE') || 'nest_backend',
-        entities: [User, UserCompany, Company, CompanyInvitation],
+        entities: [User, UserCompany, Company, CompanyInvitation, RefreshToken],
         // Disable synchronize in all environments - use migrations instead
         // This prevents issues with tables already existing
         synchronize: false,

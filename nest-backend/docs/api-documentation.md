@@ -1,10 +1,89 @@
 # API Documentation - Multi-Company & Soft Delete Features
 
 ## Table of Contents
-1. [Authentication Endpoints](#authentication-endpoints)
-2. [Company Context Headers](#company-context-headers)
-3. [Soft Delete Query Parameters](#soft-delete-query-parameters)
-4. [New Endpoints](#new-endpoints)
+1. [API Response Wrapper](#api-response-wrapper)
+2. [Authentication Endpoints](#authentication-endpoints)
+3. [Company Context Headers](#company-context-headers)
+4. [Soft Delete Query Parameters](#soft-delete-query-parameters)
+5. [New Endpoints](#new-endpoints)
+
+---
+
+## API Response Wrapper
+
+All API responses are wrapped in a consistent format using the `ApiResponse<T>` interface.
+
+### ApiResponse Interface
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: string[];
+}
+```
+
+### Success Response Example
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+### Error Response Example
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Error description",
+  "errors": ["detail 1", "detail 2"]
+}
+```
+
+### Wrapped Response Examples
+
+#### GET /users - Success
+```json
+{
+  "success": true,
+  "data": [
+    { "id": "uuid", "email": "user@example.com" }
+  ]
+}
+```
+
+#### POST /auth/login - Success
+```json
+{
+  "success": true,
+  "data": {
+    "user": { "id": "uuid", "email": "user@example.com", "companies": [] },
+    "accessToken": "eyJhbGc...",
+    "refreshToken": "abc123..."
+  }
+}
+```
+
+#### 401 Unauthorized - Error
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Invalid credentials"
+}
+```
+
+#### 400 Bad Request - Error
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Validation failed",
+  "errors": ["email must be valid", "password is required"]
+}
+```
 
 ---
 
@@ -29,17 +108,21 @@ POST /api/v1/auth/register
 **Response (201):**
 ```json
 {
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "companies": [
-      {
-        "companyId": "uuid",
-        "role": "admin"
-      }
-    ]
-  },
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "email": "user@example.com",
+      "companies": [
+        {
+          "companyId": "uuid",
+          "role": "admin"
+        }
+      ]
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "abc123def456..."
+  }
 }
 ```
 
@@ -57,18 +140,22 @@ POST /api/v1/auth/login
 }
 ```
 
-**Response (201):**
+**Response (200):**
 ```json
 {
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "companies": [
-      { "companyId": "uuid1", "role": "admin" },
-      { "companyId": "uuid2", "role": "member" }
-    ]
-  },
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "email": "user@example.com",
+      "companies": [
+        { "companyId": "uuid1", "role": "admin" },
+        { "companyId": "uuid2", "role": "member" }
+      ]
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "abc123def456..."
+  }
 }
 ```
 
@@ -77,15 +164,106 @@ POST /api/v1/auth/login
 POST /api/v1/auth/refresh
 ```
 
+**Description:** Refresh access and refresh tokens using a valid refresh token. Does not require JWT authentication.
+
+**Request Body:**
+```json
+{
+  "refreshToken": "abc123def456..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "new-refresh-token..."
+  }
+}
+```
+
+**Error Response (401 - Invalid or expired refresh token):**
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Invalid or expired refresh token"
+}
+```
+
+### Logout
+```
+POST /api/v1/auth/logout
+```
+
+**Description:** Logout and invalidate the current refresh token. Requires JWT authentication.
+
 **Headers:**
 ```
 Authorization: Bearer <access_token>
 ```
 
-**Response (201):**
+**Request Body:**
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "refreshToken": "abc123def456..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Logged out successfully"
+  }
+}
+```
+
+### Logout All Devices
+```
+POST /api/v1/auth/logout-all
+```
+
+**Description:** Logout from all devices by revoking all refresh tokens for the current user. Requires JWT authentication.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Logged out from all devices",
+    "count": 5
+  }
+}
+```
+
+### Refresh JWT
+```
+POST /api/v1/auth/refresh-jwt
+```
+
+**Description:** Refresh JWT access token with updated company list. Requires JWT authentication.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
 }
 ```
 
@@ -93,6 +271,8 @@ Authorization: Bearer <access_token>
 ```
 POST /api/v1/auth/switch-company
 ```
+
+**Description:** Switch active company for multi-company users. Requires JWT authentication.
 
 **Headers:**
 ```
@@ -106,10 +286,13 @@ Authorization: Bearer <access_token>
 }
 ```
 
-**Response (201):**
+**Response (200):**
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "success": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
 }
 ```
 
@@ -151,13 +334,16 @@ GET /api/v1/invitations?includeDeleted=true
 
 **Response includes deleted records:**
 ```json
-[
-  {
-    "id": "uuid",
-    "name": "Company Name",
-    "deletedAt": "2024-01-15T10:30:00.000Z"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Company Name",
+      "deletedAt": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
 ```
 
 ### Restore Soft-Deleted Records
@@ -176,9 +362,12 @@ X-Company-Id: <company-uuid>
 **Response (201):**
 ```json
 {
-  "id": "uuid",
-  "name": "Company Name",
-  "deletedAt": null
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "Company Name",
+    "deletedAt": null
+  }
 }
 ```
 
@@ -188,8 +377,13 @@ X-Company-Id: <company-uuid>
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| POST | `/api/v1/auth/register` | Register new user (returns refreshToken) |
+| POST | `/api/v1/auth/login` | User login (returns refreshToken) |
+| POST | `/api/v1/auth/refresh` | Refresh tokens using refresh token |
+| POST | `/api/v1/auth/logout` | Logout and revoke refresh token |
+| POST | `/api/v1/auth/logout-all` | Logout from all devices |
 | POST | `/api/v1/auth/switch-company` | Switch active company |
-| POST | `/api/v1/auth/refresh` | Refresh access token |
+| POST | `/api/v1/auth/refresh-jwt` | Refresh JWT token |
 | POST | `/api/v1/companies/:id/restore` | Restore soft-deleted company |
 | POST | `/api/v1/users/:id/restore` | Restore soft-deleted user |
 | POST | `/api/v1/invitations/:id/restore` | Restore soft-deleted invitation |
@@ -207,26 +401,44 @@ X-Company-Id: <company-uuid>
 ### 400 - Company Selection Required
 ```json
 {
-  "statusCode": 400,
-  "message": "Company selection required. Please provide X-Company-Id header.",
-  "error": "Bad Request"
+  "success": false,
+  "data": null,
+  "message": "Company selection required. Please provide X-Company-Id header."
 }
 ```
 
 ### 403 - No Company Access
 ```json
 {
-  "statusCode": 403,
-  "message": "You do not have access to this company",
-  "error": "Forbidden"
+  "success": false,
+  "data": null,
+  "message": "You do not have access to this company"
 }
 ```
 
 ### 401 - Invalid Company on Switch
 ```json
 {
-  "statusCode": 401,
-  "message": "User does not have access to this company",
-  "error": "Unauthorized"
+  "success": false,
+  "data": null,
+  "message": "User does not have access to this company"
+}
+```
+
+### 401 - Invalid Credentials
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Invalid credentials"
+}
+```
+
+### 401 - Invalid or Expired Refresh Token
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Invalid or expired refresh token"
 }
 ```

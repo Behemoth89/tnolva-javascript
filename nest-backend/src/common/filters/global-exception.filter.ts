@@ -51,9 +51,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     const errorResponse = {
-      statusCode: status,
-      message: errors || message,
-      timestamp: new Date().toISOString(),
+      success: false,
+      data: null,
+      message: errors?.[0] || message,
+      errors: errors?.length ? errors : undefined,
     };
 
     response.status(status).json(errorResponse);

@@ -3,11 +3,11 @@ import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { ApiResponseInterceptor } from './common/interceptors/api-response.interceptor';
 
 const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS
@@ -37,6 +37,9 @@ async function bootstrap() {
 
   // Configure global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Configure global response interceptor
+  app.useGlobalInterceptors(new ApiResponseInterceptor());
 
   // Swagger configuration
   const swaggerConfig = new DocumentBuilder()
