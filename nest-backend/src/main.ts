@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -18,6 +18,12 @@ async function bootstrap() {
         : true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+  });
+
+  // Enable API versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
   });
 
   // Configure validation pipe
@@ -51,10 +57,14 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management endpoints')
+    .addTag('health', 'Health check endpoints')
+    .addTag('app', 'Application endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup('api/docs/v1', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
@@ -63,7 +73,9 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`Swagger UI is available at: http://localhost:${port}/api/docs`);
+  logger.log(
+    `Swagger UI is available at: http://localhost:${port}/api/docs/v1`,
+  );
 }
 bootstrap().catch((err: Error) => {
   logger.error('Failed to bootstrap application', err.stack);

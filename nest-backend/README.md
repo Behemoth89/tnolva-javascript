@@ -25,6 +25,44 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## API Versioning
+
+This API uses URL-based versioning. All endpoints are prefixed with `/api/v1/`.
+
+### Base URL
+```
+http://localhost:3000/api/v1
+```
+
+### API Endpoints
+
+#### Authentication
+- `POST /api/v1/auth/register` - Register a new user
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/refresh` - Refresh access token
+- `POST /api/v1/auth/switch-company` - Switch active company
+
+#### Users
+- `GET /api/v1/users` - Get all users
+- `GET /api/v1/users/deleted` - Get soft-deleted users
+- `GET /api/v1/users/:id` - Get user by ID
+- `POST /api/v1/users/:id/soft-delete` - Soft delete a user
+- `POST /api/v1/users/:id/restore` - Restore a soft-deleted user
+- `DELETE /api/v1/users/:id` - Hard delete a user
+
+#### Health
+- `GET /api/v1/health` - Health check
+
+#### Application
+- `GET /api/v1` - Application info
+
+### API Documentation
+
+Interactive API documentation is available via Swagger UI at:
+```
+http://localhost:3000/api/docs/v1
+```
+
 ## Project setup
 
 ```bash

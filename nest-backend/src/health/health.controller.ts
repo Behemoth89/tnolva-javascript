@@ -4,7 +4,10 @@ import { DataSource } from 'typeorm';
 import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('health')
-@Controller('health')
+@Controller({
+  version: '1',
+  path: 'health',
+})
 export class HealthController {
   constructor(private dataSource: DataSource) {}
 

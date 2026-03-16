@@ -25,7 +25,10 @@ import { CurrentCompany } from '../../auth/decorators/current-company.decorator'
 
 @ApiTags('users')
 @ApiBearerAuth()
-@Controller('users')
+@Controller({
+  version: '1',
+  path: 'users',
+})
 @UseGuards(ThrottlerGuard, JwtAuthGuard)
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);

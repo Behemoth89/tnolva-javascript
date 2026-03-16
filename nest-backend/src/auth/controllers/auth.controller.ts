@@ -27,7 +27,10 @@ import { Public } from '../decorators/public.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @ApiTags('auth')
-@Controller('auth')
+@Controller({
+  version: '1',
+  path: 'auth',
+})
 @UseGuards(ThrottlerGuard)
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);

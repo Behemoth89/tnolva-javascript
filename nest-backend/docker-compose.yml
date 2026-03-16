@@ -50,8 +50,8 @@ services:
       - .:/app
       # Mount node_modules to avoid reinstalling on every change
       - /app/node_modules
-    # Use nest start --watch for hot reload
-    command: npm run start:dev
+    # Use ts-node for hot reload with watch
+    command: npx ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/main.ts
 
   # Production service
   app-prod:
