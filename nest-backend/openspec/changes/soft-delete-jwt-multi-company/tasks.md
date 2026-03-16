@@ -80,16 +80,16 @@
 
 ## 13. Testing
 
-- [ ] 13.1 Write unit tests for soft delete repository methods
-- [ ] 13.2 Write unit tests for JWT companies array generation
-- [ ] 13.3 Write unit tests for company context middleware
-- [ ] 13.4 Write e2e tests for multi-company login flow
-- [ ] 13.5 Write e2e tests for company switching
-- [ ] 13.6 Write e2e tests for soft delete queries
+- [x] 13.1 Write unit tests for soft delete repository methods
+- [x] 13.2 Write unit tests for JWT companies array generation
+- [x] 13.3 Write unit tests for company context middleware
+- [x] 13.4 Write e2e tests for multi-company login flow
+- [x] 13.5 Write e2e tests for company switching
+- [x] 13.6 Write e2e tests for soft delete queries
 
 ## 14. Documentation
 
-- [ ] 14.1 Update API documentation for new endpoints
-- [ ] 14.2 Document JWT token structure changes
-- [ ] 14.3 Document soft delete behavior for developers
-- [ ] 14.4 Create migration guide for existing installations
+- [x] 14.1 Update API documentation for new endpoints
+- [x] 14.2 Document JWT token structure changes
+- [x] 14.3 Document soft delete behavior for developers
+- [x] 14.4 Create migration guide for existing installations

@@ -67,8 +67,8 @@
 
 ## 10. Testing
 
-- [ ] 10.1 Write unit tests for CompaniesService CRUD methods
-- [ ] 10.2 Write unit tests for CompanyRepository methods
-- [ ] 10.3 Write e2e tests for company CRUD endpoints
-- [ ] 10.4 Write e2e tests for registration with company creation
-- [ ] 10.5 Write e2e tests for company access validation
+- [x] 10.1 Write unit tests for CompaniesService CRUD methods
+- [x] 10.2 Write unit tests for CompanyRepository methods
+- [x] 10.3 Write e2e tests for company CRUD endpoints
+- [x] 10.4 Write e2e tests for registration with company creation
+- [x] 10.5 Write e2e tests for company access validation
