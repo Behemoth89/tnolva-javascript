@@ -19,9 +19,9 @@
 
 ## 4. Testing
 
-- [ ] 4.1 Verify v1 endpoints work at `/api/v1/*` (e.g., `/api/v1/auth/login`)
-- [ ] 4.2 Verify unversioned requests return 404 at `/api/*`
-- [ ] 4.3 Verify Swagger documentation is accessible at `/api/docs/v1`
+- [x] 4.1 Verify v1 endpoints work at `/api/v1/*` (e.g., `/api/v1/auth/login`)
+- [x] 4.2 Verify unversioned requests return 404 at `/api/*`
+- [x] 4.3 Verify Swagger documentation is accessible at `/api/docs/v1`
 - [x] 4.4 Run existing E2E tests and update base URLs to use v1 prefix
 
 ## 5. Documentation Updates
