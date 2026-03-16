@@ -25,7 +25,9 @@ describe('ApiResponseInterceptor', () => {
       providers: [ApiResponseInterceptor],
     }).compile();
 
-    interceptor = module.get<ApiResponseInterceptor<any>>(ApiResponseInterceptor);
+    interceptor = module.get<ApiResponseInterceptor<any>>(
+      ApiResponseInterceptor,
+    );
   });
 
   it('should be defined', () => {
@@ -116,7 +118,9 @@ describe('ApiResponseInterceptor', () => {
     });
 
     const mockData = { id: '1' };
-    mockCallHandler.handle.mockReturnValue(of(mockData) as unknown as Observable<any>);
+    mockCallHandler.handle.mockReturnValue(
+      of(mockData) as unknown as Observable<any>,
+    );
 
     interceptor.intercept(mockContext, mockCallHandler).subscribe((result) => {
       expect(result).toEqual(mockData);

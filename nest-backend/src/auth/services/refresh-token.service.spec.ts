@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { RefreshTokenService } from './refresh-token.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import { RefreshTokenRepository } from '../repositories/refresh-token.repository';
 
 describe('RefreshTokenService', () => {
   let service: RefreshTokenService;
-  let repository: RefreshTokenRepository;
-  let mockRefreshTokenRepository: any;
-  let mockRefreshTokenRepo: any;
+  let mockRefreshTokenRepository: Partial<Repository<RefreshToken>>;
+  let mockRefreshTokenRepo: Partial<RefreshTokenRepository>;
 
   beforeEach(async () => {
     mockRefreshTokenRepository = {
@@ -38,7 +38,6 @@ describe('RefreshTokenService', () => {
     }).compile();
 
     service = module.get<RefreshTokenService>(RefreshTokenService);
-    repository = module.get<RefreshTokenRepository>(RefreshTokenRepository);
   });
 
   it('should be defined', () => {
@@ -52,7 +51,7 @@ describe('RefreshTokenService', () => {
       const mockExpiresAt = new Date();
       mockExpiresAt.setDate(mockExpiresAt.getDate() + 7);
 
-      mockRefreshTokenRepo.create.mockResolvedValue({
+      (mockRefreshTokenRepo.create as jest.Mock).mockResolvedValue({
         userId,
         token: mockToken,
         expiresAt: mockExpiresAt,
@@ -75,7 +74,7 @@ describe('RefreshTokenService', () => {
       const mockExpiresAt = new Date();
       mockExpiresAt.setDate(mockExpiresAt.getDate() + 7);
 
-      mockRefreshTokenRepo.create.mockResolvedValue({
+      (mockRefreshTokenRepo.create as jest.Mock).mockResolvedValue({
         userId,
         token: 'hashed_token',
         expiresAt: mockExpiresAt,
@@ -84,7 +83,7 @@ describe('RefreshTokenService', () => {
       const result = await service.createRefreshToken(userId);
 
       expect(result.token).toHaveLength(64);
-      expect(/^[a-f0-9]+$/.test(result.token)).toBe(true);
+      expect(/^[a-f0-9]+$/u.test(result.token)).toBe(true);
     });
 
     it('should set expiration to 7 days from now', async () => {
@@ -93,7 +92,7 @@ describe('RefreshTokenService', () => {
       const mockExpiresAt = new Date();
       mockExpiresAt.setDate(mockExpiresAt.getDate() + 7);
 
-      mockRefreshTokenRepo.create.mockResolvedValue({
+      (mockRefreshTokenRepo.create as jest.Mock).mockResolvedValue({
         userId,
         token: 'hashed_token',
         expiresAt: mockExpiresAt,
@@ -107,15 +106,19 @@ describe('RefreshTokenService', () => {
       const expectedMax = new Date(afterCreation);
       expectedMax.setDate(expectedMax.getDate() + 7);
 
-      expect(result.expiresAt.getTime()).toBeGreaterThanOrEqual(expectedMin.getTime());
-      expect(result.expiresAt.getTime()).toBeLessThanOrEqual(expectedMax.getTime());
+      expect(result.expiresAt.getTime()).toBeGreaterThanOrEqual(
+        expectedMin.getTime(),
+      );
+      expect(result.expiresAt.getTime()).toBeLessThanOrEqual(
+        expectedMax.getTime(),
+      );
     });
   });
 
   describe('validateRefreshToken', () => {
     it('should return null for invalid token', async () => {
       const token = 'invalid_token';
-      mockRefreshTokenRepo.findByToken.mockResolvedValue(null);
+      (mockRefreshTokenRepo.findByToken as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateRefreshToken(token);
 
@@ -136,7 +139,9 @@ describe('RefreshTokenService', () => {
         isValid: () => false,
       } as unknown as RefreshToken;
 
-      mockRefreshTokenRepo.findByToken.mockResolvedValue(expiredToken);
+      (mockRefreshTokenRepo.findByToken as jest.Mock).mockResolvedValue(
+        expiredToken,
+      );
 
       const result = await service.validateRefreshToken(token);
 
@@ -156,7 +161,9 @@ describe('RefreshTokenService', () => {
         isValid: () => false,
       } as unknown as RefreshToken;
 
-      mockRefreshTokenRepo.findByToken.mockResolvedValue(revokedToken);
+      (mockRefreshTokenRepo.findByToken as jest.Mock).mockResolvedValue(
+        revokedToken,
+      );
 
       const result = await service.validateRefreshToken(token);
 
@@ -176,7 +183,9 @@ describe('RefreshTokenService', () => {
         isValid: () => true,
       } as unknown as RefreshToken;
 
-      mockRefreshTokenRepo.findByToken.mockResolvedValue(validToken);
+      (mockRefreshTokenRepo.findByToken as jest.Mock).mockResolvedValue(
+        validToken,
+      );
 
       const result = await service.validateRefreshToken(token);
 
@@ -187,7 +196,7 @@ describe('RefreshTokenService', () => {
   describe('rotateRefreshToken', () => {
     it('should return null for invalid token', async () => {
       const token = 'invalid_token';
-      mockRefreshTokenRepo.findByToken.mockResolvedValue(null);
+      (mockRefreshTokenRepo.findByToken as jest.Mock).mockResolvedValue(null);
 
       const result = await service.rotateRefreshToken(token);
 
@@ -208,9 +217,11 @@ describe('RefreshTokenService', () => {
         isValid: () => true,
       } as unknown as RefreshToken;
 
-      mockRefreshTokenRepo.findByToken.mockResolvedValue(validToken);
-      mockRefreshTokenRepo.revoke.mockResolvedValue(true);
-      mockRefreshTokenRepo.create.mockResolvedValue({
+      (mockRefreshTokenRepo.findByToken as jest.Mock).mockResolvedValue(
+        validToken,
+      );
+      (mockRefreshTokenRepo.revoke as jest.Mock).mockResolvedValue(true);
+      (mockRefreshTokenRepo.create as jest.Mock).mockResolvedValue({
         userId,
         token: 'new_hashed_token',
         expiresAt: new Date(Date.now() + 86400000 * 7),
@@ -227,7 +238,7 @@ describe('RefreshTokenService', () => {
   describe('revokeRefreshToken', () => {
     it('should return true when token is revoked', async () => {
       const token = 'token_to_revoke';
-      mockRefreshTokenRepo.revoke.mockResolvedValue(true);
+      (mockRefreshTokenRepo.revoke as jest.Mock).mockResolvedValue(true);
 
       const result = await service.revokeRefreshToken(token);
 
@@ -237,7 +248,7 @@ describe('RefreshTokenService', () => {
 
     it('should return false when token is not found', async () => {
       const token = 'nonexistent_token';
-      mockRefreshTokenRepo.revoke.mockResolvedValue(false);
+      (mockRefreshTokenRepo.revoke as jest.Mock).mockResolvedValue(false);
 
       const result = await service.revokeRefreshToken(token);
 
@@ -248,17 +259,23 @@ describe('RefreshTokenService', () => {
   describe('revokeAllUserTokens', () => {
     it('should revoke all tokens for a user', async () => {
       const userId = '123e4567-e89b-12d3-a456-426614174000';
-      mockRefreshTokenRepo.revokeAllByUserId.mockResolvedValue(5);
+      (mockRefreshTokenRepo.revokeAllByUserId as jest.Mock).mockResolvedValue(
+        5,
+      );
 
       const result = await service.revokeAllUserTokens(userId);
 
       expect(result).toBe(5);
-      expect(mockRefreshTokenRepo.revokeAllByUserId).toHaveBeenCalledWith(userId);
+      expect(mockRefreshTokenRepo.revokeAllByUserId).toHaveBeenCalledWith(
+        userId,
+      );
     });
 
     it('should return 0 when user has no tokens', async () => {
       const userId = '123e4567-e89b-12d3-a456-426614174000';
-      mockRefreshTokenRepo.revokeAllByUserId.mockResolvedValue(0);
+      (mockRefreshTokenRepo.revokeAllByUserId as jest.Mock).mockResolvedValue(
+        0,
+      );
 
       const result = await service.revokeAllUserTokens(userId);
 

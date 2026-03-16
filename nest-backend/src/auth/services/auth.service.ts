@@ -265,7 +265,8 @@ export class AuthService {
     }
 
     // Rotate the refresh token
-    const rotated = await this.refreshTokenService.rotateRefreshToken(refreshToken);
+    const rotated =
+      await this.refreshTokenService.rotateRefreshToken(refreshToken);
     if (!rotated) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
