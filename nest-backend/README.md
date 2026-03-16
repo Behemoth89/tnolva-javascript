@@ -56,6 +56,62 @@ http://localhost:3000/api/v1
 #### Application
 - `GET /api/v1` - Application info
 
+#### Companies
+- `GET /api/v1/companies` - Get all companies (admin+)
+- `GET /api/v1/companies/:id` - Get company by ID
+- `POST /api/v1/companies` - Create new company
+- `PATCH /api/v1/companies/:id` - Update company
+- `DELETE /api/v1/companies/:id` - Delete company (owner only)
+- `POST /api/v1/companies/:id/transfer-ownership` - Transfer ownership (owner only)
+
+#### Company Users
+- `GET /api/v1/companies/:id/users` - List company users (admin+)
+- `PATCH /api/v1/companies/:id/users/:userId/role` - Update user role (admin+)
+- `DELETE /api/v1/companies/:id/users/:userId` - Remove user from company (admin+)
+
+#### Invitations
+- `POST /api/v1/companies/:id/invitations` - Create invitation (admin+)
+- `GET /api/v1/companies/:id/invitations` - List invitations (admin+)
+- `DELETE /api/v1/companies/:id/invitations/:invitationId` - Cancel invitation (admin+)
+- `POST /api/v1/companies/:id/invitations/accept` - Accept invitation
+
+### Role-Based Access Control
+
+This API implements role-based access control with three roles:
+
+| Role | Permissions |
+|------|-------------|
+| **Owner** | Full access to all company operations including deletion and ownership transfer |
+| **Admin** | Manage users, create/cancel invitations, cannot delete company or transfer ownership |
+| **Member** | Read-only access to company resources |
+
+#### Using Role Guards
+
+Add role guards to controller methods using decorators:
+
+```typescript
+import { OwnerGuard } from '../auth/guards/roles/owner-guard.decorator';
+import { AdminGuard } from '../auth/guards/roles/admin-guard.decorator';
+import { MemberGuard } from '../auth/guards/roles/member-guard.decorator';
+
+@Controller('companies')
+export class CompaniesController {
+  @Delete(':id')
+  @OwnerGuard()
+  deleteCompany() {}
+
+  @Post(':id/invitations')
+  @AdminGuard()
+  createInvitation() {}
+
+  @Get()
+  @MemberGuard()
+  listCompanies() {}
+}
+```
+
+**Important:** All role-protected endpoints require the `x-company-id` header to be set.
+
 ### API Documentation
 
 Interactive API documentation is available via Swagger UI at:

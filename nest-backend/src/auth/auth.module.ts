@@ -7,6 +7,10 @@ import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { CompaniesModule } from '../companies/companies.module';
+import { RoleGuard } from './guards/roles/role.guard';
+import { OwnerGuard } from './guards/roles/owner.guard';
+import { AdminGuard } from './guards/roles/admin.guard';
+import { MemberGuard } from './guards/roles/member.guard';
 
 @Module({
   imports: [
@@ -32,7 +36,7 @@ import { CompaniesModule } from '../companies/companies.module';
     CompaniesModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  providers: [AuthService, JwtStrategy, RoleGuard, OwnerGuard, AdminGuard, MemberGuard],
+  exports: [AuthService, JwtStrategy, PassportModule, RoleGuard, OwnerGuard, AdminGuard, MemberGuard],
 })
 export class AuthModule {}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Company } from '../entities/company.entity';
 
 @Injectable()
@@ -8,6 +8,7 @@ export class CompanyRepository {
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(companyIds?: string[]): Promise<Company[]> {
@@ -85,5 +86,24 @@ export class CompanyRepository {
       .andWhere('company.isActive = :isActive', { isActive: true })
       .orderBy('company.name', 'ASC')
       .getMany();
+  }
+
+  /**
+   * Get users by their IDs
+   */
+  async getUsersByIds(userIds: string[]): Promise<Array<{
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+  }>> {
+    if (userIds.length === 0) {
+      return [];
+    }
+    return this.dataSource
+      .query(
+        `SELECT id, email, "firstName", "lastName" FROM users WHERE id = ANY($1)`,
+        [userIds],
+      );
   }
 }

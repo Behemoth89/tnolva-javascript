@@ -23,6 +23,13 @@ export class UserCompanyRepository {
   }
 
   /**
+   * Find all user-company associations for a company
+   */
+  async findByCompanyId(companyId: string): Promise<UserCompany[]> {
+    return this.repository.find({ where: { companyId } });
+  }
+
+  /**
    * Find a specific user-company association
    */
   async findByUserAndCompany(

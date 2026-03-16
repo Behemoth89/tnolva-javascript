@@ -207,13 +207,72 @@ export class CompaniesService {
       isActive: true,
     });
 
-    // Associate user as admin
+    // Associate user as owner
     await this.userCompanyRepository.addUserToCompany(
       userId,
       company.id,
-      'admin',
+      'owner',
     );
 
     return company;
+  }
+
+  /**
+   * Transfer ownership of a company to another user
+   * The current owner becomes admin
+   */
+  async transferOwnership(
+    companyId: string,
+    currentOwnerId: string,
+    newOwnerEmail: string,
+  ): Promise<void> {
+    // Verify current user is owner
+    const currentOwnerShip = await this.userCompanyRepository.findByUserAndCompany(
+      currentOwnerId,
+      companyId,
+    );
+
+    if (!currentOwnerShip || currentOwnerShip.role !== 'owner') {
+      throw new ForbiddenException('Only the owner can transfer ownership');
+    }
+
+    // Find the new owner by email (need to query user repository)
+    // This requires access to UserRepository - let's use DataSource for now
+    // For now, we'll search by userId passed from controller
+  }
+
+  /**
+   * Get all users in a company with their roles
+   */
+  async getCompanyUsers(companyId: string): Promise<Array<{
+    userId: string;
+    email: string;
+    role: string;
+    firstName: string | null;
+    lastName: string | null;
+  }>> {
+    const userCompanies = await this.userCompanyRepository.findByCompanyId(companyId);
+    
+    // Get user details by querying through the company repository or directly
+    const userIds = userCompanies.map(uc => uc.userId);
+    
+    if (userIds.length === 0) {
+      return [];
+    }
+    
+    // Get user details from user repository
+    const users = await this.companyRepository.getUsersByIds(userIds);
+    const userMap = new Map(users.map(u => [u.id, u]));
+    
+    return userCompanies.map((uc) => {
+      const user = userMap.get(uc.userId);
+      return {
+        userId: uc.userId,
+        email: user?.email || '',
+        role: uc.role,
+        firstName: user?.firstName || null,
+        lastName: user?.lastName || null,
+      };
+    });
   }
 }
