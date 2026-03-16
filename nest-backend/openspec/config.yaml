@@ -12,7 +12,7 @@ context: |
   Tech stack: TypeScript, NestJS, TypeORM, PostgreSQL
   Authentication: JWT (Bearer tokens) with bcrypt password hashing (12 rounds)
   Architecture: Multi-tenant SaaS with companyId-based row-level isolation
-  API Documentation: Swagger/OpenAPI 3.0 at /api/docs (auto-generated from decorators)
+  API Documentation: Swagger/OpenAPI 3.0 at /api/docs/v1 (versioned, auto-generated from decorators)
   Security: Rate limiting (@nestjs/throttler), CORS, global exception filter
   Validation: class-validator DTOs with class-transformer
   
@@ -22,8 +22,10 @@ context: |
     - Repository pattern for data access
     - Request-scoped TenantService for tenant context
     - @Public() decorator marks public endpoints
-    - JWT payload includes: sub (userId), email, companyId
-    - All entities extend BaseEntity with id (UUID), companyId, timestamps
+    - JWT payload includes: sub (userId), email, companies: [{ companyId, role }]
+    - All entities extend BaseEntity with id (UUID), companyId, timestamps, deletedAt (soft delete)
+    - Multi-company users: X-Company-Id header selects active company from JWT's companies array
+    - Soft delete: All entities use deletedAt timestamp; queries auto-filter deleted records
     - Use Gherkin syntax for spec scenarios
     - Reference actual source files in spec.md files
 
