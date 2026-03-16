@@ -55,4 +55,15 @@ export class RegisterDto {
   @IsOptional()
   @IsUUID()
   companyId?: string;
+
+  @ApiPropertyOptional({
+    example: 'Acme Corporation',
+    description:
+      'Company name to create and associate user with (creates company if provided)',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(255)
+  companyName?: string;
 }

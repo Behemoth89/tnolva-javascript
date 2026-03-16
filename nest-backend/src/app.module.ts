@@ -9,8 +9,10 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { HealthModule } from './health/health.module';
 import { CommonModule } from './common/common.module';
+import { CompaniesModule } from './companies/companies.module';
 import { User } from './users/entities/user.entity';
 import { UserCompany } from './users/entities/user-company.entity';
+import { Company } from './companies/entities/company.entity';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { SoftDeleteSubscriber } from './common/subscribers/soft-delete.subscriber';
 
@@ -51,7 +53,7 @@ import { SoftDeleteSubscriber } from './common/subscribers/soft-delete.subscribe
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || 'postgres',
         database: configService.get<string>('DB_DATABASE') || 'nest_backend',
-        entities: [User, UserCompany],
+        entities: [User, UserCompany, Company],
         // Disable synchronize in all environments - use migrations instead
         // This prevents issues with tables already existing
         synchronize: false,
@@ -70,6 +72,7 @@ import { SoftDeleteSubscriber } from './common/subscribers/soft-delete.subscribe
     AuthModule,
     UsersModule,
     HealthModule,
+    CompaniesModule,
   ],
   controllers: [AppController],
   providers: [

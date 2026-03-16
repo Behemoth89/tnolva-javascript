@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { UserCompanyRepository } from '../../users/repositories/user-company.repository';
+import { CompaniesService } from '../../companies/services/companies.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { User } from '../../users/entities/user.entity';
@@ -25,13 +26,15 @@ export class AuthService {
     private userRepository: UserRepository,
     private userCompanyRepository: UserCompanyRepository,
     private jwtService: JwtService,
+    private companiesService: CompaniesService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{
     user: { id: string; email: string; companies: CompanyInfo[] };
     accessToken: string;
   }> {
-    const { email, password, firstName, lastName, companyId } = registerDto;
+    const { email, password, firstName, lastName, companyId, companyName } =
+      registerDto;
 
     // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(email);
@@ -52,10 +55,18 @@ export class AuthService {
       companyId: companyId || null,
     });
 
-    // Get companies for the user
+    // Handle company creation or association
     let companies: CompanyInfo[] = [];
-    if (companyId) {
-      // Add user to the company
+
+    if (companyName) {
+      // Create new company and associate user as admin
+      const company = await this.companiesService.createWithUser(
+        companyName,
+        user.id,
+      );
+      companies = [{ companyId: company.id, role: 'admin' }];
+    } else if (companyId) {
+      // Add user to existing company
       await this.userCompanyRepository.addUserToCompany(
         user.id,
         companyId,
