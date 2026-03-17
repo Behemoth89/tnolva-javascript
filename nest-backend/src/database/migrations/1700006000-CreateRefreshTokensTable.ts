@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateRefreshTokensTable1700006000 implements MigrationInterface {
-  name = 'CreateRefreshTokensTable1700006000';
+export class CreateRefreshTokensTable1700006000000 implements MigrationInterface {
+  name = 'CreateRefreshTokensTable1700006000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Enable uuid-ossp extension if not exists

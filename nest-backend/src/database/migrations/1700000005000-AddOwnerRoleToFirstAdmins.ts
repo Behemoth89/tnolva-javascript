@@ -5,15 +5,15 @@ export class AddOwnerRoleToFirstAdmins1700000005000 implements MigrationInterfac
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // First, update the CHECK constraint to allow 'owner' role
-    // Check if constraint exists and update it
-    try {
+    // Check if constraint exists and drop it if it does
+    const constraintExists = await queryRunner.query(`
+      SELECT constraint_name FROM information_schema.table_constraints
+      WHERE table_name = 'user_companies' AND constraint_name = 'user_companies_role_check'
+    `);
+
+    if (constraintExists.length > 0) {
       await queryRunner.query(
         `ALTER TABLE "user_companies" DROP CONSTRAINT "user_companies_role_check"`,
-      );
-    } catch {
-      // Constraint may not exist in fresh database, log and continue
-      console.log(
-        'Constraint "user_companies_role_check" may not exist, attempting to continue...',
       );
     }
 
