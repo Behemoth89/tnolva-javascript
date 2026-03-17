@@ -22,10 +22,13 @@ context: |
     - Repository pattern for data access
     - Request-scoped TenantService for tenant context
     - @Public() decorator marks public endpoints
-    - JWT payload includes: sub (userId), email, companies: [{ companyId, role }]
+    - JWT payload includes: sub (userId), email, companyId, companies: [{ companyId, role }]
     - All entities extend BaseEntity with id (UUID), companyId, timestamps, deletedAt (soft delete)
     - Multi-company users: X-Company-Id header selects active company from JWT's companies array
     - Soft delete: All entities use deletedAt timestamp; queries auto-filter deleted records
+    - Roles stored lowercase (owner/admin/member) with case-insensitive comparison
+    - companyName NOT in JWT - only returned in login response, not stored in token
+    - Slug must be provided manually (no auto-generation from companyName)
     - Use Gherkin syntax for spec scenarios
     - Reference actual source files in spec.md files
 
