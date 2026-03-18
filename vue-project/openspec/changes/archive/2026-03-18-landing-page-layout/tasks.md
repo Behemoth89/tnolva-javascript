@@ -28,11 +28,11 @@
 
 ## 5. Integration Testing
 
-- [ ] 5.1 Test landing page navigation
-- [ ] 5.2 Test login flow to main layout
-- [ ] 5.3 Test header displays user info
-- [ ] 5.4 Test logout returns to landing
-- [ ] 5.5 Test unauthenticated access to /app redirects
+- [x] 5.1 Test landing page navigation
+- [x] 5.2 Test login flow to main layout
+- [x] 5.3 Test header displays user info
+- [x] 5.4 Test logout returns to landing
+- [x] 5.5 Test unauthenticated access to /app redirects
 
 ## 6. Not Found Page (404)
 
