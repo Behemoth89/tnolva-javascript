@@ -53,7 +53,8 @@ export class ApiClient {
   private timeout: number = 10000 // Default 10 second timeout
 
   constructor(options: ApiClientOptions = {}) {
-    this.baseUrl = options.baseUrl || 'http://localhost:3000/api/v1'
+    this.baseUrl =
+      options.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1'
     this.timeout = options.timeout ?? 10000
   }
 

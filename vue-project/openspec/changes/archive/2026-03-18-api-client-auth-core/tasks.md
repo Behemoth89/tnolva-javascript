@@ -11,7 +11,7 @@
 ## 2. API Client Implementation
 
 - [x] 2.1 Create `src/api/client.ts` with ApiClient class
-- [x] 2.2 Implement base URL configuration with default `http://localhost:3000/api/v1`
+- [x] 2.2 Implement base URL configuration with VITE_API_BASE_URL env var (with localhost fallback)
 - [x] 2.3 Add method to set access token
 - [x] 2.4 Add method to set selected company ID
 - [x] 2.5 Implement request() method with fetch, headers, and response unwrapping
@@ -38,3 +38,12 @@
 - [x] 4.3 Test JWT decode with sample tokens
 - [x] 4.4 Test error handling for various HTTP status codes
 - [x] 4.5 Verify TypeScript types compile without errors
+
+## 5. Adjustment (2026-03-18)
+
+**Issue**: API client hardcoded to localhost, ignoring environment variable
+
+- [x] 5.1 Update ApiClient constructor to read from `import.meta.env.VITE_API_BASE_URL`
+- [x] 5.2 Add fallback to localhost for local development
+- [x] 5.3 Verify TypeScript compilation
+- [x] 5.4 Update design.md with new decision

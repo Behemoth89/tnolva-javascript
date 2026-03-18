@@ -68,6 +68,16 @@ Current state: Empty Vue project with Pinia, Vue Router, and TypeScript. No API 
 - Single place for error handling logic
 - Type-safe API calls
 
+### 5. Environment Variable for Base URL (2026-03-18 Adjustment)
+
+**Decision**: Read API base URL from `VITE_API_BASE_URL` environment variable
+**Rationale**:
+
+- Supports different environments (dev, staging, production)
+- `.env` file already exists with `VITE_API_BASE_URL`
+- Fallback to localhost for local development
+- Allows runtime configuration without code changes
+
 ## Risks / Trade-offs
 
 | Risk                                  | Mitigation                                        |

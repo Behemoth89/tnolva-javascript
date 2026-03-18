@@ -10,7 +10,8 @@ context: |
   - **Tailwind CSS** for styling
 
   ## API Base URL
-  - Default: `http://localhost:3000/api/v1`
+  - Set via `VITE_API_BASE_URL` environment variable
+  - Fallback: `http://localhost:3000/api/v1`
 
   ## Response Format (ALL endpoints)
   ```typescript

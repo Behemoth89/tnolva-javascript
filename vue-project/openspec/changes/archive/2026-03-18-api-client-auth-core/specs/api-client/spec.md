@@ -4,10 +4,17 @@
 
 The API client SHALL accept a base URL configuration for the backend API.
 
-#### Scenario: Default base URL
+#### Scenario: Environment variable base URL
 
 - **WHEN** API client is initialized without explicit base URL
-- **THEN** it SHALL use the default base URL `http://localhost:3000/api/v1`
+- **AND** `VITE_API_BASE_URL` environment variable is set
+- **THEN** it SHALL use the value from `VITE_API_BASE_URL`
+
+#### Scenario: Default base URL (fallback)
+
+- **WHEN** API client is initialized without explicit base URL
+- **AND** `VITE_API_BASE_URL` environment variable is not set
+- **THEN** it SHALL use the fallback default `http://localhost:3000/api/v1`
 
 #### Scenario: Custom base URL
 
