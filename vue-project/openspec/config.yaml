@@ -1,20 +1,60 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  ## Tech Stack
+  - Vue 3 (Composition API with `<script setup lang="ts">`)
+  - Pinia 3.x for state management
+  - Vue Router 5.x
+  - TypeScript 5.9.x
+  - Vite 7.x
+  - **Tailwind CSS** for styling
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  ## API Base URL
+  - Default: `http://localhost:3000/api/v1`
+
+  ## Response Format (ALL endpoints)
+  ```typescript
+  interface ApiResponse<T> {
+    success: boolean;
+    data: T | null;
+    message?: string;
+  }
+  ```
+
+  ## Auth Endpoints
+  | Method | Endpoint | Description |
+  |--------|----------|-------------|
+  | POST | /auth/register | Register new user |
+  | POST | /auth/login | Login with credentials |
+  | POST | /auth/logout | Logout current device |
+  | POST | /auth/refresh | Refresh tokens (no auth needed) |
+  | POST | /auth/switch-company | Switch active company |
+
+  ## JWT Payload
+  ```typescript
+  interface JWTPayload {
+    sub: string;               // user ID
+    email: string;
+    companyId: string | null;  // currently selected company
+    companies: Array<{ companyId: string; role: 'owner' | 'admin' | 'member' }>;
+  }
+  ```
+
+  ## Required Headers
+  - `Authorization: Bearer <access_token>` - for all protected requests
+  - `X-Company-Id: <company_uuid>` - required for multi-company users
+
+  ## Role Hierarchy
+  - owner > admin > member
+
+  ## Token Storage
+  - Store in memory (Pinia state) - NOT localStorage
+
+rules: |
+  - Use Composition API with `<script setup lang="ts">`
+  - Use Pinia stores for global state
+  - Use Tailwind CSS for all styling (utility classes)
+  - Always unwrap ApiResponse and throw errors on failure
+  - Handle 401: try refresh, then redirect to login
+  - Handle 400: show company selector if multi-company user
+  - Validate forms before submit, disable during API calls
