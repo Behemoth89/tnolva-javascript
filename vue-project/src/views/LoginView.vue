@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiClient, ApiError } from '@/api/client'
 import type { LoginRequest, AuthResponse } from '@/api/types'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 // Form state
@@ -96,8 +97,9 @@ async function handleSubmit() {
     authStore.setTokens(response.accessToken, response.refreshToken)
     authStore.setUser(response.user)
 
-    // Redirect to main app
-    router.push('/')
+    // Redirect to original destination or main app
+    const redirectPath = route.query.redirect as string
+    router.push(redirectPath || '/app')
   } catch (error) {
     if (error instanceof ApiError) {
       submitError.value = error.message
