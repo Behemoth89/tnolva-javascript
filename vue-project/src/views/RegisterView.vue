@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiClient, ApiError } from '@/api/client'
@@ -33,8 +33,23 @@ const submitError = ref('')
 // Email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-// Minimum password length
+// Password requirements constants
 const MIN_PASSWORD_LENGTH = 8
+const MAX_PASSWORD_LENGTH = 72
+const SPECIAL_CHAR_REGEX = /[@$!%*?&]/
+
+// Password requirements for live validation (computed)
+const passwordRequirements = computed(() => {
+  const pwd = password.value
+  return {
+    minLength: pwd.length >= MIN_PASSWORD_LENGTH,
+    maxLength: pwd.length <= MAX_PASSWORD_LENGTH,
+    uppercase: /[A-Z]/.test(pwd),
+    lowercase: /[a-z]/.test(pwd),
+    number: /\d/.test(pwd),
+    specialChar: SPECIAL_CHAR_REGEX.test(pwd),
+  }
+})
 
 // Validate email format
 function validateEmail(): boolean {
@@ -58,6 +73,26 @@ function validatePassword(): boolean {
   }
   if (password.value.length < MIN_PASSWORD_LENGTH) {
     errors.value.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+    return false
+  }
+  if (password.value.length > MAX_PASSWORD_LENGTH) {
+    errors.value.password = `Password must be at most ${MAX_PASSWORD_LENGTH} characters`
+    return false
+  }
+  if (!passwordRequirements.value.uppercase) {
+    errors.value.password = 'Password must contain at least one uppercase letter'
+    return false
+  }
+  if (!passwordRequirements.value.lowercase) {
+    errors.value.password = 'Password must contain at least one lowercase letter'
+    return false
+  }
+  if (!passwordRequirements.value.number) {
+    errors.value.password = 'Password must contain at least one number'
+    return false
+  }
+  if (!passwordRequirements.value.specialChar) {
+    errors.value.password = 'Password must contain at least one special character (@$!%*?&)'
     return false
   }
   errors.value.password = ''
@@ -268,12 +303,41 @@ async function handleSubmit() {
               autocomplete="new-password"
               required
               :disabled="isLoading"
-              placeholder="Password (min. 8 characters)"
+              placeholder="Password (8+ chars, uppercase, lowercase, number, special)"
               class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               :class="{ 'border-red-300': errors.password }"
               @input="clearError('password')"
             />
             <p v-if="errors.password" class="text-red-500 text-xs mt-1">{{ errors.password }}</p>
+          </div>
+
+          <!-- Password Requirements Checklist (shown when password has content) -->
+          <div v-if="password" class="text-xs space-y-1">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+              <div :class="passwordRequirements.minLength ? 'text-green-600' : 'text-gray-500'">
+                <span v-if="passwordRequirements.minLength">✓</span><span v-else>✗</span> At least 8
+                characters
+              </div>
+              <div :class="passwordRequirements.maxLength ? 'text-green-600' : 'text-gray-500'">
+                <span v-if="passwordRequirements.maxLength">✓</span><span v-else>✗</span> Maximum 72
+                characters
+              </div>
+              <div :class="passwordRequirements.uppercase ? 'text-green-600' : 'text-gray-500'">
+                <span v-if="passwordRequirements.uppercase">✓</span><span v-else>✗</span> One
+                uppercase letter
+              </div>
+              <div :class="passwordRequirements.lowercase ? 'text-green-600' : 'text-gray-500'">
+                <span v-if="passwordRequirements.lowercase">✓</span><span v-else>✗</span> One
+                lowercase letter
+              </div>
+              <div :class="passwordRequirements.number ? 'text-green-600' : 'text-gray-500'">
+                <span v-if="passwordRequirements.number">✓</span><span v-else>✗</span> One number
+              </div>
+              <div :class="passwordRequirements.specialChar ? 'text-green-600' : 'text-gray-500'">
+                <span v-if="passwordRequirements.specialChar">✓</span><span v-else>✗</span> One
+                special character (@$!%*?&)
+              </div>
+            </div>
           </div>
 
           <!-- Confirm Password Field -->

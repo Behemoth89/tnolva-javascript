@@ -37,8 +37,8 @@
 
 ## 4. Testing & Integration
 
-- [ ] 4.1 Test login flow end-to-end
-- [ ] 4.2 Test registration flow end-to-end
-- [ ] 4.3 Test validation errors display
-- [ ] 4.4 Test navigation between pages
-- [ ] 4.5 Verify auth store updates correctly
+- [x] 4.1 Test login flow end-to-end
+- [x] 4.2 Test registration flow end-to-end
+- [x] 4.3 Test validation errors display
+- [x] 4.4 Test navigation between pages
+- [x] 4.5 Verify auth store updates correctly
