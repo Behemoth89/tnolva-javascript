@@ -20,6 +20,9 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Set global API prefix
+  app.setGlobalPrefix('api');
+
   // Enable API versioning
   app.enableVersioning({
     type: VersioningType.URI,
