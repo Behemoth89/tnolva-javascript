@@ -5,6 +5,7 @@ import LandingView from '@/views/LandingView.vue'
 import MainView from '@/views/MainView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import { useAuthStore } from '@/stores/auth'
+import { canPerformAction, type UserRole } from '@/utils/permissions'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,14 +52,24 @@ const router = createRouter({
   ],
 })
 
-// Auth guard - navigation before each route
+// Auth and role guard - navigation before each route
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiresRole = to.meta.requiresRole as UserRole | undefined
 
   if (requiresAuth && !authStore.isAuthenticated) {
     // Not authenticated, redirect to login
     next({ name: 'login', query: { redirect: to.fullPath } })
+  } else if (requiresRole && authStore.isAuthenticated) {
+    // Check if user has required role
+    const hasPermission = canPerformAction(authStore.currentRole, requiresRole)
+    if (!hasPermission) {
+      // User lacks required role, redirect to app home
+      next({ name: 'app-home' })
+    } else {
+      next()
+    }
   } else if (to.name === 'login' && authStore.isAuthenticated) {
     // Already authenticated, redirect to app
     next({ name: 'app-home' })

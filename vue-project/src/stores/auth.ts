@@ -29,6 +29,21 @@ export const useAuthStore = defineStore('auth', () => {
   // Get list of companies the user belongs to
   const getCompanies = computed(() => user.value?.companies ?? [])
 
+  // Role getters
+  const currentRole = computed((): 'owner' | 'admin' | 'member' | null => {
+    if (!selectedCompanyId.value || !user.value?.companies) {
+      return null
+    }
+    const company = user.value.companies.find((c) => c.companyId === selectedCompanyId.value)
+    return company?.role ?? null
+  })
+
+  const isOwner = computed(() => currentRole.value === 'owner')
+
+  const isAdmin = computed(() => currentRole.value === 'admin')
+
+  const isMember = computed(() => currentRole.value === 'member')
+
   // Actions
 
   /**
@@ -180,6 +195,10 @@ export const useAuthStore = defineStore('auth', () => {
     // Computed
     isAuthenticated,
     getCompanies,
+    currentRole,
+    isOwner,
+    isAdmin,
+    isMember,
     // Actions
     setTokens,
     setUser,
