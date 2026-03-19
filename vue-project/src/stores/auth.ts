@@ -21,9 +21,13 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const selectedCompanyId = ref<string | null>(null)
 
   // Computed
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
+
+  // Get list of companies the user belongs to
+  const getCompanies = computed(() => user.value?.companies ?? [])
 
   // Actions
 
@@ -120,13 +124,49 @@ export const useAuthStore = defineStore('auth', () => {
     // Clear API client tokens
     apiClient.setAccessToken(null)
     apiClient.setSelectedCompany(null)
+    selectedCompanyId.value = null
   }
 
   /**
    * Set selected company
    */
   function setSelectedCompany(companyId: string): void {
+    selectedCompanyId.value = companyId
     apiClient.setSelectedCompany(companyId)
+  }
+
+  /**
+   * Auto-select company if user has only one
+   */
+  function autoSelectCompany(): void {
+    const companies = getCompanies.value
+    if (companies.length === 1 && companies[0]) {
+      setSelectedCompany(companies[0].companyId)
+    }
+  }
+
+  /**
+   * Switch to a different company via API
+   */
+  async function switchCompany(companyId: string): Promise<void> {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await apiClient.post<{ accessToken: string; refreshToken: string }>(
+        '/auth/switch-company',
+        { companyId },
+      )
+
+      // Update tokens and selected company
+      setTokens(response.accessToken, response.refreshToken)
+      selectedCompanyId.value = companyId
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to switch company'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {
@@ -136,8 +176,10 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     isLoading,
     error,
+    selectedCompanyId,
     // Computed
     isAuthenticated,
+    getCompanies,
     // Actions
     setTokens,
     setUser,
@@ -145,5 +187,7 @@ export const useAuthStore = defineStore('auth', () => {
     setError,
     clearAuth,
     setSelectedCompany,
+    autoSelectCompany,
+    switchCompany,
   }
 })
