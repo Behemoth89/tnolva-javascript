@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  tags:
+    - shared
+  script:
+    - cd javascript && docker compose -p javascript up --build --remove-orphans --detach

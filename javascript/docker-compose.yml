@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    container_name: nginx-javascript
+    ports:
+      - "81:80"

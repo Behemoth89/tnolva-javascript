@@ -1,2 +1,3 @@
 include:
   - local: 'deploy-test/.gitlab-ci.yml'
+  - local: 'javascript/.gitlab-ci.yml'
