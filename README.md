@@ -24,4 +24,4 @@ A collection of my web development projects.
 
 ## Getting Started
 
-Each project has its own setup instructions. Navigate to the respective folder and follow the README.md in each project.
+Each project has its own setup instructions. Navigate to the respective folder and follow the README.md in each project..
