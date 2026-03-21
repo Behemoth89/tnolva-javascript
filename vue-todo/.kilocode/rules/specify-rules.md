@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-03-21
 
 ## Active Technologies
+- TypeScript 5.9+ + Vue 3.5+, Vite 7+, Pinia 3+, Vue Router 5+, Vitest 4+ (002-task-dashboard)
+- N/A (frontend-only, data persisted via external API at taltech.akaver.com) (002-task-dashboard)
 
 - TypeScript 5.9.3 (strict mode via vue-tsc) + Vue 3.5.29, Vite 7.3.1, Pinia 3.0.4, Vue Router 5.0.3, Vitest 4.0.18 (001-user-auth)
 
@@ -23,6 +25,7 @@ npm test; npm run lint
 TypeScript 5.9.3 (strict mode via vue-tsc): Follow standard conventions
 
 ## Recent Changes
+- 002-task-dashboard: Added TypeScript 5.9+ + Vue 3.5+, Vite 7+, Pinia 3+, Vue Router 5+, Vitest 4+
 
 - 001-user-auth: Added TypeScript 5.9.3 (strict mode via vue-tsc) + Vue 3.5.29, Vite 7.3.1, Pinia 3.0.4, Vue Router 5.0.3, Vitest 4.0.18
 
