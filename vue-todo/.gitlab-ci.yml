@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  tags:
+    - shared
+  script:
+    - cd vue-todo && docker compose -p vue-todo up --build --remove-orphans --detach

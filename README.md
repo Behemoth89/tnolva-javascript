@@ -8,7 +8,7 @@ A collection of my web development projects.
 |---------|-------------|--------|-----------|
 | JavaScript | Vanilla JavaScript project | ✅ Live | [tnolva-javascript.proxy.itcollege.ee](https://tnolva-javascript.proxy.itcollege.ee) |
 | TypeScript | TypeScript project | ✅ Live | [tnolva-typescript.proxy.itcollege.ee](https://tnolva-typescript.proxy.itcollege.ee) |
-| Vue Todo | Todo application built with Vue.js | 🚧 Coming Soon | - |
+| Vue Todo | Todo application built with Vue.js | 🚧 Active Development | [tnolva-vue-todo.proxy.itcollege.ee](https://tnolva-vue-todo.proxy.itcollege.ee) |
 | React Todo | Todo application built with React | 🚧 Coming Soon | - |
 
 ---
@@ -17,7 +17,7 @@ A collection of my web development projects.
 
 - **JavaScript**: [View Project](./javascript) | [Live Demo](https://tnolva-javascript.proxy.itcollege.ee)
 - **TypeScript**: [View Project](./typescript) | [Live Demo](https://tnolva-typescript.proxy.itcollege.ee)
-- **Vue Todo**: [View Project](./vue-todo) | [Live Demo](#)
+- **Vue Todo**: [View Project](./vue-todo) | [Live Demo](https://tnolva-vue-todo.proxy.itcollege.ee)
 - **React Todo**: [View Project](./react-todo) | [Live Demo](#)
 
 ---

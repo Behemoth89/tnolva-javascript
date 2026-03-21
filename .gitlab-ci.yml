@@ -2,3 +2,4 @@ include:
   - local: 'deploy-test/.gitlab-ci.yml'
   - local: 'javascript/.gitlab-ci.yml'
   - local: 'typescript/.gitlab-ci.yml'
+  - local: 'vue-todo/.gitlab-ci.yml'

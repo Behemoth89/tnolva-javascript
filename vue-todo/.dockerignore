@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.gitlab-ci.yml
+
+# Build output (we rebuild in Docker)
+dist
+
+# Vite cache
+node_modules/.vite
+
+# Test coverage
+coverage

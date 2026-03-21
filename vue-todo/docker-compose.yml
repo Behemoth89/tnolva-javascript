@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    container_name: nginx-vue-todo
+    ports:
+      - "83:80"
