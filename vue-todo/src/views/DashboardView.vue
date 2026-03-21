@@ -1,46 +1,160 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useTasksStore } from '@/stores/tasks'
+import { usePrioritiesStore } from '@/stores/priorities'
+import { useCategoriesStore } from '@/stores/categories'
+import { useUIStore } from '@/stores/ui'
 import UserDisplay from '@/components/auth/UserDisplay.vue'
 import LogoutButton from '@/components/auth/LogoutButton.vue'
+import TaskList from '@/components/dashboard/TaskList.vue'
+import TaskSort from '@/components/dashboard/TaskSort.vue'
+import TaskFilters from '@/components/dashboard/TaskFilters.vue'
+import TaskForm from '@/components/dashboard/TaskForm.vue'
+import StatisticsCard from '@/components/dashboard/StatisticsCard.vue'
+import type { Task } from '@/types/task'
 
+const router = useRouter()
 const authStore = useAuthStore()
+const tasksStore = useTasksStore()
+const prioritiesStore = usePrioritiesStore()
+const categoriesStore = useCategoriesStore()
+const uiStore = useUIStore()
 
-onMounted(() => {
-  // Setup storage listener for multi-tab sync
+const showTaskForm = ref(false)
+const editingTask = ref<Task | null>(null)
+
+onMounted(async () => {
   authStore.setupStorageListener()
+  await loadData()
 })
 
 onUnmounted(() => {
-  // Cleanup storage listener to prevent memory leaks
   authStore.removeStorageListener()
 })
+
+const loadData = async () => {
+  try {
+    await Promise.all([
+      tasksStore.fetchTasks(),
+      prioritiesStore.fetchPriorities(),
+      categoriesStore.fetchCategories(),
+    ])
+
+    // Sync priorities and categories to tasks store
+    tasksStore.setPriorities(prioritiesStore.priorities)
+    tasksStore.setCategories(categoriesStore.categories)
+  } catch {
+    uiStore.showError('Failed to load data. Please try again.')
+  }
+}
+
+const handleToggleComplete = async (id: string) => {
+  try {
+    await tasksStore.toggleTaskComplete(id)
+    uiStore.showSuccess('Task updated')
+  } catch {
+    uiStore.showError('Failed to update task')
+  }
+}
+
+const handleDelete = async (id: string) => {
+  if (!confirm('Are you sure you want to delete this task?')) return
+
+  try {
+    await tasksStore.deleteTask(id)
+    uiStore.showSuccess('Task deleted')
+  } catch {
+    uiStore.showError('Failed to delete task')
+  }
+}
+
+const handleEdit = (task: Task) => {
+  editingTask.value = task
+  showTaskForm.value = true
+}
+
+const handleCreateTask = () => {
+  editingTask.value = null
+  showTaskForm.value = true
+}
+
+const handleTaskSaved = () => {
+  // Task list will automatically update via store
+}
+
+const handleCloseTaskForm = () => {
+  showTaskForm.value = false
+  editingTask.value = null
+}
+
+const goToSettings = () => {
+  router.push({ name: 'settings' })
+}
 </script>
 
 <template>
   <div class="dashboard-page">
     <header class="dashboard-header">
-      <h1 class="dashboard-title">Dashboard</h1>
+      <div class="header-left">
+        <h1 class="dashboard-title">Task Dashboard</h1>
+      </div>
       <div class="dashboard-actions">
+        <button class="settings-btn" @click="goToSettings" title="Settings">⚙️</button>
         <UserDisplay />
         <LogoutButton />
       </div>
     </header>
 
     <main class="dashboard-content">
-      <div class="card welcome-card">
-        <h2>Welcome to vue-todo!</h2>
-        <p>Your authentication is set up successfully.</p>
-        <p class="text-secondary">
-          This is your protected dashboard area. You can only see this page when logged in.
-        </p>
+      <!-- Create Task Button -->
+      <button class="create-task-btn" @click="handleCreateTask">+ Create New Task</button>
+
+      <!-- Statistics -->
+      <StatisticsCard :statistics="tasksStore.statistics" class="stats-section" />
+
+      <!-- Sort and Filter Bar -->
+      <div class="controls-bar">
+        <TaskFilters />
+        <TaskSort />
       </div>
 
-      <div class="card">
-        <h3>Getting Started</h3>
-        <p class="text-secondary">Task management features will be available in the next phase.</p>
+      <!-- Task List -->
+      <div class="task-list-container">
+        <TaskList
+          :tasks="tasksStore.sortedTasks"
+          :priorities="prioritiesStore.priorities"
+          :categories="categoriesStore.categories"
+          :loading="tasksStore.loading"
+          :error="tasksStore.error"
+          @toggle-complete="handleToggleComplete"
+          @delete="handleDelete"
+          @edit="handleEdit"
+          @retry="loadData"
+        />
       </div>
     </main>
+
+    <!-- Task Form Modal -->
+    <TaskForm
+      v-if="showTaskForm"
+      :task="editingTask"
+      @close="handleCloseTaskForm"
+      @saved="handleTaskSaved"
+    />
+
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+      <div
+        v-for="toast in uiStore.toasts"
+        :key="toast.id"
+        class="toast"
+        :class="`toast-${toast.type}`"
+      >
+        {{ toast.message }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -59,6 +173,12 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--border-color);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .dashboard-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -69,31 +189,123 @@ onUnmounted(() => {
 .dashboard-actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.settings-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
 }
 
 .dashboard-content {
   padding: 2rem;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
-.welcome-card {
+.create-task-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bg-primary);
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.create-task-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.stats-section {
   margin-bottom: 1.5rem;
 }
 
-.welcome-card h2 {
-  margin: 0 0 0.5rem;
-  color: var(--accent-primary);
+.controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
 }
 
-.card h3 {
-  margin: 0 0 0.5rem;
-  color: var(--text-primary);
+.task-list-container {
+  min-height: 200px;
 }
 
-.text-secondary {
-  color: var(--text-secondary);
-  margin: 0;
+/* Toast styles */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.toast {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.toast-success {
+  background: var(--color-success);
+  color: white;
+}
+
+.toast-error {
+  background: var(--color-error);
+  color: white;
+}
+
+.toast-warning {
+  background: var(--color-warning);
+  color: var(--bg-primary);
+}
+
+.toast-info {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 </style>

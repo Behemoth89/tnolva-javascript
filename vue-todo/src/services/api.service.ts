@@ -3,6 +3,8 @@
  * Fetch-based implementation with token refresh handling
  */
 
+import router from '@/router'
+
 // Base URL for taltech API - from environment variables
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}`
 
@@ -236,14 +238,15 @@ export async function apiRequest<T>(
         return retryResponse.json() as Promise<T>
       } else {
         processQueue(new Error('Token refresh failed'), null)
-        // Redirect to login
-        window.location.href = '/login'
+        // Redirect to login using Vue Router (preserves app state)
+        router.push({ name: 'login', query: { redirect: window.location.pathname } })
         throw new ApiError(401, 'Unauthorized - redirecting to login')
       }
     } catch (refreshError) {
       processQueue(refreshError as Error, null)
       clearTokens()
-      window.location.href = '/login'
+      // Redirect to login using Vue Router (preserves app state)
+      router.push({ name: 'login', query: { redirect: window.location.pathname } })
       throw refreshError
     } finally {
       isRefreshing = false

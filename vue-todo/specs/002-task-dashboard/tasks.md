@@ -16,74 +16,74 @@ Setup → Foundational → US1 (Dashboard View) → US2+US3 (Sort+Filter) → US
 
 ## Phase 1: Setup
 
-- [ ] T001 Create TypeScript type definitions for Task, Priority, Category in src/types/
-- [ ] T002 Create API service modules for tasks, priorities, categories in src/services/
-- [ ] T003 Configure Vue Router with dashboard and settings routes in src/router/index.ts
+- [x] T001 Create TypeScript type definitions for Task, Priority, Category in src/types/
+- [x] T002 Create API service modules for tasks, priorities, categories in src/services/
+- [x] T003 Configure Vue Router with dashboard and settings routes in src/router/index.ts
 
 ## Phase 2: Foundational
 
-- [ ] T004 Create Pinia store for tasks in src/stores/tasks.ts
-- [ ] T005 Create Pinia store for priorities in src/stores/priorities.ts
-- [ ] T006 Create Pinia store for categories in src/stores/categories.ts
-- [ ] T007 Create Pinia store for UI state in src/stores/ui.ts
-- [ ] T008 Create composable for infinite scroll in src/composables/useInfiniteScroll.ts
+- [x] T004 Create Pinia store for tasks in src/stores/tasks.ts
+- [x] T005 Create Pinia store for priorities in src/stores/priorities.ts
+- [x] T006 Create Pinia store for categories in src/stores/categories.ts
+- [x] T007 Create Pinia store for UI state in src/stores/ui.ts
+- [x] T008 Create composable for infinite scroll in src/composables/useInfiniteScroll.ts
 
 ## Phase 3: User Story 1 - View Tasks Dashboard
 
-- [ ] T009 [US1] Create DashboardView.vue in src/views/DashboardView.vue
-- [ ] T010 [US1] Create TaskList.vue component in src/components/dashboard/TaskList.vue
-- [ ] T011 [US1] Create TaskCard.vue component in src/components/dashboard/TaskCard.vue
-- [ ] T012 [P] [US1] Create SkeletonLoader.vue component in src/components/dashboard/SkeletonLoader.vue
-- [ ] T013 [US1] Implement task fetching and display in DashboardView
+- [x] T009 [US1] Create DashboardView.vue in src/views/DashboardView.vue
+- [x] T010 [US1] Create TaskList.vue component in src/components/dashboard/TaskList.vue
+- [x] T011 [US1] Create TaskCard.vue component in src/components/dashboard/TaskCard.vue
+- [x] T012 [P] [US1] Create SkeletonLoader.vue component in src/components/dashboard/SkeletonLoader.vue
+- [x] T013 [US1] Implement task fetching and display in DashboardView
 
 **Independent Test**: Load dashboard and verify all tasks display with title, priority, category, status, due date
 
 ## Phase 4: User Story 2 & 3 - Sort & Filter
 
-- [ ] T014 [P] [US2] Create TaskSort.vue component in src/components/dashboard/TaskSort.vue
-- [ ] T015 [P] [US3] Create TaskFilters.vue component in src/components/dashboard/TaskFilters.vue
-- [ ] T016 [US2] Implement sorting logic in useSorting.ts composable
-- [ ] T017 [US3] Implement filtering logic in useFiltering.ts composable
-- [ ] T018 [US2] Connect sorting UI to tasks store
-- [ ] T019 [US3] Connect filtering UI to tasks store
-- [ ] T020 [US3] Display empty state when no tasks match filter
+- [x] T014 [P] [US2] Create TaskSort.vue component in src/components/dashboard/TaskSort.vue
+- [x] T015 [P] [US3] Create TaskFilters.vue component in src/components/dashboard/TaskFilters.vue
+- [x] T016 [US2] Implement sorting logic in useSorting.ts composable
+- [x] T017 [US3] Implement filtering logic in useFiltering.ts composable
+- [x] T018 [US2] Connect sorting UI to tasks store
+- [x] T019 [US3] Connect filtering UI to tasks store
+- [x] T020 [US3] Display empty state when no tasks match filter
 
 **Independent Test**: Apply each sort/filter option and verify tasks reorder/filter correctly
 
 ## Phase 5: User Story 7 - Create Task with Category Selection
 
-- [ ] T021 [US7] Create TaskForm.vue component in src/components/dashboard/TaskForm.vue
-- [ ] T022 [US7] Create CategorySelect.vue component in src/components/dashboard/CategorySelect.vue
-- [ ] T023 [US7] Implement inline category creation in CategorySelect
-- [ ] T024 [US7] Connect task creation form to store
-- [ ] T025 [US7] Integrate task form into DashboardView
+- [x] T021 [US7] Create TaskForm.vue component in src/components/dashboard/TaskForm.vue
+- [x] T022 [US7] Create CategorySelect.vue component in src/components/dashboard/CategorySelect.vue
+- [x] T023 [US7] Implement inline category creation in CategorySelect
+- [x] T024 [US7] Connect task creation form to store
+- [x] T025 [US7] Integrate task form into DashboardView
 
 **Independent Test**: Create task with existing category, create task with new category, create task without category
 
 ## Phase 6: User Story 4 - Statistics
 
-- [ ] T026 [P] [US4] Create StatisticsCard.vue component in src/components/dashboard/StatisticsCard.vue
-- [ ] T027 [US4] Implement statistics calculation in tasks store
-- [ ] T028 [US4] Display statistics cards on DashboardView
+- [x] T026 [P] [US4] Create StatisticsCard.vue component in src/components/dashboard/StatisticsCard.vue
+- [x] T027 [US4] Implement statistics calculation in tasks store
+- [x] T028 [US4] Display statistics cards on DashboardView
 
 **Independent Test**: Verify total/pending/completed counts and completion % display correctly
 
 ## Phase 7: User Story 5 - Priorities CRUD
 
-- [ ] T029 [US5] Create PrioritiesList.vue component in src/components/settings/PrioritiesList.vue
-- [ ] T030 [P] [US5] Create PriorityForm.vue component in src/components/settings/PriorityForm.vue
-- [ ] T031 [US5] Create SettingsView.vue in src/views/SettingsView.vue
-- [ ] T032 [US5] Implement priority CRUD in priorities store and components
-- [ ] T033 [US5] Integrate priorities management into SettingsView
+- [x] T029 [US5] Create PrioritiesList.vue component in src/components/settings/PrioritiesList.vue
+- [x] T030 [P] [US5] Create PriorityForm.vue component in src/components/settings/PriorityForm.vue
+- [x] T031 [US5] Create SettingsView.vue in src/views/SettingsView.vue
+- [x] T032 [US5] Implement priority CRUD in priorities store and components
+- [x] T033 [US5] Integrate priorities management into SettingsView
 
 **Independent Test**: Create, view, edit, delete priorities in settings
 
 ## Phase 8: User Story 6 - Categories CRUD
 
-- [ ] T034 [P] [US6] Create CategoriesList.vue component in src/components/settings/CategoriesList.vue
-- [ ] T035 [P] [US6] Create CategoryForm.vue component in src/components/settings/CategoryForm.vue
-- [ ] T036 [US6] Implement category CRUD in categories store and components
-- [ ] T037 [US6] Integrate categories management into SettingsView
+- [x] T034 [P] [US6] Create CategoriesList.vue component in src/components/settings/CategoriesList.vue
+- [x] T035 [P] [US6] Create CategoryForm.vue component in src/components/settings/CategoryForm.vue
+- [x] T036 [US6] Implement category CRUD in categories store and components
+- [x] T037 [US6] Integrate categories management into SettingsView
 
 **Independent Test**: Create, view, edit, delete categories in settings
 
@@ -107,10 +107,10 @@ Setup → Foundational → US1 (Dashboard View) → US2+US3 (Sort+Filter) → US
 
 ## Phase 11: User Story 10 - Not Found Page
 
-- [ ] T046 [US10] Create NotFoundView.vue in src/views/NotFoundView.vue
-- [ ] T047 [US10] Configure wildcard route in src/router/index.ts
-- [ ] T048 [US10] Add conditional home link based on auth status
-- [ ] T049 [US10] Style 404 page with dark & gold theme
+- [x] T046 [US10] Create NotFoundView.vue in src/views/NotFoundView.vue
+- [x] T047 [US10] Configure wildcard route in src/router/index.ts
+- [x] T048 [US10] Add conditional home link based on auth status
+- [x] T049 [US10] Style 404 page with dark & gold theme
 
 **Independent Test**: Navigate to non-existent route, verify 404 page with correct link
 
