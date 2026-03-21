@@ -1,12 +1,12 @@
 ## 1. Token Refresh Implementation
 
-- [ ] 1.1 Add refreshToken() method to API client
-- [ ] 1.2 Implement 401 detection in response handler
-- [ ] 1.3 Add refresh token request to /api/v1/auth/refresh
-- [ ] 1.4 Update auth store with new tokens after refresh
-- [ ] 1.5 Implement request retry after successful refresh
-- [ ] 1.6 Add flag to prevent infinite refresh loops
-- [ ] 1.7 Handle refresh failure - redirect to login
+- [x] 1.1 Add refreshToken() method to API client
+- [x] 1.2 Implement 401 detection in response handler
+- [x] 1.3 Add refresh token request to /api/v1/auth/refresh
+- [x] 1.4 Update auth store with new tokens after refresh
+- [x] 1.5 Implement request retry after successful refresh
+- [x] 1.6 Add flag to prevent infinite refresh loops
+- [x] 1.7 Handle refresh failure - redirect to login
 
 ## 2. Testing
 
