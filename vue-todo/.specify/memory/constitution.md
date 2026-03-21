@@ -46,6 +46,7 @@ The project uses the following confirmed technology stack. Adding new dependenci
 - **Language**: TypeScript 5.9+ (strict mode)
 - **State Management**: Pinia 3+
 - **Routing**: Vue Router 5+
+- **HTTP Client**: Native fetch API (no external library)
 - **Testing**: Vitest 4+ with @vue/test-utils
 - **Linting**: ESLint 10+ with oxlint 1.50+, Prettier 3.8+
 - **Node Version**: ^20.19.0 || >=22.12.0
