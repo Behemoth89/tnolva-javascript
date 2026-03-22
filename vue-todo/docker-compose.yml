@@ -1,7 +1,11 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: 'https://taltech.akaver.com/api'
+        VITE_API_VERSION: 'v1'
     restart: unless-stopped
     container_name: nginx-vue-todo
     ports:
-      - "83:80"
+      - '83:80'
