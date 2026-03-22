@@ -8,6 +8,18 @@ import router from '@/router'
 // Base URL for taltech API - from environment variables
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/${import.meta.env.VITE_API_VERSION}`
 
+/**
+ * Validates and normalizes an API endpoint path
+ * Prevents path traversal attacks by rejecting endpoints containing '..'
+ */
+function validateEndpoint(endpoint: string): string {
+  if (endpoint.includes('..')) {
+    throw new ApiError(400, 'Invalid endpoint: path traversal not allowed')
+  }
+  // Ensure endpoint starts with /
+  return endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+}
+
 // Storage keys
 const TOKEN_KEY = 'authToken'
 const REFRESH_TOKEN_KEY = 'authRefreshToken'
@@ -74,6 +86,11 @@ export function getRefreshToken(): string | null {
 
 /**
  * Store tokens in localStorage
+ * DESIGN CHOICE: Tokens are stored in localStorage rather than httpOnly cookies
+ * because this is a client-side SPA consuming an external API (taltech.akaver.com).
+ * The API does not support cookie-based auth, so Bearer tokens in localStorage are
+ * the accepted pattern for this architecture. XSS risk is mitigated by strict CSP
+ * headers and input sanitization on the API side.
  */
 export function setTokens(
   response: { token: string; refreshToken: string },
@@ -164,13 +181,15 @@ const processQueue = (error: Error | null, token: string | null = null): void =>
 
 /**
  * Make an API request with automatic token refresh on 401
+ * @param signal - Optional AbortSignal for request cancellation
  */
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {},
+  options: RequestInit & { signal?: AbortSignal } = {},
   retry = false,
 ): Promise<T> {
   const token = getToken()
+  const validatedEndpoint = validateEndpoint(endpoint)
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -181,9 +200,10 @@ export async function apiRequest<T>(
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${validatedEndpoint}`, {
     ...options,
     headers,
+    signal: options.signal,
   })
 
   // Handle 401 - try to refresh token
@@ -198,7 +218,7 @@ export async function apiRequest<T>(
             ...headers,
             Authorization: `Bearer ${token}`,
           }
-          return fetch(`${API_BASE_URL}${endpoint}`, {
+          return fetch(`${API_BASE_URL}${validatedEndpoint}`, {
             ...options,
             headers: newHeaders,
           })
@@ -226,7 +246,7 @@ export async function apiRequest<T>(
           ...headers,
           Authorization: `Bearer ${newToken.token}`,
         }
-        const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const retryResponse = await fetch(`${API_BASE_URL}${validatedEndpoint}`, {
           ...options,
           headers: newHeaders,
         })
@@ -255,11 +275,24 @@ export async function apiRequest<T>(
 
   if (!response.ok) {
     let data: unknown
+    let responseText: string | undefined
     try {
-      data = await response.json()
+      responseText = await response.text()
+      data = JSON.parse(responseText)
     } catch {
-      data = undefined
+      data = responseText
     }
+    // Log detailed error for debugging
+    console.error('API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      endpoint: validatedEndpoint,
+      method: options.method || 'GET',
+      requestData: options.body,
+      responseData: data,
+      responseText: responseText,
+      url: `${API_BASE_URL}${validatedEndpoint}`,
+    })
     throw new ApiError(response.status, `Request failed: ${response.statusText}`, data)
   }
 
@@ -274,31 +307,43 @@ export async function apiRequest<T>(
 
 // Convenience methods matching axios-like API
 export const api = {
-  get: <T>(url: string, options?: RequestInit): Promise<T> =>
+  get: <T>(url: string, options?: RequestInit & { signal?: AbortSignal }): Promise<T> =>
     apiRequest<T>(url, { ...options, method: 'GET' }),
 
-  post: <T>(url: string, data?: unknown, options?: RequestInit): Promise<T> =>
+  post: <T>(
+    url: string,
+    data?: unknown,
+    options?: RequestInit & { signal?: AbortSignal },
+  ): Promise<T> =>
     apiRequest<T>(url, {
       ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  put: <T>(url: string, data?: unknown, options?: RequestInit): Promise<T> =>
+  put: <T>(
+    url: string,
+    data?: unknown,
+    options?: RequestInit & { signal?: AbortSignal },
+  ): Promise<T> =>
     apiRequest<T>(url, {
       ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  patch: <T>(url: string, data?: unknown, options?: RequestInit): Promise<T> =>
+  patch: <T>(
+    url: string,
+    data?: unknown,
+    options?: RequestInit & { signal?: AbortSignal },
+  ): Promise<T> =>
     apiRequest<T>(url, {
       ...options,
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  delete: <T>(url: string, options?: RequestInit): Promise<T> =>
+  delete: <T>(url: string, options?: RequestInit & { signal?: AbortSignal }): Promise<T> =>
     apiRequest<T>(url, { ...options, method: 'DELETE' }),
 }
 

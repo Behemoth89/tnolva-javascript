@@ -22,6 +22,9 @@ export const useUIStore = defineStore('ui', () => {
   const modalType = ref<ModalType>(null)
   const globalLoading = ref(false)
 
+  // Timeout tracking for cleanup
+  const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
   // Actions
 
   /**
@@ -35,9 +38,11 @@ export const useUIStore = defineStore('ui', () => {
 
     // Auto-remove after duration
     if (duration > 0) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
+        toastTimeouts.delete(id)
         removeToast(id)
       }, duration)
+      toastTimeouts.set(id, timeoutId)
     }
   }
 
@@ -45,6 +50,11 @@ export const useUIStore = defineStore('ui', () => {
    * Remove a toast by ID
    */
   function removeToast(id: string): void {
+    const timeoutId = toastTimeouts.get(id)
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      toastTimeouts.delete(id)
+    }
     toasts.value = toasts.value.filter((t) => t.id !== id)
   }
 
@@ -103,6 +113,8 @@ export const useUIStore = defineStore('ui', () => {
    * Clear all toasts
    */
   function clearToasts(): void {
+    toastTimeouts.forEach((timeoutId) => clearTimeout(timeoutId))
+    toastTimeouts.clear()
     toasts.value = []
   }
 

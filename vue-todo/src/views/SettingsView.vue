@@ -1,24 +1,17 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUIStore } from '@/stores/ui'
+import { useStorageListener } from '@/composables/useStorageListener'
 import UserDisplay from '@/components/auth/UserDisplay.vue'
 import LogoutButton from '@/components/auth/LogoutButton.vue'
 import PrioritiesList from '@/components/settings/PrioritiesList.vue'
 import CategoriesList from '@/components/settings/CategoriesList.vue'
+import ToastContainer from '@/components/common/ToastContainer.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const uiStore = useUIStore()
 
-onMounted(() => {
-  authStore.setupStorageListener()
-})
-
-onUnmounted(() => {
-  authStore.removeStorageListener()
-})
+useStorageListener(authStore.handleStorageEvent)
 
 const goToDashboard = () => {
   router.push({ name: 'dashboard' })
@@ -53,16 +46,7 @@ const goToDashboard = () => {
     </main>
 
     <!-- Toast Notifications -->
-    <div class="toast-container">
-      <div
-        v-for="toast in uiStore.toasts"
-        :key="toast.id"
-        class="toast"
-        :class="`toast-${toast.type}`"
-      >
-        {{ toast.message }}
-      </div>
-    </div>
+    <ToastContainer />
   </div>
 </template>
 
@@ -140,55 +124,5 @@ const goToDashboard = () => {
   margin: 0 0 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
-}
-
-/* Toast styles */
-.toast-container {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.toast {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  animation: slideIn 0.3s ease;
-}
-
-.toast-success {
-  background: var(--color-success);
-  color: white;
-}
-
-.toast-error {
-  background: var(--color-error);
-  color: white;
-}
-
-.toast-warning {
-  background: var(--color-warning);
-  color: var(--bg-primary);
-}
-
-.toast-info {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 </style>

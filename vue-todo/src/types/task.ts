@@ -23,14 +23,19 @@ export interface TaskWithRelations extends Task {
 }
 
 // Task creation DTO
+// API requires: taskName, createdDt, isCompleted, isArchived, syncDt
+// Optional UUID fields must be omitted (not null) when not set
+// API schema has additionalProperties: false
 export interface CreateTaskDto {
   taskName: string
+  createdDt: string
+  isCompleted: boolean
+  isArchived: boolean
+  syncDt: string
   taskSort?: number
   dueDt?: string | null
-  isCompleted?: boolean
-  isArchived?: boolean
-  todoCategoryId?: string | null
-  todoPriorityId?: string | null
+  todoCategoryId?: string
+  todoPriorityId?: string
 }
 
 // Task update DTO

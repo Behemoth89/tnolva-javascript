@@ -5,6 +5,7 @@ import { useUIStore } from '@/stores/ui'
 
 defineProps<{
   modelValue: string | null
+  required?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -49,8 +50,13 @@ const cancelNewCategory = () => {
 <template>
   <div class="category-select">
     <div v-if="!showNewCategory" class="select-wrapper">
-      <select class="category-dropdown" :value="modelValue || ''" @change="handleChange">
-        <option value="">No Category</option>
+      <select
+        class="category-dropdown"
+        :value="modelValue || ''"
+        :required="required"
+        @change="handleChange"
+      >
+        <option value="" disabled>Select a category</option>
         <option
           v-for="category in categoriesStore.categories"
           :key="category.id"

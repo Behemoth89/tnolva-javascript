@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Task } from '@/types/task'
 import type { Priority } from '@/types/priority'
 import type { Category } from '@/types/category'
@@ -20,14 +21,17 @@ const emit = defineEmits<{
   retry: []
 }>()
 
+const priorityMap = computed(() => new Map(props.priorities.map((p) => [p.id, p])))
+const categoryMap = computed(() => new Map(props.categories.map((c) => [c.id, c])))
+
 const getPriority = (id: string | null): Priority | null => {
   if (!id) return null
-  return props.priorities.find((p) => p.id === id) || null
+  return priorityMap.value.get(id) ?? null
 }
 
 const getCategory = (id: string | null): Category | null => {
   if (!id) return null
-  return props.categories.find((c) => c.id === id) || null
+  return categoryMap.value.get(id) ?? null
 }
 </script>
 

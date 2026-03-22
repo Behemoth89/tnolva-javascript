@@ -41,6 +41,8 @@ export const useTasksStore = defineStore('tasks', () => {
   const categories = ref<Category[]>([])
 
   // Getters
+  // Note: filteredTasks and sortedTasks return new array references on each access,
+  // but Vue's computed caching ensures they only re-compute when dependencies change.
   const filteredTasks = computed(() => {
     let result = [...tasks.value]
 

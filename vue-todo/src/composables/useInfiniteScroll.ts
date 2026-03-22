@@ -8,6 +8,7 @@ import { ref, onMounted, onUnmounted, type Ref } from 'vue'
 interface UseInfiniteScrollOptions {
   distance?: number
   disabled?: boolean
+  debounceMs?: number
 }
 
 export function useInfiniteScroll(
@@ -19,26 +20,33 @@ export function useInfiniteScroll(
   error: Ref<Error | null>
   observer: Ref<IntersectionObserver | null>
 } {
-  const { distance = 100, disabled = false } = options
+  const { distance = 100, disabled = false, debounceMs = 150 } = options
 
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
   const observer = ref<IntersectionObserver | null>(null)
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-  const handleIntersection: IntersectionObserverCallback = async (entries) => {
+  const handleIntersection: IntersectionObserverCallback = (entries) => {
     const [entry] = entries
 
     if (entry && entry.isIntersecting && !isLoading.value && !disabled) {
-      isLoading.value = true
-      error.value = null
-
-      try {
-        await callback()
-      } catch (err) {
-        error.value = err instanceof Error ? err : new Error('Failed to load more')
-      } finally {
-        isLoading.value = false
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
       }
+
+      debounceTimer = setTimeout(async () => {
+        isLoading.value = true
+        error.value = null
+
+        try {
+          await callback()
+        } catch (err) {
+          error.value = err instanceof Error ? err : new Error('Failed to load more')
+        } finally {
+          isLoading.value = false
+        }
+      }, debounceMs)
     }
   }
 
@@ -55,6 +63,10 @@ export function useInfiniteScroll(
   })
 
   onUnmounted(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
     if (observer.value) {
       observer.value.disconnect()
       observer.value = null

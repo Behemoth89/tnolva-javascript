@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
 import { usePrioritiesStore } from '@/stores/priorities'
 
@@ -20,9 +20,14 @@ const tasksStore = useTasksStore()
 const prioritiesStore = usePrioritiesStore()
 const uiStore = useUIStore()
 
-const isEditing = !!props.task
+const isEditing = computed(() => !!props.task)
 
-const formData = ref<CreateTaskDto & { todoCategoryId: string | null }>({
+const formData = ref<{
+  taskName: string
+  dueDt: string | null
+  todoCategoryId: string | null
+  todoPriorityId: string | null
+}>({
   taskName: '',
   dueDt: null,
   todoCategoryId: null,
@@ -50,10 +55,20 @@ const handleSubmit = async () => {
     return
   }
 
+  if (!formData.value.todoPriorityId) {
+    uiStore.showError('Priority is required')
+    return
+  }
+
+  if (!formData.value.todoCategoryId) {
+    uiStore.showError('Category is required')
+    return
+  }
+
   try {
     let result: Task
 
-    if (isEditing && props.task) {
+    if (isEditing.value && props.task) {
       // API requires full object with all fields for PUT request
       const updateData = {
         id: props.task.id,
@@ -70,14 +85,33 @@ const handleSubmit = async () => {
       result = await tasksStore.updateTask(props.task.id, updateData)
       uiStore.showSuccess('Task updated')
     } else {
-      result = await tasksStore.createTask(formData.value)
+      const now = new Date().toISOString()
+      // Build request object - only include fields with values
+      // API has additionalProperties: false and non-nullable UUID fields
+      const createData: Record<string, unknown> = {
+        taskName: formData.value.taskName,
+        createdDt: now,
+        isCompleted: false,
+        isArchived: false,
+        syncDt: now,
+      }
+      if (formData.value.dueDt) {
+        createData.dueDt = formData.value.dueDt
+      }
+      if (formData.value.todoCategoryId) {
+        createData.todoCategoryId = formData.value.todoCategoryId
+      }
+      if (formData.value.todoPriorityId) {
+        createData.todoPriorityId = formData.value.todoPriorityId
+      }
+      result = await tasksStore.createTask(createData as unknown as CreateTaskDto)
       uiStore.showSuccess('Task created')
     }
 
     emit('saved', result)
     emit('close')
   } catch {
-    uiStore.showError(isEditing ? 'Failed to update task' : 'Failed to create task')
+    uiStore.showError(isEditing.value ? 'Failed to update task' : 'Failed to create task')
   }
 }
 
@@ -114,9 +148,9 @@ const handleClose = () => {
         </div>
 
         <div class="form-group">
-          <label class="form-label">Priority</label>
-          <select v-model="formData.todoPriorityId" class="form-select">
-            <option :value="null">No Priority</option>
+          <label class="form-label">Priority *</label>
+          <select v-model="formData.todoPriorityId" class="form-select" required>
+            <option :value="null" disabled>Select a priority</option>
             <option
               v-for="priority in prioritiesStore.priorities"
               :key="priority.id"
@@ -128,8 +162,8 @@ const handleClose = () => {
         </div>
 
         <div class="form-group">
-          <label class="form-label">Category</label>
-          <CategorySelect v-model="formData.todoCategoryId" />
+          <label class="form-label">Category *</label>
+          <CategorySelect v-model="formData.todoCategoryId" required />
         </div>
 
         <div class="form-actions">

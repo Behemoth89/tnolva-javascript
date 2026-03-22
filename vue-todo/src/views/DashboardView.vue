@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTasksStore } from '@/stores/tasks'
 import { usePrioritiesStore } from '@/stores/priorities'
 import { useCategoriesStore } from '@/stores/categories'
 import { useUIStore } from '@/stores/ui'
+import { useStorageListener } from '@/composables/useStorageListener'
 import UserDisplay from '@/components/auth/UserDisplay.vue'
 import LogoutButton from '@/components/auth/LogoutButton.vue'
 import TaskList from '@/components/dashboard/TaskList.vue'
@@ -13,6 +14,7 @@ import TaskSort from '@/components/dashboard/TaskSort.vue'
 import TaskFilters from '@/components/dashboard/TaskFilters.vue'
 import TaskForm from '@/components/dashboard/TaskForm.vue'
 import StatisticsCard from '@/components/dashboard/StatisticsCard.vue'
+import ToastContainer from '@/components/common/ToastContainer.vue'
 import type { Task } from '@/types/task'
 
 const router = useRouter()
@@ -26,13 +28,10 @@ const showTaskForm = ref(false)
 const editingTask = ref<Task | null>(null)
 
 onMounted(async () => {
-  authStore.setupStorageListener()
   await loadData()
 })
 
-onUnmounted(() => {
-  authStore.removeStorageListener()
-})
+useStorageListener(authStore.handleStorageEvent)
 
 const loadData = async () => {
   try {
@@ -45,8 +44,8 @@ const loadData = async () => {
     // Sync priorities and categories to tasks store
     tasksStore.setPriorities(prioritiesStore.priorities)
     tasksStore.setCategories(categoriesStore.categories)
-  } catch {
-    uiStore.showError('Failed to load data. Please try again.')
+  } catch (err: unknown) {
+    uiStore.showError(err instanceof Error ? err.message : 'Failed to load data. Please try again.')
   }
 }
 
@@ -54,8 +53,8 @@ const handleToggleComplete = async (id: string) => {
   try {
     await tasksStore.toggleTaskComplete(id)
     uiStore.showSuccess('Task updated')
-  } catch {
-    uiStore.showError('Failed to update task')
+  } catch (err: unknown) {
+    uiStore.showError(err instanceof Error ? err.message : 'Failed to update task')
   }
 }
 
@@ -65,8 +64,8 @@ const handleDelete = async (id: string) => {
   try {
     await tasksStore.deleteTask(id)
     uiStore.showSuccess('Task deleted')
-  } catch {
-    uiStore.showError('Failed to delete task')
+  } catch (err: unknown) {
+    uiStore.showError(err instanceof Error ? err.message : 'Failed to delete task')
   }
 }
 
@@ -137,24 +136,17 @@ const goToSettings = () => {
     </main>
 
     <!-- Task Form Modal -->
-    <TaskForm
-      v-if="showTaskForm"
-      :task="editingTask"
-      @close="handleCloseTaskForm"
-      @saved="handleTaskSaved"
-    />
+    <KeepAlive :max="1">
+      <TaskForm
+        v-if="showTaskForm"
+        :task="editingTask"
+        @close="handleCloseTaskForm"
+        @saved="handleTaskSaved"
+      />
+    </KeepAlive>
 
     <!-- Toast Notifications -->
-    <div class="toast-container">
-      <div
-        v-for="toast in uiStore.toasts"
-        :key="toast.id"
-        class="toast"
-        :class="`toast-${toast.type}`"
-      >
-        {{ toast.message }}
-      </div>
-    </div>
+    <ToastContainer />
   </div>
 </template>
 
@@ -257,55 +249,5 @@ const goToSettings = () => {
 
 .task-list-container {
   min-height: 200px;
-}
-
-/* Toast styles */
-.toast-container {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.toast {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  animation: slideIn 0.3s ease;
-}
-
-.toast-success {
-  background: var(--color-success);
-  color: white;
-}
-
-.toast-error {
-  background: var(--color-error);
-  color: white;
-}
-
-.toast-warning {
-  background: var(--color-warning);
-  color: var(--bg-primary);
-}
-
-.toast-info {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 </style>

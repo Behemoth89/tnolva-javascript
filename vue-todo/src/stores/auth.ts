@@ -9,6 +9,26 @@ import type { User, AuthTokens, LoginCredentials, RegisterData } from '@/types/a
 import * as authService from '@/services/auth.service'
 import { getToken, getRefreshToken, ApiError } from '@/services/api.service'
 
+interface ApiErrorData {
+  messages?: string[]
+}
+
+function isApiErrorData(data: unknown): data is ApiErrorData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'messages' in data &&
+    Array.isArray((data as ApiErrorData).messages)
+  )
+}
+
+function extractApiErrorMessage(err: unknown): string | null {
+  if (err instanceof ApiError && isApiErrorData(err.data)) {
+    return err.data.messages!.join(', ')
+  }
+  return null
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref<User | null>(null)
@@ -86,16 +106,16 @@ export const useAuthStore = defineStore('auth', () => {
       tokens.value = response.tokens
 
       // Store email for session restoration
+      // DESIGN CHOICE: Email stored in localStorage for session restoration on page reload.
+      // This is a non-sensitive identifier used to populate user display without re-fetching
+      // from API. Acceptable trade-off for UX in this internal task management app.
       localStorage.setItem('authEmail', data.email)
 
       return true
     } catch (err: unknown) {
-      if (
-        err instanceof ApiError &&
-        err.data &&
-        Array.isArray((err.data as { messages?: string[] }).messages)
-      ) {
-        error.value = (err.data as { messages: string[] }).messages.join(', ')
+      const apiMessage = extractApiErrorMessage(err)
+      if (apiMessage) {
+        error.value = apiMessage
       } else if (err instanceof Error) {
         error.value = err.message || 'Registration failed. Please try again.'
       } else {
@@ -125,12 +145,9 @@ export const useAuthStore = defineStore('auth', () => {
 
       return true
     } catch (err: unknown) {
-      if (
-        err instanceof ApiError &&
-        err.data &&
-        Array.isArray((err.data as { messages?: string[] }).messages)
-      ) {
-        error.value = (err.data as { messages: string[] }).messages.join(', ')
+      const apiMessage = extractApiErrorMessage(err)
+      if (apiMessage) {
+        error.value = apiMessage
       } else if (err instanceof Error) {
         error.value = err.message || 'Invalid email or password.'
       } else {
@@ -162,20 +179,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /**
-   * Setup storage event listener for multi-tab sync
-   */
-  function setupStorageListener(): void {
-    window.addEventListener('storage', handleStorageEvent)
-  }
-
-  /**
-   * Remove storage event listener
-   */
-  function removeStorageListener(): void {
-    window.removeEventListener('storage', handleStorageEvent)
-  }
-
   return {
     // State
     user,
@@ -189,8 +192,6 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     login,
     logout,
-    setupStorageListener,
-    removeStorageListener,
     handleStorageEvent,
   }
 })
