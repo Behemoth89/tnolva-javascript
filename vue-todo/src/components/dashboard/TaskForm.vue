@@ -5,6 +5,7 @@ import { usePrioritiesStore } from '@/stores/priorities'
 
 import { useUIStore } from '@/stores/ui'
 import CategorySelect from './CategorySelect.vue'
+import DatePicker from '@/components/ui/DatePicker.vue'
 import type { Task, CreateTaskDto } from '@/types/task'
 
 const props = defineProps<{
@@ -143,8 +144,8 @@ const handleClose = () => {
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="dueDt">Due Date</label>
-          <input id="dueDt" v-model="formData.dueDt" type="datetime-local" class="form-input" />
+          <label class="form-label">Due Date</label>
+          <DatePicker v-model="formData.dueDt" />
         </div>
 
         <div class="form-group">
