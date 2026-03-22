@@ -24,38 +24,51 @@ export const useAuthStore = defineStore('auth', () => {
   /**
    * Initialize auth state from localStorage
    */
-  function initializeAuth(): void {
+  async function initializeAuth(): Promise<void> {
     const token = getToken()
     const refreshToken = getRefreshToken()
 
-    if (token && refreshToken) {
-      // Try to restore user session
-      const email = localStorage.getItem('authEmail')
-      const expiresAt = localStorage.getItem('authTokenExpiresIn')
-      const issuedAt = localStorage.getItem('authTokenIssuedAt')
+    if (!token || !refreshToken) return
 
-      if (email && expiresAt && issuedAt) {
-        // Check if token is expired
-        const expiryDate = new Date(parseInt(expiresAt, 10))
-        if (expiryDate <= new Date()) {
-          // Token expired, clear tokens and return
-          logout()
-          return
-        }
+    const email = localStorage.getItem('authEmail')
+    const expiresAt = localStorage.getItem('authTokenExpiresIn')
+    const issuedAt = localStorage.getItem('authTokenIssuedAt')
 
-        user.value = {
-          id: '',
-          email,
-          firstName: null,
-          lastName: null,
-        }
-        tokens.value = {
-          token,
-          refreshToken,
-          expiresAt: expiryDate,
-          issuedAt: new Date(parseInt(issuedAt, 10)),
-        }
+    if (!email || !expiresAt || !issuedAt) return
+
+    const expiryDate = new Date(parseInt(expiresAt, 10))
+
+    if (expiryDate > new Date()) {
+      // Token still valid, restore session directly
+      user.value = {
+        id: '',
+        email,
+        firstName: null,
+        lastName: null,
       }
+      tokens.value = {
+        token,
+        refreshToken,
+        expiresAt: expiryDate,
+        issuedAt: new Date(parseInt(issuedAt, 10)),
+      }
+      return
+    }
+
+    // Token expired, attempt to refresh
+    isLoading.value = true
+    try {
+      const refreshed = await authService.refreshToken()
+      if (refreshed) {
+        user.value = refreshed.user
+        tokens.value = refreshed.tokens
+      } else {
+        logout()
+      }
+    } catch {
+      logout()
+    } finally {
+      isLoading.value = false
     }
   }
 
