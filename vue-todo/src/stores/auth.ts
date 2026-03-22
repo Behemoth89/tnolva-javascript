@@ -60,11 +60,14 @@ export const useAuthStore = defineStore('auth', () => {
 
     if (expiryDate > new Date()) {
       // Token still valid, restore session directly
+      const firstName = localStorage.getItem('authFirstName')
+      const lastName = localStorage.getItem('authLastName')
+
       user.value = {
         id: '',
         email,
-        firstName: null,
-        lastName: null,
+        firstName: firstName || null,
+        lastName: lastName || null,
       }
       tokens.value = {
         token,
@@ -105,11 +108,14 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.user
       tokens.value = response.tokens
 
-      // Store email for session restoration
-      // DESIGN CHOICE: Email stored in localStorage for session restoration on page reload.
-      // This is a non-sensitive identifier used to populate user display without re-fetching
-      // from API. Acceptable trade-off for UX in this internal task management app.
+      // Store user info for session restoration
       localStorage.setItem('authEmail', data.email)
+      if (data.firstName) {
+        localStorage.setItem('authFirstName', data.firstName)
+      }
+      if (data.lastName) {
+        localStorage.setItem('authLastName', data.lastName)
+      }
 
       return true
     } catch (err: unknown) {
@@ -140,8 +146,14 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.user
       tokens.value = response.tokens
 
-      // Store email for session restoration
+      // Store user info for session restoration
       localStorage.setItem('authEmail', credentials.email)
+      if (response.user.firstName) {
+        localStorage.setItem('authFirstName', response.user.firstName)
+      }
+      if (response.user.lastName) {
+        localStorage.setItem('authLastName', response.user.lastName)
+      }
 
       return true
     } catch (err: unknown) {
@@ -167,6 +179,9 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     tokens.value = null
     error.value = null
+    localStorage.removeItem('authEmail')
+    localStorage.removeItem('authFirstName')
+    localStorage.removeItem('authLastName')
   }
 
   /**

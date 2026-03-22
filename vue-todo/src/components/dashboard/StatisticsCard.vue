@@ -45,22 +45,21 @@ const completionStyle = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1rem 1.5rem;
-  background: var(--bg-secondary);
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .stat-item {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
   gap: 0.25rem;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--accent-primary);
 }
@@ -74,7 +73,7 @@ const completionStyle = computed(() => {
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -82,27 +81,27 @@ const completionStyle = computed(() => {
 
 .progress-item {
   flex: 1;
-  max-width: 200px;
+  max-width: 150px;
 }
 
 .progress-header {
   display: flex;
   align-items: baseline;
   gap: 0.25rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .progress-bar {
-  height: 8px;
-  background: var(--bg-tertiary);
-  border-radius: 4px;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-hover));
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 </style>

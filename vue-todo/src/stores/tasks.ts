@@ -28,6 +28,7 @@ export const useTasksStore = defineStore('tasks', () => {
     status: 'all',
     categoryId: null,
     priorityId: null,
+    search: '',
   })
 
   // Sort state
@@ -45,6 +46,12 @@ export const useTasksStore = defineStore('tasks', () => {
   // but Vue's computed caching ensures they only re-compute when dependencies change.
   const filteredTasks = computed(() => {
     let result = [...tasks.value]
+
+    // Apply search filter
+    if (filters.value.search) {
+      const searchLower = filters.value.search.toLowerCase()
+      result = result.filter((task) => task.taskName.toLowerCase().includes(searchLower))
+    }
 
     // Apply status filter
     if (filters.value.status === 'pending') {
@@ -230,6 +237,7 @@ export const useTasksStore = defineStore('tasks', () => {
       status: 'all',
       categoryId: null,
       priorityId: null,
+      search: '',
     }
   }
 

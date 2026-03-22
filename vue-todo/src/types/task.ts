@@ -54,6 +54,7 @@ export interface TaskFilters {
   status: 'all' | 'pending' | 'completed'
   categoryId: string | null
   priorityId: string | null
+  search: string
 }
 
 // Task sort options

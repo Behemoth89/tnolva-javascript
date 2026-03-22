@@ -53,17 +53,17 @@ const currentOrder = computed({
 .task-sort {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .sort-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
 .sort-select {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
@@ -82,7 +82,7 @@ const currentOrder = computed({
 }
 
 .order-select {
-  width: 60px;
+  width: 50px;
   text-align: center;
 }
 </style>

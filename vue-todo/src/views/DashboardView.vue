@@ -96,29 +96,29 @@ const goToSettings = () => {
 <template>
   <div class="dashboard-page">
     <header class="dashboard-header">
-      <div class="header-left">
-        <h1 class="dashboard-title">Task Dashboard</h1>
+      <div class="header-top">
+        <div class="header-left">
+          <h1 class="dashboard-title">Task Dashboard</h1>
+          <button class="create-task-btn" @click="handleCreateTask">+ New Task</button>
+        </div>
+        <div class="header-center">
+          <StatisticsCard :statistics="tasksStore.statistics" />
+        </div>
+        <div class="dashboard-actions">
+          <button class="settings-btn" @click="goToSettings" title="Settings">⚙️</button>
+          <UserDisplay />
+          <LogoutButton />
+        </div>
       </div>
-      <div class="dashboard-actions">
-        <button class="settings-btn" @click="goToSettings" title="Settings">⚙️</button>
-        <UserDisplay />
-        <LogoutButton />
+      <div class="header-bottom">
+        <div class="controls-bar">
+          <TaskFilters />
+          <TaskSort />
+        </div>
       </div>
     </header>
 
     <main class="dashboard-content">
-      <!-- Create Task Button -->
-      <button class="create-task-btn" @click="handleCreateTask">+ Create New Task</button>
-
-      <!-- Statistics -->
-      <StatisticsCard :statistics="tasksStore.statistics" class="stats-section" />
-
-      <!-- Sort and Filter Bar -->
-      <div class="controls-bar">
-        <TaskFilters />
-        <TaskSort />
-      </div>
-
       <!-- Task List -->
       <div class="task-list-container">
         <TaskList
@@ -157,12 +157,19 @@ const goToSettings = () => {
 }
 
 .dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  gap: 1rem;
 }
 
 .header-left {
@@ -172,29 +179,53 @@ const goToSettings = () => {
 }
 
 .dashboard-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  white-space: nowrap;
+}
+
+.create-task-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bg-primary);
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.create-task-btn:hover {
+  background: var(--accent-hover);
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .dashboard-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .settings-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 
@@ -203,35 +234,8 @@ const goToSettings = () => {
   border-color: var(--accent-primary);
 }
 
-.dashboard-content {
-  padding: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.create-task-btn {
-  display: inline-block;
-  width: 100%;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--bg-primary);
-  background: var(--accent-primary);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.create-task-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-}
-
-.stats-section {
-  margin-bottom: 1.5rem;
+.header-bottom {
+  padding: 0 1.5rem 0.75rem;
 }
 
 .controls-bar {
@@ -239,12 +243,17 @@ const goToSettings = () => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: var(--bg-secondary);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+}
+
+.dashboard-content {
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .task-list-container {

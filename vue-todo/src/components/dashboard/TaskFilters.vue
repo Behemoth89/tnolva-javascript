@@ -36,11 +36,19 @@ const currentPriorityId = computed({
   },
 })
 
+const searchQuery = computed({
+  get: () => tasksStore.filters.search,
+  set: (value: string) => {
+    tasksStore.setFilters({ search: value })
+  },
+})
+
 const hasActiveFilters = computed(() => {
   return (
     tasksStore.filters.status !== 'all' ||
     tasksStore.filters.categoryId !== null ||
-    tasksStore.filters.priorityId !== null
+    tasksStore.filters.priorityId !== null ||
+    tasksStore.filters.search !== ''
   )
 })
 
@@ -51,6 +59,10 @@ const resetFilters = () => {
 
 <template>
   <div class="task-filters">
+    <div class="filter-group search-group">
+      <input v-model="searchQuery" type="text" class="search-input" placeholder="Search tasks..." />
+    </div>
+
     <div class="filter-group">
       <label class="filter-label">Status:</label>
       <select v-model="currentStatus" class="filter-select">
@@ -99,25 +111,54 @@ const resetFilters = () => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
+}
+
+.search-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: border-color 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-input:hover {
+  border-color: var(--accent-primary);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
 }
 
 .filter-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 
 .filter-select {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  min-width: 140px;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  min-width: 100px;
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
@@ -136,8 +177,8 @@ const resetFilters = () => {
 }
 
 .reset-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--border-color);
