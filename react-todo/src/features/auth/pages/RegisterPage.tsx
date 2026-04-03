@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
-import apiClient from '../lib/apiClient';
-import { useAuthStore } from '../stores/useAuthStore';
-import type { LoginResponse } from '../types/auth';
+import { apiClient } from '../../../lib/apiClient';
+import { useAuthStore } from '../../../stores/useAuthStore';
+import type { LoginResponse } from '../../../types/auth';
 
 interface FormErrors {
   email?: string;
@@ -60,7 +60,8 @@ export function RegisterPage() {
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     const allValues = { password };
-    const error = validateField(field, getAllValues()[field], allValues);
+    const values = getAllValues();
+    const error = validateField(field, values[field as keyof typeof values], allValues);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
@@ -110,7 +111,7 @@ export function RegisterPage() {
     setErrors({});
 
     try {
-      const response = await apiClient.post<LoginResponse>('/api/auth/register', {
+      const response = await apiClient.post<LoginResponse>('/Account/Register', {
         email,
         password,
         firstName: firstName.trim(),
@@ -127,11 +128,13 @@ export function RegisterPage() {
       navigate('/dashboard');
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { status: number; data?: { message?: string } } };
-        if (axiosErr.response?.status === 409) {
+        const axiosErr = err as { response?: { status: number; data?: { messages?: string[] } } };
+        const msgs = axiosErr.response?.data?.messages;
+        const hasDuplicate = msgs?.some(m => m.toLowerCase().includes('already'));
+        if (axiosErr.response?.status === 409 || hasDuplicate) {
           setErrors({ email: 'An account with this email already exists.' });
         } else if (axiosErr.response?.status && axiosErr.response.status >= 400 && axiosErr.response.status < 500) {
-          const message = axiosErr.response.data?.message ?? 'Registration failed. Please try again.';
+          const message = msgs && msgs.length > 0 ? msgs.join(' ') : 'Registration failed. Please try again.';
           setErrors({ general: message });
         } else {
           setErrors({ general: 'Registration failed. Please try again.' });

@@ -21,6 +21,11 @@ export interface LoginResponse {
   lastName: string;
 }
 
+export interface RefreshTokenResponse {
+  jwt: string;
+  refreshToken: string;
+}
+
 export interface RegisterPayload {
   email: string;
   password: string;

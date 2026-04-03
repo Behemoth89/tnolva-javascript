@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { apiClient } from '../lib/apiClient';
-import { useAuthStore } from '../stores/useAuthStore';
-import type { LoginResponse } from '../types/auth';
+import { apiClient } from '../../../lib/apiClient';
+import { useAuthStore } from '../../../stores/useAuthStore';
+import type { LoginResponse } from '../../../types/auth';
 
 interface FormErrors {
   email?: string;
@@ -74,7 +74,7 @@ export function LoginPage() {
     setErrors({});
 
     try {
-      const response = await apiClient.post<LoginResponse>('/api/auth/login', {
+      const response = await apiClient.post<LoginResponse>('/Account/Login', {
         email,
         password,
       });

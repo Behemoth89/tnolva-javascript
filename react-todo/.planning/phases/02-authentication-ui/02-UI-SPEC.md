@@ -23,7 +23,7 @@ created: 2026-04-03
 | Icon library | @heroicons/react 2.2.x |
 | Font | System font stack (Tailwind CSS default: `ui-sans-serif, system-ui, -apple-system, ...`) |
 
-**Note:** shadcn not initialized. No `components.json` detected. Using Tailwind CSS v4 utility classes directly with CSS-first configuration (`@import "tailwindcss"`). No custom theme overrides in `index.css`.
+**Note:** shadcn not initialized. No `components.json` detected. Using Tailwind CSS v4 utility classes directly with CSS-first configuration (`@import "tailwindcss"`). Dark theme using zinc palette with amber-500 gold accent.
 
 ---
 
@@ -58,7 +58,7 @@ Exceptions:
 | Heading | 24px | 700 (bold) | 1.2 | `text-2xl font-bold` |
 | Error | 14px | 400 (normal) | 1.4 | `text-sm text-red-600` |
 
-**Source:** Existing placeholder pages use `text-2xl font-bold` for page headings (D-01 confirms centered card pattern). Body text uses `text-gray-600` at default size (16px).
+**Source:** Existing placeholder pages use `bg-gray-50`, `text-gray-900`, `text-gray-600`. Dark theme overrides these with zinc-950/900 palette and amber-500 gold accent.
 
 ---
 
@@ -66,21 +66,26 @@ Exceptions:
 
 | Role | Value | Usage |
 |------|-------|-------|
-| Dominant (60%) | `bg-gray-50` (#F9FAFB) | Full-page background for auth pages |
-| Secondary (30%) | `bg-white` (#FFFFFF) | Card surface, navbar background |
-| Accent (10%) | `text-blue-600` / `bg-blue-600` (#2563EB) | Primary CTA buttons, active links |
-| Destructive | `text-red-600` / `bg-red-600` (#DC2626) | Error text, destructive actions only |
+| Dominant (60%) | `bg-zinc-950` (#09090B) | Full-page background for auth pages |
+| Secondary (30%) | `bg-zinc-900` (#18181B) | Card surface, navbar background |
+| Accent (10%) | `text-amber-500` / `bg-amber-500` (#F59E0B) | Primary CTA buttons, active links, focus rings |
+| Destructive | `text-red-500` / `bg-red-500` (#EF4444) | Error text, destructive actions only |
 
 Accent reserved for:
 - Primary submit buttons (Login, Register)
 - Link text ("Don't have an account? Register")
+- Focus ring outlines
+- Active/selected states
 
 **Semantic color usage:**
-- Success states: `text-green-600` (future use, not in this phase)
-- Warning states: `text-yellow-600` (future use, not in this phase)
-- Disabled: `bg-gray-300 text-gray-500 cursor-not-allowed`
+- Success states: `text-green-500` (future use, not in this phase)
+- Warning states: `text-yellow-500` (future use, not in this phase)
+- Disabled: `bg-zinc-800 text-zinc-600 cursor-not-allowed`
+- Borders: `border-zinc-800` for subtle card/input borders
+- Text primary: `text-zinc-100` for headings and body text
+- Text muted: `text-zinc-400` for subtitles, placeholders, secondary text
 
-**Source:** Existing placeholder pages use `bg-gray-50`, `text-gray-900`, `text-gray-600`. Tailwind CSS default gray/blue/red palette.
+**Source:** Dark theme with gold accent. Zinc palette provides warm, rich dark tones (not pure black). Amber-500 gold accent pairs naturally with zinc's warm undertones.
 
 ---
 
@@ -181,18 +186,19 @@ Accent reserved for:
 ### Auth Pages (Login / Register)
 ```
 ┌─────────────────────────────────────┐
-│         bg-gray-50                  │
+│         bg-zinc-950                 │
 │                                     │
 │    ┌─────────────────────────┐      │
-│    │    bg-white, shadow     │      │
+│    │    bg-zinc-900          │      │
+│    │    border border-zinc-800│     │
 │    │    rounded-lg           │      │
 │    │    max-w-md, w-full     │      │
 │    │    p-8                  │      │
 │    │                         │      │
-│    │    Heading (text-2xl)   │      │
-│    │    Form fields          │      │
-│    │    Submit button        │      │
-│    │    Link text            │      │
+│    │    Heading (text-zinc-100)     │
+│    │    Form fields (text-zinc-100) │
+│    │    Submit button (amber-500)   │
+│    │    Link text (amber-500)       │
 │    └─────────────────────────┘      │
 │                                     │
 └─────────────────────────────────────┘
@@ -201,14 +207,35 @@ Accent reserved for:
 ### Dashboard Page
 ```
 ┌─────────────────────────────────────┐
-│  Navbar: bg-white, border-b        │
-│  "Hi, {firstName}"        [Logout] │
+│  Navbar: bg-zinc-900, border-b     │
+│  border-zinc-800                    │
+│  "Hi, {firstName}" (text-zinc-100)  │
+│                           [Logout]  │
 ├──────────────┬──────────────────────┤
 │              │                      │
 │   Sidebar    │   Main Content       │
 │   (reserved  │   (placeholder for   │
 │   empty)     │   Phase 3)           │
 │   w-64       │   flex-1             │
+│   bg-zinc-900│   bg-zinc-950        │
+│              │                      │
+└──────────────┴──────────────────────┘
+```
+
+### Dashboard Page
+```
+┌─────────────────────────────────────┐
+│  Navbar: bg-zinc-900, border-b     │
+│  border-zinc-800                    │
+│  "Hi, {firstName}" (text-zinc-100)  │
+│                           [Logout]  │
+├──────────────┬──────────────────────┤
+│              │                      │
+│   Sidebar    │   Main Content       │
+│   (reserved  │   (placeholder for   │
+│   empty)     │   Phase 3)           │
+│   w-64       │   flex-1             │
+│   bg-zinc-900│   bg-zinc-950        │
 │              │                      │
 └──────────────┴──────────────────────┘
 ```

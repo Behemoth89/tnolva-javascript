@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { useAuthStore } from '../stores/useAuthStore';
-import type { LoginResponse } from '../types/auth';
+import type { RefreshTokenResponse } from '../types/auth';
 
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason?: any) => void }> = [];
@@ -58,11 +58,12 @@ export function createApiClient(): AxiosInstance {
             return Promise.reject(error);
           }
 
-          const response = await client.post<LoginResponse>('/api/auth/refresh', {
+          const response = await client.post<RefreshTokenResponse>('/Account/RefreshToken', {
+            jwt: useAuthStore.getState().token,
             refreshToken,
           });
 
-          const { token, refreshToken: newRefreshToken } = response.data;
+          const { jwt: token, refreshToken: newRefreshToken } = response.data;
           useAuthStore.getState().setAuth({
             token,
             refreshToken: newRefreshToken || refreshToken,
@@ -89,9 +90,6 @@ export function createApiClient(): AxiosInstance {
 
   return client;
 }
-
-// Singleton instance — use apiClient.post('/auth/login', payload)
-export const apiClient = createApiClient();
 
 // Singleton instance — use apiClient.post('/auth/login', payload)
 export const apiClient = createApiClient();

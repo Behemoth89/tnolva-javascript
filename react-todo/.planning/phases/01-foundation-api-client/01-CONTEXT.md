@@ -31,7 +31,7 @@ Project scaffolding is ready and all API calls go through a centralized client w
 - **D-11:** Refresh token rotation handled — if API rotates refresh tokens, the new refreshToken is captured and persisted.
 
 ### Routing structure
-- **D-12:** React Router SPA mode (ssr: false in react-router.config.ts) with BrowserRouter. Pure client-side rendering.
+- **D-12:** Pure declarative React Router mode with BrowserRouter — no react-router.config.ts, no framework mode. Uses <BrowserRouter>, <Routes>, <Route> components from 'react-router'. Simpler for a pure SPA consuming an external API.
 - **D-13:** Placeholder pages for Phase 1: /login, /register, /dashboard (protected). Settings page added in Phase 4.
 - **D-14:** ProtectedRoute component wraps protected routes — reads auth state from Zustand store, redirects to /login if unauthenticated.
 - **D-15:** Authenticated users visiting /login or /register are redirected to /dashboard.

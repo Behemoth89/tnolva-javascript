@@ -64,17 +64,18 @@ A school project — a React-based to-do application that connects to the TalTec
 |-------|-----|-------------|
 | Create React App (CRA) | Officially deprecated. Slow builds, no HMR optimization, stuck on Webpack 4. | Vite 8 — 10-100x faster dev server, instant HMR, Rollup production builds. |
 | Tailwind CSS v3 | Requires `tailwind.config.js`, PostCSS setup, `@tailwind` directives. v4 eliminates all of this. | Tailwind CSS v4 — CSS-first config via `@theme`, native Vite plugin, no PostCSS needed. |
-| react-router-dom v6 | v7 is the current line. v6 is in maintenance mode. v7 adds SPA mode, `clientLoader`/`clientAction`, and better TypeScript. | React Router 7.x with SPA mode (`ssr: false`). |
+| react-router-dom v6 | v6 is in maintenance mode. v7 adds better TypeScript and unified API. | React Router 7.x with declarative mode (`BrowserRouter`). |
 | Redux | Boilerplate-heavy (slices, store setup, providers). 100+ lines of setup for what Zustand does in 10. | Zustand — single `create()` call, no providers, built-in persist middleware. |
 | jsonwebtoken in browser | `jsonwebtoken` is a Node.js-only library. It will not work in the browser. | Use `jwt-decode` (v4.x) for decoding JWT claims client-side. It's a tiny utility that only decodes, never verifies. |
 | Single-stage Docker builds | Includes Node.js, node_modules, and source code in production image. 300MB+ images with unnecessary attack surface. | Multi-stage: build in `node:20-alpine`, serve from `nginx:stable-alpine`. Final image ~25MB. |
 | Timer-based token refresh | Refreshing on a fixed interval wastes requests and fails if the user's clock drifts. | Refresh on 401 response via Axios interceptor — only refresh when the server says the token is expired. |
 ## Stack Patterns by Variant
-- Use React Router SPA mode (`ssr: false` in `react-router.config.ts`)
-- Use `clientLoader` and `clientAction` for route-level data fetching
-- Use `BrowserRouter` for declarative routing with `<Routes>` and `<Route>`
+- Use React Router declarative mode with `BrowserRouter` from `react-router` (NOT `react-router-dom`)
+- Use `<Routes>` and `<Route>` components for route definitions
+- No `react-router.config.ts` needed — that's only for framework mode
 - Because there is no server to render — all data comes from the TalTech API
-- Switch `ssr: true` in config, add `@react-router/node` dependency
+- Switch to framework mode with `ssr: true` in `react-router.config.ts` if SSR/SSG is needed later
+- Add `@react-router/node` dependency, create `root.tsx` and `routes.ts`
 - Routes with `loader` will server-render automatically
 - Because React Router 7 is designed for this transition without UI changes
 - Replace Axios with Fetch + custom interceptor wrapper (~13KB saved)
