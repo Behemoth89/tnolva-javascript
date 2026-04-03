@@ -70,8 +70,8 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Create TypeScript type contracts for tasks, categories, and priorities
 - [x] 03-02-PLAN.md — Create Zustand stores for tasks, categories, and priorities with CRUD operations
-- [ ] 03-03-PLAN.md — Build task UI components (cards, list, modal) and wire into DashboardPage
-- [ ] 03-04-PLAN.md — Build Settings page with category/priority CRUD management and add route
+- [x] 03-03-PLAN.md — Build task UI components (cards, list, modal) and wire into DashboardPage
+- [x] 03-04-PLAN.md — Build Settings page with category/priority CRUD management and add route
 **UI hint**: yes
 
 ### Phase 4: Settings & Integration
