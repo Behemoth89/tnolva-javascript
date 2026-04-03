@@ -45,8 +45,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INF-01**: App is styled with Tailwind CSS
-- [ ] **INF-02**: App uses React Router for navigation between pages
+- [x] **INF-01**: App is styled with Tailwind CSS
+- [x] **INF-02**: App uses React Router for navigation between pages
 - [ ] **INF-03**: App can be deployed via Docker with Dockerfile and docker-compose
 - [ ] **INF-04**: Loading states are displayed during all API operations
 - [ ] **INF-05**: Error states with user-friendly messages are displayed on API failures
@@ -120,8 +120,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SET-01 | Phase 4 | Pending |
 | SET-02 | Phase 4 | Pending |
 | SET-03 | Phase 4 | Pending |
-| INF-01 | Phase 1 | Pending |
-| INF-02 | Phase 1 | Pending |
+| INF-01 | Phase 1 | Complete |
+| INF-02 | Phase 1 | Complete |
 | INF-03 | Phase 5 | Pending |
 | INF-04 | Phase 3 | Pending |
 | INF-05 | Phase 3 | Pending |

@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold Vite + React + Tailwind CSS project, create placeholder pages and router
+- [x] 01-01-PLAN.md — Scaffold Vite + React + Tailwind CSS project, create placeholder pages and router
 - [x] 01-02-PLAN.md — Create Zustand auth store with persist middleware and auth type contracts
 - [ ] 01-03-PLAN.md — Create Axios API client factory with JWT interceptors and queued retry on 401
 
