@@ -12,8 +12,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AUTH-01**: User can register with email, password, first name, and last name
 - [ ] **AUTH-02**: User can log in with email and password
 - [ ] **AUTH-03**: User can log out from any authenticated page
-- [ ] **AUTH-04**: JWT access token is automatically attached to all API requests
-- [ ] **AUTH-05**: Expired access token is automatically refreshed on 401 response without user action
+- [x] **AUTH-04**: JWT access token is automatically attached to all API requests
+- [x] **AUTH-05**: Expired access token is automatically refreshed on 401 response without user action
 - [ ] **AUTH-06**: User session is restored on page reload
 - [ ] **AUTH-07**: Unauthenticated users are redirected to login when accessing protected routes
 - [ ] **AUTH-08**: Authenticated users are redirected to dashboard when visiting login/register
@@ -99,8 +99,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Complete |
+| AUTH-05 | Phase 1 | Complete |
 | AUTH-06 | Phase 2 | Pending |
 | AUTH-07 | Phase 2 | Pending |
 | AUTH-08 | Phase 2 | Pending |
