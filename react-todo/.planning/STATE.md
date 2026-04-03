@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-04-03T19:34:17.386Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-04-03T19:35:27.169Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 03 (todo-core) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-03
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 02-authentication-ui P03 | 8min | 3 tasks | 6 files |
 | Phase 02-authentication-ui P03 | 3min | 3 tasks | 5 files |
 | Phase 03-todo-core P01 | 2min | 2 tasks | 3 files |
+| Phase 03-todo-core P02 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Recent decisions affecting current work:
 - [Phase 02-authentication-ui]: Exported singleton apiClient alongside createApiClient() factory — LoginPage needed direct import of apiClient instance — Plan specified apiClient.post() usage but only factory function was exported
 - [Phase 02-authentication-ui]: isLoading starts true, set to false via onRehydrateStorage callback after persist rehydration — Prevents flash of wrong page during Zustand persist rehydration from localStorage
 - [Phase 02-authentication-ui]: isLoading starts true, set to false via onRehydrateStorage callback after persist rehydration — Prevents flash of wrong page during Zustand persist rehydration from localStorage
+- [Phase 03-todo-core]: No persist middleware on todo stores — data should always be fetched fresh from API on component mount
 
 ### Pending Todos
 
@@ -96,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T19:34:17.381Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-04-03T19:35:27.165Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
