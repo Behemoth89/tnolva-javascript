@@ -65,9 +65,9 @@ completed: 2026-04-03T12:24:56+02:00
 
 Each task was committed atomically:
 
-1. **Task 1: Create Axios client factory with JWT request interceptor** - pending
+1. **Task 1: Create Axios client factory with JWT request interceptor** - `6b8267d` (feat)
 
-**Plan metadata:** pending
+**Plan metadata:** `1526cfe` (docs: complete project scaffold plan)
 
 ## Files Created/Modified
 - `src/lib/apiClient.ts` - Axios instance factory with JWT interceptors and queued retry
