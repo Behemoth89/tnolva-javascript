@@ -92,7 +92,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & API Client | 0/0 | Not started | - |
+| 1. Foundation & API Client | 3/3 | Complete | 2026-04-03 |
 | 2. Authentication UI | 0/0 | Not started | - |
 | 3. Todo Core | 0/0 | Not started | - |
 | 4. Settings & Integration | 0/0 | Not started | - |
