@@ -4,6 +4,7 @@ export interface AuthState {
   firstName: string | null;
   lastName: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 export interface SetAuthPayload {

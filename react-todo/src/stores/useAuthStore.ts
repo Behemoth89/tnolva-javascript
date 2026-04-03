@@ -15,6 +15,7 @@ export const useAuthStore = create<AuthStore>()(
       firstName: null,
       lastName: null,
       isAuthenticated: false,
+      isLoading: true,
 
       setAuth: (payload: SetAuthPayload) =>
         set({
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthStore>()(
           firstName: payload.firstName,
           lastName: payload.lastName,
           isAuthenticated: true,
+          isLoading: false,
         }),
 
       clearAuth: () =>
@@ -32,10 +34,16 @@ export const useAuthStore = create<AuthStore>()(
           firstName: null,
           lastName: null,
           isAuthenticated: false,
+          isLoading: false,
         }),
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isLoading = false;
+        }
+      },
     }
   )
 );
