@@ -20,22 +20,22 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Task Management
 
-- [ ] **TASK-01**: User can view a list of their tasks
-- [ ] **TASK-02**: User can create a new task with name, category, priority, and due date
-- [ ] **TASK-03**: User can edit an existing task's name, category, priority, and due date
-- [ ] **TASK-04**: User can delete a task
-- [ ] **TASK-05**: User can toggle task completion status
+- [x] **TASK-01**: User can view a list of their tasks
+- [x] **TASK-02**: User can create a new task with name, category, priority, and due date
+- [x] **TASK-03**: User can edit an existing task's name, category, priority, and due date
+- [x] **TASK-04**: User can delete a task
+- [x] **TASK-05**: User can toggle task completion status
 - [ ] **TASK-06**: Priority is displayed as an icon on each task
 - [ ] **TASK-07**: Tasks can be filtered by category via the sidebar
 
 ### Categories & Priorities
 
-- [ ] **CAT-01**: User can create a new task category with a name
-- [ ] **CAT-02**: User can edit an existing category's name
-- [ ] **CAT-03**: User can delete a task category
-- [ ] **PRI-01**: User can create a new priority with a name and sort order
-- [ ] **PRI-02**: User can edit an existing priority's name and sort order
-- [ ] **PRI-03**: User can delete a priority
+- [x] **CAT-01**: User can create a new task category with a name
+- [x] **CAT-02**: User can edit an existing category's name
+- [x] **CAT-03**: User can delete a task category
+- [x] **PRI-01**: User can create a new priority with a name and sort order
+- [x] **PRI-02**: User can edit an existing priority's name and sort order
+- [x] **PRI-03**: User can delete a priority
 
 ### Settings
 
@@ -48,8 +48,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INF-01**: App is styled with Tailwind CSS
 - [x] **INF-02**: App uses React Router for navigation between pages
 - [ ] **INF-03**: App can be deployed via Docker with Dockerfile and docker-compose
-- [ ] **INF-04**: Loading states are displayed during all API operations
-- [ ] **INF-05**: Error states with user-friendly messages are displayed on API failures
+- [x] **INF-04**: Loading states are displayed during all API operations
+- [x] **INF-05**: Error states with user-friendly messages are displayed on API failures
 - [ ] **INF-06**: Empty states are shown when no tasks, categories, or priorities exist
 
 ## v2 Requirements
@@ -104,27 +104,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-06 | Phase 2 | Complete |
 | AUTH-07 | Phase 2 | Complete |
 | AUTH-08 | Phase 2 | Complete |
-| TASK-01 | Phase 3 | Pending |
-| TASK-02 | Phase 3 | Pending |
-| TASK-03 | Phase 3 | Pending |
-| TASK-04 | Phase 3 | Pending |
-| TASK-05 | Phase 3 | Pending |
+| TASK-01 | Phase 3 | Complete |
+| TASK-02 | Phase 3 | Complete |
+| TASK-03 | Phase 3 | Complete |
+| TASK-04 | Phase 3 | Complete |
+| TASK-05 | Phase 3 | Complete |
 | TASK-06 | Phase 4 | Pending |
 | TASK-07 | Phase 4 | Pending |
-| CAT-01 | Phase 3 | Pending |
-| CAT-02 | Phase 3 | Pending |
-| CAT-03 | Phase 3 | Pending |
-| PRI-01 | Phase 3 | Pending |
-| PRI-02 | Phase 3 | Pending |
-| PRI-03 | Phase 3 | Pending |
+| CAT-01 | Phase 3 | Complete |
+| CAT-02 | Phase 3 | Complete |
+| CAT-03 | Phase 3 | Complete |
+| PRI-01 | Phase 3 | Complete |
+| PRI-02 | Phase 3 | Complete |
+| PRI-03 | Phase 3 | Complete |
 | SET-01 | Phase 4 | Pending |
 | SET-02 | Phase 4 | Pending |
 | SET-03 | Phase 4 | Pending |
 | INF-01 | Phase 1 | Complete |
 | INF-02 | Phase 1 | Complete |
 | INF-03 | Phase 5 | Pending |
-| INF-04 | Phase 3 | Pending |
-| INF-05 | Phase 3 | Pending |
+| INF-04 | Phase 3 | Complete |
+| INF-05 | Phase 3 | Complete |
 | INF-06 | Phase 4 | Pending |
 
 **Coverage:**
