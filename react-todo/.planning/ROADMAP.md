@@ -13,7 +13,7 @@ Build a React-based to-do application that connects to the TalTech API (taltech.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation & API Client** - Project scaffolding, Tailwind CSS setup, and centralized Axios client with JWT interceptors
-- [ ] **Phase 2: Authentication UI** - Login, register, logout flows with protected routes and session management
+- [x] **Phase 2: Authentication UI** - Login, register, logout flows with protected routes and session management
 - [ ] **Phase 3: Todo Core** - Task CRUD, category/priority management, filtering, loading and error states
 - [ ] **Phase 4: Settings & Integration** - Settings page, sidebar wiring, priority icons, empty states
 - [ ] **Phase 5: Docker Deployment** - Multi-stage Dockerfile and docker-compose for deployment
@@ -51,7 +51,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md — Login page with form, validation, API integration; PublicRoute wrapper for authenticated user redirect
 - [x] 02-02-PLAN.md — Registration page with 5 fields, password confirmation validation, API integration
-- [ ] 02-03-PLAN.md — Protected route guard, dashboard navbar with greeting/logout, session persistence, rehydration loading
+- [x] 02-03-PLAN.md — Protected route guard, dashboard navbar with greeting/logout, session persistence, rehydration loading
 
 **UI hint**: yes
 
@@ -99,7 +99,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & API Client | 3/3 | Complete | 2026-04-03 |
-| 2. Authentication UI | 0/0 | Not started | - |
+| 2. Authentication UI | 3/3 | Complete | 2026-04-03 |
 | 3. Todo Core | 0/0 | Not started | - |
 | 4. Settings & Integration | 0/0 | Not started | - |
 | 5. Docker Deployment | 0/0 | Not started | - |
