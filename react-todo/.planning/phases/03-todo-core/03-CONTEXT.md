@@ -55,9 +55,12 @@ Covers: TASK-01, TASK-02, TASK-03, TASK-04, TASK-05, CAT-01, CAT-02, CAT-03, PRI
 ### Task API
 - `.planning/PROJECT.md` — API endpoint structure, task fields (taskName, taskSort, createdDt, dueDt, isCompleted, isArchived, todoCategoryId, todoPriorityId, syncDt)
 - `.planning/REQUIREMENTS.md` — TASK-01 through TASK-05, CAT-01 through CAT-03, PRI-01 through PRI-03, INF-04, INF-05
+- **Swagger API** — `GET/POST /api/v1/TodoTasks`, `GET/PUT/DELETE /api/v1/TodoTasks/{id}`
 
 ### Category & Priority API
 - `.planning/PROJECT.md` — Category fields (categoryName, categorySort, syncDt, tag) and Priority fields (priorityName, prioritySort, syncDt, tag)
+- **Swagger API** — `GET/POST /api/v1/TodoCategories`, `GET/PUT/DELETE /api/v1/TodoCategories/{id}`
+- **Swagger API** — `GET/POST /api/v1/TodoPriorities`, `GET/PUT/DELETE /api/v1/TodoPriorities/{id}`
 
 ### Auth & API Client (existing)
 - `src/lib/apiClient.ts` — Axios client with JWT interceptors, use this for all API calls
