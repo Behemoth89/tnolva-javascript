@@ -63,12 +63,12 @@ export function createApiClient(): AxiosInstance {
             refreshToken,
           });
 
-          const { jwt: token, refreshToken: newRefreshToken } = response.data;
+          const { token, refreshToken: newRefreshToken, firstName, lastName } = response.data;
           useAuthStore.getState().setAuth({
             token,
             refreshToken: newRefreshToken || refreshToken,
-            firstName: useAuthStore.getState().firstName!,
-            lastName: useAuthStore.getState().lastName!,
+            firstName: firstName || useAuthStore.getState().firstName!,
+            lastName: lastName || useAuthStore.getState().lastName!,
           });
 
           processQueue(null, token);
