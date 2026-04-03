@@ -46,10 +46,18 @@ export const useCategoryStore = create<CategoryStore>((set) => ({
   updateCategory: async (payload: UpdateCategoryPayload) => {
     set({ isLoading: true, error: null });
     try {
-      const { id, ...rest } = payload;
-      const response = await apiClient.put<Category>(`/TodoCategories/${id}`, rest);
+      const existing = useCategoryStore.getState().categories.find((c) => c.id === payload.id);
+      if (!existing) {
+        set({ error: 'Category not found', isLoading: false });
+        return;
+      }
+      const updated = {
+        ...existing,
+        ...payload,
+      };
+      const response = await apiClient.put<Category>(`/TodoCategories/${payload.id}`, updated);
       set((state) => ({
-        categories: state.categories.map((cat) => (cat.id === id ? response.data : cat)),
+        categories: state.categories.map((cat) => (cat.id === payload.id ? response.data : cat)),
         isLoading: false,
       }));
     } catch (err: unknown) {

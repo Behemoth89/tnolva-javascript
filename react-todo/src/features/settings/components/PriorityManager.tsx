@@ -17,6 +17,7 @@ export function PriorityManager() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+  const [newSort, setNewSort] = useState(0);
   const MAX_NAME_LENGTH = 50;
 
   useEffect(() => {
@@ -26,29 +27,33 @@ export function PriorityManager() {
   const handleAdd = async () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    await createPriority({ priorityName: trimmed });
+    await createPriority({ priorityName: trimmed, prioritySort: newSort });
     setNewName('');
+    setNewSort(0);
     setIsAdding(false);
   };
 
   const handleEditStart = (priority: Priority) => {
     setEditingId(priority.id);
     setNewName(priority.priorityName);
+    setNewSort(priority.prioritySort);
   };
 
   const handleEditSave = async () => {
     if (!editingId) return;
     const trimmed = newName.trim();
     if (!trimmed) return;
-    await updatePriority({ id: editingId, priorityName: trimmed } as UpdatePriorityPayload);
+    await updatePriority({ id: editingId, priorityName: trimmed, prioritySort: newSort } as UpdatePriorityPayload);
     setEditingId(null);
     setNewName('');
+    setNewSort(0);
   };
 
   const handleCancel = () => {
     setIsAdding(false);
     setEditingId(null);
     setNewName('');
+    setNewSort(0);
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -79,6 +84,15 @@ export function PriorityManager() {
             autoFocus
           />
           <p className="text-xs text-zinc-500 mt-1">{newName.length}/{MAX_NAME_LENGTH}</p>
+          <div className="mt-2">
+            <label className="text-xs text-zinc-400 mb-1 block">Sort order</label>
+            <input
+              type="number"
+              value={newSort}
+              onChange={(e) => setNewSort(Number(e.target.value))}
+              className="w-24 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
+            />
+          </div>
           {error && (
             <p className="text-sm text-red-500 mt-2 bg-red-500/10 border border-red-500/20 rounded px-3 py-1">
               {error}
@@ -129,7 +143,9 @@ export function PriorityManager() {
       )}
 
       <div className="space-y-2">
-        {priorities.map((priority) =>
+        {[...priorities]
+          .sort((a, b) => a.prioritySort - b.prioritySort)
+          .map((priority) =>
           editingId === priority.id ? (
             <div key={priority.id} className="p-3 bg-zinc-900 border border-amber-500/30 rounded-lg">
               <input
@@ -141,6 +157,15 @@ export function PriorityManager() {
                 autoFocus
               />
               <p className="text-xs text-zinc-500 mt-1">{newName.length}/{MAX_NAME_LENGTH}</p>
+              <div className="mt-2">
+                <label className="text-xs text-zinc-400 mb-1 block">Sort order</label>
+                <input
+                  type="number"
+                  value={newSort}
+                  onChange={(e) => setNewSort(Number(e.target.value))}
+                  className="w-24 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
+                />
+              </div>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={handleEditSave}

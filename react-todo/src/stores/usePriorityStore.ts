@@ -46,10 +46,18 @@ export const usePriorityStore = create<PriorityStore>((set) => ({
   updatePriority: async (payload: UpdatePriorityPayload) => {
     set({ isLoading: true, error: null });
     try {
-      const { id, ...rest } = payload;
-      const response = await apiClient.put<Priority>(`/TodoPriorities/${id}`, rest);
+      const existing = usePriorityStore.getState().priorities.find((p) => p.id === payload.id);
+      if (!existing) {
+        set({ error: 'Priority not found', isLoading: false });
+        return;
+      }
+      const updated = {
+        ...existing,
+        ...payload,
+      };
+      const response = await apiClient.put<Priority>(`/TodoPriorities/${payload.id}`, updated);
       set((state) => ({
-        priorities: state.priorities.map((p) => (p.id === id ? response.data : p)),
+        priorities: state.priorities.map((p) => (p.id === payload.id ? response.data : p)),
         isLoading: false,
       }));
     } catch (err: unknown) {
