@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Phase 02 authentication-ui complete — all 3 plans executed
-last_updated: "2026-04-03T11:39:27.465Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-04-03T11:40:12.261Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 5
@@ -62,6 +62,7 @@ Progress: [██████████] 100%
 | Phase 02-authentication-ui P01 | 4min | 2 tasks | 3 files |
 | Phase 02-authentication-ui P03 | 8min | 3 tasks | 6 files |
 | Phase 02-authentication-ui P03 | 8min | 3 tasks | 6 files |
+| Phase 02-authentication-ui P03 | 3min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Recent decisions affecting current work:
 - [Phase 01-foundation-api-client]: Feature-based directory structure over flat structure — scales as app grows — Feature-based organization scales better as the application grows with multiple features
 - [Phase 02-authentication-ui]: Used zinc palette (not gray) for dark theme per UI-SPEC — UI-SPEC overrides D-01 gray palette decision
 - [Phase 02-authentication-ui]: Exported singleton apiClient alongside createApiClient() factory — LoginPage needed direct import of apiClient instance — Plan specified apiClient.post() usage but only factory function was exported
+- [Phase 02-authentication-ui]: isLoading starts true, set to false via onRehydrateStorage callback after persist rehydration — Prevents flash of wrong page during Zustand persist rehydration from localStorage
+- [Phase 02-authentication-ui]: isLoading starts true, set to false via onRehydrateStorage callback after persist rehydration — Prevents flash of wrong page during Zustand persist rehydration from localStorage
 
 ### Pending Todos
 
@@ -92,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T11:38:25.069Z
-Stopped at: Phase 02 authentication-ui complete — all 3 plans executed
+Last session: 2026-04-03T11:40:12.258Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
