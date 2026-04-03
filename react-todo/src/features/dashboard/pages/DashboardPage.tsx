@@ -111,6 +111,8 @@ export function DashboardPage() {
           ) : (
             <TaskList
               tasks={tasks}
+              categories={categories}
+              priorities={priorities}
               onToggle={handleToggleTask}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}

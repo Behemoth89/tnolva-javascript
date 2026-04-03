@@ -1,14 +1,18 @@
 import type { Task } from '../../../types/task';
+import type { Category } from '../../../types/category';
+import type { Priority } from '../../../types/priority';
 import { TaskCard } from './TaskCard';
 
 interface TaskListProps {
   tasks: Task[];
+  categories: Category[];
+  priorities: Priority[];
   onToggle: (id: string) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
 }
 
-export function TaskList({ tasks, onToggle, onEdit, onDelete }: TaskListProps) {
+export function TaskList({ tasks, categories, priorities, onToggle, onEdit, onDelete }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">
@@ -23,6 +27,8 @@ export function TaskList({ tasks, onToggle, onEdit, onDelete }: TaskListProps) {
         <TaskCard
           key={task.id}
           task={task}
+          categories={categories}
+          priorities={priorities}
           onToggle={onToggle}
           onEdit={onEdit}
           onDelete={onDelete}

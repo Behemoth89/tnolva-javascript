@@ -1,13 +1,19 @@
 import type { Task } from '../../../types/task';
+import type { Category } from '../../../types/category';
+import type { Priority } from '../../../types/priority';
 
 interface TaskCardProps {
   task: Task;
+  categories: Category[];
+  priorities: Priority[];
   onToggle: (id: string) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
 }
 
-export function TaskCard({ task, onToggle, onEdit, onDelete }: TaskCardProps) {
+export function TaskCard({ task, categories, priorities, onToggle, onEdit, onDelete }: TaskCardProps) {
+  const category = categories.find((c) => c.id === task.todoCategoryId);
+  const priority = priorities.find((p) => p.id === task.todoPriorityId);
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors">
       <div className="flex items-start gap-3">
@@ -40,9 +46,15 @@ export function TaskCard({ task, onToggle, onEdit, onDelete }: TaskCardProps) {
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {/* Category badge */}
-            {task.todoCategoryId && (
+            {category && (
               <span className="inline-flex items-center rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
-                Category
+                {category.categoryName}
+              </span>
+            )}
+            {/* Priority badge */}
+            {priority && (
+              <span className="inline-flex items-center rounded bg-zinc-800 px-2 py-0.5 text-xs text-amber-500">
+                {priority.priorityName}
               </span>
             )}
             {/* Due date */}
