@@ -89,3 +89,9 @@ export function createApiClient(): AxiosInstance {
 
   return client;
 }
+
+// Singleton instance — use apiClient.post('/auth/login', payload)
+export const apiClient = createApiClient();
+
+// Singleton instance — use apiClient.post('/auth/login', payload)
+export const apiClient = createApiClient();
