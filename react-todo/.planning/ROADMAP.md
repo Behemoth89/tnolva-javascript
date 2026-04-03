@@ -46,7 +46,13 @@ Plans:
   3. User can log out from any authenticated page
   4. User session is restored on page reload (stays logged in)
   5. Unauthenticated users are redirected to login; authenticated users are redirected to dashboard when visiting login/register
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Login page with form, validation, API integration; PublicRoute wrapper for authenticated user redirect
+- [ ] 02-02-PLAN.md — Registration page with 5 fields, password confirmation validation, API integration
+- [ ] 02-03-PLAN.md — Protected route guard, dashboard navbar with greeting/logout, session persistence, rehydration loading
+
 **UI hint**: yes
 
 ### Phase 3: Todo Core
