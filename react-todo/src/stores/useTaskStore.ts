@@ -47,10 +47,18 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   updateTask: async (payload: UpdateTaskPayload) => {
     set({ isLoading: true, error: null });
     try {
-      const { id, ...rest } = payload;
-      const response = await apiClient.put<Task>(`/TodoTasks/${id}`, rest);
+      const existing = get().tasks.find((t) => t.id === payload.id);
+      if (!existing) {
+        set({ error: 'Task not found', isLoading: false });
+        return;
+      }
+      const updated = {
+        ...existing,
+        ...payload,
+      };
+      const response = await apiClient.put<Task>(`/TodoTasks/${payload.id}`, updated);
       set((state) => ({
-        tasks: state.tasks.map((task) => (task.id === id ? response.data : task)),
+        tasks: state.tasks.map((task) => (task.id === payload.id ? response.data : task)),
         isLoading: false,
       }));
     } catch (err: unknown) {
@@ -81,9 +89,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         set({ error: 'Task not found', isLoading: false });
         return;
       }
-      const response = await apiClient.put<Task>(`/TodoTasks/${id}`, {
+      const updated = {
+        ...task,
         isCompleted: !task.isCompleted,
-      });
+      };
+      const response = await apiClient.put<Task>(`/TodoTasks/${id}`, updated);
       set((state) => ({
         tasks: state.tasks.map((t) => (t.id === id ? response.data : t)),
         isLoading: false,
