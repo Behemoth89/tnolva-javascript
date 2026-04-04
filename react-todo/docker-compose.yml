@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        VITE_API_URL: https://taltech.akaver.com
+        VITE_API_BASE_URL: https://taltech.akaver.com/api/v1
     ports:
       - "84:80"
     restart: unless-stopped

@@ -7,8 +7,8 @@ RUN npm install
 
 COPY . .
 
-ARG VITE_API_URL=https://taltech.akaver.com
-ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_API_BASE_URL=https://taltech.akaver.com/api/v1
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 RUN npm run build
 
