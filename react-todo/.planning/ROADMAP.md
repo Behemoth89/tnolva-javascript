@@ -100,7 +100,11 @@ Plans:
   1. App builds successfully via Dockerfile
   2. App runs and is accessible via docker-compose
   3. SPA routing works correctly in production (nginx try_files)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Multi-stage Dockerfile (node:20-alpine → nginx:stable-alpine) and .dockerignore
+- [ ] 05-02-PLAN.md — nginx.conf for SPA routing and docker-compose.yml for deployment
 
 ## Progress
 
