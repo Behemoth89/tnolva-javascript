@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-04-04T08:48:08.788Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-04-04T08:49:38.748Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 14
-  completed_plans: 11
+  completed_plans: 12
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 04 (settings-integration) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -68,6 +68,7 @@ Progress: [██████████] 100%
 | Phase 03-todo-core P03 | 3min | 3 tasks | 4 files |
 | Phase 03-todo-core P04 | 4min | 2 tasks | 5 files |
 | Phase 04-settings-integration P02 | 2min | 2 tasks | 2 files |
+| Phase 04-settings-integration P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase 03-todo-core]: No persist middleware on todo stores — data should always be fetched fresh from API on component mount
 - [Phase 03-todo-core]: Used window.confirm for delete confirmation — simple, no extra component needed — Avoids creating a separate confirmation dialog component for a single use case
 - [Phase 03-todo-core]: TaskCard shows generic Category text badge instead of resolved category name — Category name resolution deferred to Phase 4 sidebar integration where category data will be joined
+- [Phase 04-settings-integration]: Used partialize in persist config to only persist filter fields, not tasks/isLoading/error — tasks should always be fresh from API on reload — Tasks must be fetched fresh from API; only filter preferences (category selection, date range, show completed) need to survive page reload
+- [Phase 04-settings-integration]: EmptyState accepts icon as React.ElementType rather than a variant prop — caller controls icon choice — Keeps component generic and reusable across all empty state scenarios (no tasks, no categories, no priorities, filtered empty)
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T08:48:08.784Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-04-04T08:49:38.745Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None

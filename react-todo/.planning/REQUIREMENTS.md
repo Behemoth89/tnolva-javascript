@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TASK-03**: User can edit an existing task's name, category, priority, and due date
 - [x] **TASK-04**: User can delete a task
 - [x] **TASK-05**: User can toggle task completion status
-- [ ] **TASK-06**: Priority is displayed as an icon on each task
+- [x] **TASK-06**: Priority is displayed as an icon on each task
 - [x] **TASK-07**: Tasks can be filtered by category via the sidebar
 
 ### Categories & Priorities
@@ -39,9 +39,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Settings
 
-- [ ] **SET-01**: User can access a settings page from the navigation
-- [ ] **SET-02**: User can manage categories (CRUD) from the settings page
-- [ ] **SET-03**: User can manage priorities (CRUD) from the settings page
+- [x] **SET-01**: User can access a settings page from the navigation
+- [x] **SET-02**: User can manage categories (CRUD) from the settings page
+- [x] **SET-03**: User can manage priorities (CRUD) from the settings page
 
 ### Infrastructure
 
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TASK-03 | Phase 3 | Complete |
 | TASK-04 | Phase 3 | Complete |
 | TASK-05 | Phase 3 | Complete |
-| TASK-06 | Phase 4 | Pending |
+| TASK-06 | Phase 4 | Complete |
 | TASK-07 | Phase 4 | Complete |
 | CAT-01 | Phase 3 | Complete |
 | CAT-02 | Phase 3 | Complete |
@@ -117,9 +117,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRI-01 | Phase 3 | Complete |
 | PRI-02 | Phase 3 | Complete |
 | PRI-03 | Phase 3 | Complete |
-| SET-01 | Phase 4 | Pending |
-| SET-02 | Phase 4 | Pending |
-| SET-03 | Phase 4 | Pending |
+| SET-01 | Phase 4 | Complete |
+| SET-02 | Phase 4 | Complete |
+| SET-03 | Phase 4 | Complete |
 | INF-01 | Phase 1 | Complete |
 | INF-02 | Phase 1 | Complete |
 | INF-03 | Phase 5 | Pending |
