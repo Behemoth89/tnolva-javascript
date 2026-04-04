@@ -5,6 +5,7 @@ import { useCategoryStore } from '../../../stores/useCategoryStore';
 import { usePriorityStore } from '../../../stores/usePriorityStore';
 import { TaskList } from '../components/TaskList';
 import { TaskModal } from '../components/TaskModal';
+import { Sidebar } from '../components/Sidebar';
 import type { Task, CreateTaskPayload, UpdateTaskPayload } from '../../../types/task';
 
 export function DashboardPage() {
@@ -23,6 +24,10 @@ export function DashboardPage() {
 
   const priorities = usePriorityStore((state) => state.priorities);
   const fetchPriorities = usePriorityStore((state) => state.fetchPriorities);
+
+  const selectedCategoryIds = useTaskStore((state) => state.selectedCategoryIds);
+  const selectedDateRange = useTaskStore((state) => state.selectedDateRange);
+  const showCompleted = useTaskStore((state) => state.showCompleted);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
@@ -73,9 +78,7 @@ export function DashboardPage() {
     <div className="min-h-screen bg-zinc-950">
       <Navbar />
       <div className="flex">
-        <aside className="w-64 bg-zinc-900 min-h-[calc(100vh-64px)] border-r border-zinc-800">
-          {/* Reserved for Phase 4 sidebar */}
-        </aside>
+        <Sidebar />
         <main className="flex-1 p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -116,6 +119,9 @@ export function DashboardPage() {
               onToggle={handleToggleTask}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}
+              selectedCategoryIds={selectedCategoryIds}
+              selectedDateRange={selectedDateRange}
+              showCompleted={showCompleted}
             />
           )}
 
