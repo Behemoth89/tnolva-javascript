@@ -90,7 +90,7 @@ Plans:
 - [x] 04-01-PLAN.md — Extend useTaskStore with filter state and persist, create EmptyState component
 - [x] 04-02-PLAN.md — Replace priority text badge with FlagIcon, add Home link to Navbar
 - [x] 04-03-PLAN.md — Create Sidebar component with category filtering, due date filter, completed toggle
-- [ ] 04-04-PLAN.md — Wire Sidebar into DashboardPage, add filtering logic to TaskList
+- [x] 04-04-PLAN.md — Wire Sidebar into DashboardPage, add filtering logic to TaskList
 
 ### Phase 5: Docker Deployment
 **Goal**: App can be deployed and run in a Docker container with docker-compose
