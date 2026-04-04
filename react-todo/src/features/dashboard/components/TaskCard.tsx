@@ -1,3 +1,4 @@
+import { FlagIcon } from '@heroicons/react/24/outline';
 import type { Task } from '../../../types/task';
 import type { Category } from '../../../types/category';
 import type { Priority } from '../../../types/priority';
@@ -9,6 +10,14 @@ interface TaskCardProps {
   onToggle: (id: string) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+}
+
+function getPriorityColor(priority: Priority, allPriorities: Priority[]): string {
+  const sorted = [...allPriorities].sort((a, b) => a.prioritySort - b.prioritySort);
+  const index = sorted.findIndex((p) => p.id === priority.id);
+  if (index === 0) return 'text-red-500';
+  if (index === sorted.length - 1) return 'text-green-500';
+  return 'text-amber-500';
 }
 
 export function TaskCard({ task, categories, priorities, onToggle, onEdit, onDelete }: TaskCardProps) {
@@ -51,10 +60,13 @@ export function TaskCard({ task, categories, priorities, onToggle, onEdit, onDel
                 {category.categoryName}
               </span>
             )}
-            {/* Priority badge */}
+            {/* Priority icon */}
             {priority && (
-              <span className="inline-flex items-center rounded bg-zinc-800 px-2 py-0.5 text-xs text-amber-500">
-                {priority.priorityName}
+              <span
+                title={priority.priorityName}
+                className="cursor-help inline-flex items-center"
+              >
+                <FlagIcon className={`h-5 w-5 ${getPriorityColor(priority, priorities)}`} />
               </span>
             )}
             {/* Due date */}
