@@ -26,7 +26,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TASK-04**: User can delete a task
 - [x] **TASK-05**: User can toggle task completion status
 - [ ] **TASK-06**: Priority is displayed as an icon on each task
-- [ ] **TASK-07**: Tasks can be filtered by category via the sidebar
+- [x] **TASK-07**: Tasks can be filtered by category via the sidebar
 
 ### Categories & Priorities
 
@@ -50,7 +50,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INF-03**: App can be deployed via Docker with Dockerfile and docker-compose
 - [x] **INF-04**: Loading states are displayed during all API operations
 - [x] **INF-05**: Error states with user-friendly messages are displayed on API failures
-- [ ] **INF-06**: Empty states are shown when no tasks, categories, or priorities exist
+- [x] **INF-06**: Empty states are shown when no tasks, categories, or priorities exist
 
 ## v2 Requirements
 
@@ -110,7 +110,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TASK-04 | Phase 3 | Complete |
 | TASK-05 | Phase 3 | Complete |
 | TASK-06 | Phase 4 | Pending |
-| TASK-07 | Phase 4 | Pending |
+| TASK-07 | Phase 4 | Complete |
 | CAT-01 | Phase 3 | Complete |
 | CAT-02 | Phase 3 | Complete |
 | CAT-03 | Phase 3 | Complete |
@@ -125,7 +125,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INF-03 | Phase 5 | Pending |
 | INF-04 | Phase 3 | Complete |
 | INF-05 | Phase 3 | Complete |
-| INF-06 | Phase 4 | Pending |
+| INF-06 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 30 total
