@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router';
+import { HomeIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export function Navbar() {
@@ -15,6 +16,13 @@ export function Navbar() {
     <nav className="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
       <span className="text-zinc-100 font-medium">Hi, {firstName}</span>
       <div className="flex items-center gap-4">
+        <Link
+          to="/"
+          className="text-zinc-400 hover:text-amber-500 transition-colors"
+          aria-label="Home"
+        >
+          <HomeIcon className="h-5 w-5" />
+        </Link>
         <Link
           to="/settings"
           className="text-zinc-400 hover:text-amber-500 transition-colors"
