@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  tags:
+    - shared
+  script:
+    - cd express-api && docker compose -p express-api up --build --remove-orphans --detach

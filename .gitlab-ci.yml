@@ -4,3 +4,4 @@ include:
   - local: 'typescript/.gitlab-ci.yml'
   - local: 'vue-todo/.gitlab-ci.yml'
   - local: 'react-todo/.gitlab-ci.yml'
+  - local: 'express-api/.gitlab-ci.yml'
