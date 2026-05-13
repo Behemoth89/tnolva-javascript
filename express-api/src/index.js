@@ -41,6 +41,14 @@ app.get('/swagger-docs', (req, res) => {
   res.send(swaggerHtml);
 });
 
+app.get('/test', (req, res) => {
+  res.json({ message: 'test route works' });
+});
+
+app.get('/api-docs/', (req, res) => {
+  res.send(swaggerHtml);
+});
+
 const PORT = process.env.PORT || 3000;
 
 const authRoutes = require('./routes/auth');
