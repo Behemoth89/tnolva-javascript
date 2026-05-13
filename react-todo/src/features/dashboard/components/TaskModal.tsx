@@ -1,31 +1,24 @@
 import { useState, useEffect } from 'react';
-import type { Task, CreateTaskPayload, UpdateTaskPayload } from '../../../types/task';
-import type { Category } from '../../../types/category';
-import type { Priority } from '../../../types/priority';
-
-interface TaskModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (payload: CreateTaskPayload | UpdateTaskPayload) => void;
-  task?: Task;
-  categories: Category[];
-  priorities: Priority[];
-  isSubmitting: boolean;
-}
+import type { CreateTaskPayload, UpdateTaskPayload } from '../../../types/task';
+import { useModalStore } from '../../../stores/useModalStore';
+import { useCategoryStore } from '../../../stores/useCategoryStore';
+import { usePriorityStore } from '../../../stores/usePriorityStore';
+import { useTaskStore } from '../../../stores/useTaskStore';
 
 interface FormErrors {
   taskName?: string;
 }
 
-export function TaskModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  task,
-  categories,
-  priorities,
-  isSubmitting,
-}: TaskModalProps) {
+export function TaskModal() {
+  const isOpen = useModalStore((state) => state.isOpen);
+  const editingTask = useModalStore((state) => state.editingTask);
+  const closeModal = useModalStore((state) => state.closeModal);
+
+  const categories = useCategoryStore((state) => state.categories);
+  const priorities = usePriorityStore((state) => state.priorities);
+  const isLoading = useTaskStore((state) => state.isLoading);
+  const createTask = useTaskStore((state) => state.createTask);
+  const updateTask = useTaskStore((state) => state.updateTask);
   const [taskName, setTaskName] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [priorityId, setPriorityId] = useState<string>('');
@@ -33,15 +26,15 @@ export function TaskModal({
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState(false);
 
-  const isEditMode = task !== undefined;
+  const isEditMode = editingTask !== undefined;
 
   // Pre-fill form when editing
   useEffect(() => {
-    if (task) {
-      setTaskName(task.taskName || '');
-      setCategoryId(task.todoCategoryId || '');
-      setPriorityId(task.todoPriorityId || '');
-      setDueDate(task.dueDt ? task.dueDt.split('T')[0] : '');
+    if (editingTask) {
+      setTaskName(editingTask.taskName || '');
+      setCategoryId(editingTask.todoCategoryId || '');
+      setPriorityId(editingTask.todoPriorityId || '');
+      setDueDate(editingTask.dueDt ? editingTask.dueDt.split('T')[0] : '');
     } else {
       setTaskName('');
       setCategoryId('');
@@ -50,7 +43,7 @@ export function TaskModal({
     }
     setErrors({});
     setTouched(false);
-  }, [task, isOpen]);
+  }, [editingTask, isOpen]);
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
@@ -63,7 +56,7 @@ export function TaskModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
     if (!validate()) return;
@@ -75,11 +68,14 @@ export function TaskModal({
       todoPriorityId: priorityId || null,
     };
 
-    if (isEditMode && task) {
-      (payload as UpdateTaskPayload).id = task.id;
+    if (isEditMode && editingTask) {
+      (payload as UpdateTaskPayload).id = editingTask.id;
+      await updateTask(payload);
+    } else {
+      await createTask(payload);
     }
 
-    onSubmit(payload);
+    closeModal();
   };
 
   const handleClose = () => {
@@ -89,7 +85,7 @@ export function TaskModal({
     setDueDate('');
     setErrors({});
     setTouched(false);
-    onClose();
+    closeModal();
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,17 +187,17 @@ export function TaskModal({
             <button
               type="button"
               onClick={handleClose}
-              disabled={isSubmitting}
+              disabled={isLoading}
               className="flex-1 bg-zinc-800 text-zinc-400 rounded-lg px-4 py-2 hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !taskName.trim()}
+              disabled={isLoading || !taskName.trim()}
               className="flex-1 bg-amber-500 text-zinc-900 font-medium rounded-lg px-4 py-2 hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Saving...' : isEditMode ? 'Update Task' : 'Create Task'}
+              {isLoading ? 'Saving...' : isEditMode ? 'Update Task' : 'Create Task'}
             </button>
           </div>
         </form>

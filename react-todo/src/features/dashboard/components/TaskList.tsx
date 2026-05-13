@@ -1,18 +1,11 @@
 import { useMemo } from 'react';
 import type { Task } from '../../../types/task';
-import type { Category } from '../../../types/category';
-import type { Priority } from '../../../types/priority';
+import { useTaskStore } from '../../../stores/useTaskStore';
 import { TaskCard } from './TaskCard';
 import { EmptyState } from '../../../components/EmptyState';
 import { InboxIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 interface TaskListProps {
-  tasks: Task[];
-  categories: Category[];
-  priorities: Priority[];
-  onToggle: (id: string) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (id: string) => void;
   selectedCategoryIds?: string[];
   selectedDateRange?: string | null;
   showCompleted?: boolean;
@@ -57,16 +50,11 @@ function isDateInRange(date: Date, range: string, now: Date, today: Date): boole
 }
 
 export function TaskList({
-  tasks,
-  categories,
-  priorities,
-  onToggle,
-  onEdit,
-  onDelete,
   selectedCategoryIds = [],
   selectedDateRange = null,
   showCompleted = false,
 }: TaskListProps) {
+  const tasks = useTaskStore((state) => state.tasks);
   const filteredTasks = useMemo(() => {
     let result = tasks;
 
@@ -136,15 +124,7 @@ export function TaskList({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {filteredTasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          categories={categories}
-          priorities={priorities}
-          onToggle={onToggle}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <TaskCard key={task.id} task={task} />
       ))}
     </div>
   );

@@ -1,15 +1,12 @@
 import { FlagIcon } from '@heroicons/react/24/outline';
-import type { Task } from '../../../types/task';
-import type { Category } from '../../../types/category';
-import type { Priority } from '../../../types/priority';
+import type { Task, Priority } from '../../../types/task';
+import { useTaskStore } from '../../../stores/useTaskStore';
+import { useCategoryStore } from '../../../stores/useCategoryStore';
+import { usePriorityStore } from '../../../stores/usePriorityStore';
+import { useModalStore } from '../../../stores/useModalStore';
 
 interface TaskCardProps {
   task: Task;
-  categories: Category[];
-  priorities: Priority[];
-  onToggle: (id: string) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (id: string) => void;
 }
 
 function getPriorityColor(priority: Priority, allPriorities: Priority[]): string {
@@ -20,16 +17,33 @@ function getPriorityColor(priority: Priority, allPriorities: Priority[]): string
   return 'text-amber-500';
 }
 
-export function TaskCard({ task, categories, priorities, onToggle, onEdit, onDelete }: TaskCardProps) {
+export function TaskCard({ task }: TaskCardProps) {
+  const categories = useCategoryStore((state) => state.categories);
+  const priorities = usePriorityStore((state) => state.priorities);
+  const toggleTaskCompletion = useTaskStore((state) => state.toggleTaskCompletion);
+  const deleteTask = useTaskStore((state) => state.deleteTask);
+  const openModal = useModalStore((state) => state.openModal);
+
   const category = categories.find((c) => c.id === task.todoCategoryId);
   const priority = priorities.find((p) => p.id === task.todoPriorityId);
+
+  const handleToggle = () => toggleTaskCompletion(task.id);
+
+  const handleEdit = () => openModal(task);
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      await deleteTask(task.id);
+    }
+  };
+
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors">
       <div className="flex items-start gap-3">
         {/* Checkbox */}
         <button
           type="button"
-          onClick={() => onToggle(task.id)}
+          onClick={handleToggle}
           className={`mt-0.5 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
             task.isCompleted
               ? 'bg-amber-500 border-amber-500'
@@ -82,7 +96,7 @@ export function TaskCard({ task, categories, priorities, onToggle, onEdit, onDel
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => onEdit(task)}
+            onClick={handleEdit}
             className="p-1.5 text-zinc-400 hover:text-amber-500 transition-colors rounded"
             aria-label="Edit task"
           >
@@ -92,7 +106,7 @@ export function TaskCard({ task, categories, priorities, onToggle, onEdit, onDel
           </button>
           <button
             type="button"
-            onClick={() => onDelete(task.id)}
+            onClick={handleDelete}
             className="p-1.5 text-zinc-400 hover:text-red-500 transition-colors rounded"
             aria-label="Delete task"
           >

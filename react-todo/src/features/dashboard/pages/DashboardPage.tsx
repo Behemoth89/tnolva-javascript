@@ -1,36 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Navbar } from '../../../components/Navbar';
 import { useTaskStore } from '../../../stores/useTaskStore';
 import { useCategoryStore } from '../../../stores/useCategoryStore';
 import { usePriorityStore } from '../../../stores/usePriorityStore';
+import { useModalStore } from '../../../stores/useModalStore';
 import { TaskList } from '../components/TaskList';
 import { TaskModal } from '../components/TaskModal';
 import { Sidebar } from '../components/Sidebar';
-import type { Task, CreateTaskPayload, UpdateTaskPayload } from '../../../types/task';
 
 export function DashboardPage() {
   const tasks = useTaskStore((state) => state.tasks);
   const isLoading = useTaskStore((state) => state.isLoading);
   const error = useTaskStore((state) => state.error);
   const fetchTasks = useTaskStore((state) => state.fetchTasks);
-  const createTask = useTaskStore((state) => state.createTask);
-  const updateTask = useTaskStore((state) => state.updateTask);
-  const deleteTask = useTaskStore((state) => state.deleteTask);
-  const toggleTaskCompletion = useTaskStore((state) => state.toggleTaskCompletion);
   const clearError = useTaskStore((state) => state.clearError);
 
-  const categories = useCategoryStore((state) => state.categories);
   const fetchCategories = useCategoryStore((state) => state.fetchCategories);
-
-  const priorities = usePriorityStore((state) => state.priorities);
   const fetchPriorities = usePriorityStore((state) => state.fetchPriorities);
 
   const selectedCategoryIds = useTaskStore((state) => state.selectedCategoryIds);
   const selectedDateRange = useTaskStore((state) => state.selectedDateRange);
   const showCompleted = useTaskStore((state) => state.showCompleted);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const openModal = useModalStore((state) => state.openModal);
 
   // Fetch data on mount
   useEffect(() => {
@@ -39,40 +31,7 @@ export function DashboardPage() {
     fetchPriorities();
   }, [fetchTasks, fetchCategories, fetchPriorities]);
 
-  const handleAddTask = () => {
-    setEditingTask(undefined);
-    setIsModalOpen(true);
-  };
-
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteTask = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      await deleteTask(id);
-    }
-  };
-
-  const handleToggleTask = async (id: string) => {
-    await toggleTaskCompletion(id);
-  };
-
-  const handleSubmitTask = async (payload: CreateTaskPayload | UpdateTaskPayload) => {
-    if ('id' in payload) {
-      await updateTask(payload);
-    } else {
-      await createTask(payload);
-    }
-    setIsModalOpen(false);
-    setEditingTask(undefined);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setEditingTask(undefined);
-  };
+  const handleAddTask = () => openModal();
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -113,12 +72,6 @@ export function DashboardPage() {
             </div>
           ) : (
             <TaskList
-              tasks={tasks}
-              categories={categories}
-              priorities={priorities}
-              onToggle={handleToggleTask}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
               selectedCategoryIds={selectedCategoryIds}
               selectedDateRange={selectedDateRange}
               showCompleted={showCompleted}
@@ -126,15 +79,7 @@ export function DashboardPage() {
           )}
 
           {/* Task modal */}
-          <TaskModal
-            isOpen={isModalOpen}
-            onClose={handleModalClose}
-            onSubmit={handleSubmitTask}
-            task={editingTask}
-            categories={categories}
-            priorities={priorities}
-            isSubmitting={isLoading}
-          />
+          <TaskModal />
         </main>
       </div>
     </div>
