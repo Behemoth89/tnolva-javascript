@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import type { Task } from '../../../types/task';
 import { useTaskStore } from '../../../stores/useTaskStore';
 import { TaskCard } from './TaskCard';
 import { EmptyState } from '../../../components/EmptyState';

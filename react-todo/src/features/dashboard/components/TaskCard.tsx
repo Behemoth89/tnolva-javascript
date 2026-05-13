@@ -1,5 +1,6 @@
 import { FlagIcon } from '@heroicons/react/24/outline';
-import type { Task, Priority } from '../../../types/task';
+import type { Task } from '../../../types/task';
+import type { Priority } from '../../../types/priority';
 import { useTaskStore } from '../../../stores/useTaskStore';
 import { useCategoryStore } from '../../../stores/useCategoryStore';
 import { usePriorityStore } from '../../../stores/usePriorityStore';

@@ -61,17 +61,22 @@ export function TaskModal() {
     setTouched(true);
     if (!validate()) return;
 
-    const payload: CreateTaskPayload | UpdateTaskPayload = {
-      taskName: taskName.trim(),
-      dueDt: dueDate || null,
-      todoCategoryId: categoryId || null,
-      todoPriorityId: priorityId || null,
-    };
-
     if (isEditMode && editingTask) {
-      (payload as UpdateTaskPayload).id = editingTask.id;
+      const payload: UpdateTaskPayload = {
+        id: editingTask.id,
+        taskName: taskName.trim(),
+        dueDt: dueDate || null,
+        todoCategoryId: categoryId || null,
+        todoPriorityId: priorityId || null,
+      };
       await updateTask(payload);
     } else {
+      const payload: CreateTaskPayload = {
+        taskName: taskName.trim(),
+        dueDt: dueDate || null,
+        todoCategoryId: categoryId || null,
+        todoPriorityId: priorityId || null,
+      };
       await createTask(payload);
     }
 

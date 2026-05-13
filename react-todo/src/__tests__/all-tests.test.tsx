@@ -16,6 +16,7 @@ import { useAuthStore } from '../stores/useAuthStore';
 import { useTaskStore } from '../stores/useTaskStore';
 import { useCategoryStore } from '../stores/useCategoryStore';
 import { usePriorityStore } from '../stores/usePriorityStore';
+import { useModalStore } from '../stores/useModalStore';
 import type { Task } from '../types/task';
 import type { Category } from '../types/category';
 import type { Priority } from '../types/priority';
@@ -510,117 +511,119 @@ describe('Phase 3: Todo Core', () => {
   });
 
   describe('TaskCard Component (TASK-01..05)', () => {
+    beforeEach(() => {
+      useCategoryStore.setState({ categories: mockCategories });
+      usePriorityStore.setState({ priorities: mockPriorities });
+      useTaskStore.setState({ tasks: [mockTask] });
+      useModalStore.setState({ isOpen: false, editingTask: undefined });
+    });
+
     it('renders task name', () => {
-      renderWithRouter(
-        <TaskCard task={mockTask} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />
-      );
+      renderWithRouter(<TaskCard task={mockTask} />);
       expect(screen.getByText('Test Task')).toBeInTheDocument();
     });
 
     it('renders category name', () => {
-      renderWithRouter(
-        <TaskCard task={mockTask} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />
-      );
+      renderWithRouter(<TaskCard task={mockTask} />);
       expect(screen.getByText('Work')).toBeInTheDocument();
     });
 
-    it('calls onToggle when checkbox is clicked (TASK-05)', () => {
-      const onToggle = vi.fn();
-      renderWithRouter(
-        <TaskCard task={mockTask} categories={mockCategories} priorities={mockPriorities} onToggle={onToggle} onEdit={vi.fn()} onDelete={vi.fn()} />
-      );
+    it('calls toggleTaskCompletion when checkbox is clicked (TASK-05)', () => {
+      const toggleSpy = vi.spyOn(useTaskStore.getState(), 'toggleTaskCompletion');
+      renderWithRouter(<TaskCard task={mockTask} />);
       fireEvent.click(screen.getByRole('button', { name: /mark as complete/i }));
-      expect(onToggle).toHaveBeenCalledWith('task-1');
+      expect(toggleSpy).toHaveBeenCalledWith('task-1');
     });
 
-    it('calls onEdit when edit button is clicked (TASK-03)', () => {
-      const onEdit = vi.fn();
-      renderWithRouter(
-        <TaskCard task={mockTask} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={onEdit} onDelete={vi.fn()} />
-      );
+    it('opens modal when edit button is clicked (TASK-03)', () => {
+      renderWithRouter(<TaskCard task={mockTask} />);
       fireEvent.click(screen.getByRole('button', { name: /edit task/i }));
-      expect(onEdit).toHaveBeenCalledWith(mockTask);
+      expect(useModalStore.getState().isOpen).toBe(true);
+      expect(useModalStore.getState().editingTask).toEqual(mockTask);
     });
 
-    it('calls onDelete when delete button is clicked (TASK-04)', () => {
-      const onDelete = vi.fn();
-      renderWithRouter(
-        <TaskCard task={mockTask} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={vi.fn()} onDelete={onDelete} />
-      );
+    it('calls deleteTask when delete button is clicked (TASK-04)', () => {
+      const deleteSpy = vi.spyOn(useTaskStore.getState(), 'deleteTask');
+      renderWithRouter(<TaskCard task={mockTask} />);
       fireEvent.click(screen.getByRole('button', { name: /delete task/i }));
-      expect(onDelete).toHaveBeenCalledWith('task-1');
+      expect(deleteSpy).toHaveBeenCalledWith('task-1');
     });
 
     it('applies line-through style for completed tasks', () => {
       const completedTask = { ...mockTask, isCompleted: true };
-      renderWithRouter(
-        <TaskCard task={completedTask} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />
-      );
+      renderWithRouter(<TaskCard task={completedTask} />);
       expect(screen.getByText('Test Task')).toHaveClass('line-through');
     });
   });
 
   describe('TaskList Component (TASK-01)', () => {
+    beforeEach(() => {
+      useCategoryStore.setState({ categories: mockCategories });
+      usePriorityStore.setState({ priorities: mockPriorities });
+      useModalStore.setState({ isOpen: false, editingTask: undefined });
+    });
+
     it('renders empty state when no tasks', () => {
-      renderWithRouter(
-        <TaskList tasks={[]} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />
-      );
+      useTaskStore.setState({ tasks: [] });
+      renderWithRouter(<TaskList />);
       expect(screen.getByText(/no tasks yet/i)).toBeInTheDocument();
     });
 
     it('renders tasks in a list', () => {
-      renderWithRouter(
-        <TaskList tasks={[mockTask]} categories={mockCategories} priorities={mockPriorities} onToggle={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />
-      );
+      useTaskStore.setState({ tasks: [mockTask] });
+      renderWithRouter(<TaskList />);
       expect(screen.getByText('Test Task')).toBeInTheDocument();
     });
   });
 
   describe('TaskModal Component (TASK-02, TASK-03)', () => {
-    it('does not render when isOpen is false', () => {
-      renderWithRouter(
-        <TaskModal isOpen={false} onClose={vi.fn()} onSubmit={vi.fn()} categories={mockCategories} priorities={mockPriorities} isSubmitting={false} />
-      );
+    beforeEach(() => {
+      useCategoryStore.setState({ categories: mockCategories });
+      usePriorityStore.setState({ priorities: mockPriorities });
+      useTaskStore.setState({ isLoading: false, tasks: [] });
+    });
+
+    it('does not render when modal is closed', () => {
+      useModalStore.setState({ isOpen: false, editingTask: undefined });
+      renderWithRouter(<TaskModal />);
       expect(screen.queryByText('Create Task')).not.toBeInTheDocument();
     });
 
     it('renders create mode form', () => {
-      renderWithRouter(
-        <TaskModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} categories={mockCategories} priorities={mockPriorities} isSubmitting={false} />
-      );
+      useModalStore.setState({ isOpen: true, editingTask: undefined });
+      renderWithRouter(<TaskModal />);
       expect(screen.getByRole('heading', { name: 'Create Task' })).toBeInTheDocument();
       expect(screen.getByLabelText('Task name')).toBeInTheDocument();
     });
 
     it('renders edit mode form with pre-filled values', () => {
-      renderWithRouter(
-        <TaskModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} task={mockTask} categories={mockCategories} priorities={mockPriorities} isSubmitting={false} />
-      );
+      useModalStore.setState({ isOpen: true, editingTask: mockTask });
+      renderWithRouter(<TaskModal />);
       expect(screen.getByText('Edit Task')).toBeInTheDocument();
       expect(screen.getByLabelText('Task name')).toHaveValue('Test Task');
     });
 
     it('disables submit button when task name is empty', () => {
-      renderWithRouter(
-        <TaskModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} categories={mockCategories} priorities={mockPriorities} isSubmitting={false} />
-      );
+      useModalStore.setState({ isOpen: true, editingTask: undefined });
+      renderWithRouter(<TaskModal />);
       expect(screen.getByRole('button', { name: /^Create Task$/ })).toBeDisabled();
     });
 
-    it('submits payload when form is valid', () => {
-      const onSubmit = vi.fn();
-      renderWithRouter(
-        <TaskModal isOpen={true} onClose={vi.fn()} onSubmit={onSubmit} categories={mockCategories} priorities={mockPriorities} isSubmitting={false} />
-      );
+    it('calls createTask when form is submitted', async () => {
+      const createSpy = vi.spyOn(useTaskStore.getState(), 'createTask');
+      useModalStore.setState({ isOpen: true, editingTask: undefined });
+      renderWithRouter(<TaskModal />);
       fireEvent.change(screen.getByLabelText('Task name'), { target: { value: 'New Task' } });
       fireEvent.click(screen.getByRole('button', { name: /^Create Task$/ }));
-      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ taskName: 'New Task' }));
+      await waitFor(() => {
+        expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({ taskName: 'New Task' }));
+      });
     });
 
     it('disables submit button while submitting (INF-04)', () => {
-      renderWithRouter(
-        <TaskModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} categories={mockCategories} priorities={mockPriorities} isSubmitting={true} />
-      );
+      useTaskStore.setState({ isLoading: true });
+      useModalStore.setState({ isOpen: true, editingTask: undefined });
+      renderWithRouter(<TaskModal />);
       expect(screen.getByText('Saving...')).toBeDisabled();
     });
   });
