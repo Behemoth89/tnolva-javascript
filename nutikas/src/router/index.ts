@@ -38,6 +38,12 @@ const routes: RouteRecordRaw[] = [
     name: 'team-detail',
     component: () => import('@/views/TeamDetailView.vue'),
     meta: { guestOnly: false }
+  },
+  {
+    path: '/contests/:id/my-teams',
+    name: 'my-teams',
+    component: () => import('@/views/MyTeamsView.vue'),
+    meta: { guestOnly: false }
   }
 ]
 
