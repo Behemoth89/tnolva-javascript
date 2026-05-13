@@ -1,7 +1,8 @@
 <script setup lang="ts">
-// App component - router-view and ReloadPrompt will be added in Task 4
+import ReloadPrompt from './components/ReloadPrompt.vue'
 </script>
 
 <template>
   <router-view />
+  <ReloadPrompt />
 </template>
