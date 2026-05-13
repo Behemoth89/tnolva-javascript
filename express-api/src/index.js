@@ -2,46 +2,18 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
-
-const path = require('path');
-
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.4',
-    info: {
-      title: 'Express Todo API',
-      version: '1.0',
-      description: 'Todo API with authentication'
-    },
-    servers: [
-      { url: `http://localhost:${process.env.PORT || 3000}`, description: 'Local server' }
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Enter JWT token'
-        }
-      }
-    },
-    security: [{ bearerAuth: [] }]
-  },
-  apis: [path.join(__dirname, 'routes', '*.js')]
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/api-docs', (req, res) => {
-  const html = `<!DOCTYPE html>
+const swaggerSpec = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'existing-api.json'), 'utf8'));
+
+const swaggerHtml = `<!DOCTYPE html>
 <html>
 <head>
   <title>Swagger</title>
@@ -53,22 +25,16 @@ app.get('/api-docs', (req, res) => {
   <script>
     window.onload = () => {
       SwaggerUIBundle({
-        url: '/api-docs.json',
+        spec: ${JSON.stringify(swaggerSpec)},
         dom_id: '#swagger-ui',
       });
     };
   </script>
 </body>
 </html>`;
-  res.send(html);
-});
-
-app.get('/api-docs.json', (req, res) => {
-  res.json(swaggerDocs);
-});
 
 app.get('/', (req, res) => {
-  res.redirect('/api-docs');
+  res.send(swaggerHtml);
 });
 
 const PORT = process.env.PORT || 3000;
@@ -96,7 +62,6 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
 });
 
 module.exports = app;
