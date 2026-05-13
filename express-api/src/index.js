@@ -13,25 +13,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/swagger-ui', express.static(path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist')));
 
-app.get('/swagger-ui-check', (req, res) => {
-  const distPath = path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist');
-  fs.readdir(distPath, (err, files) => {
-    if (err) return res.json({ error: err.message, path: distPath });
-    res.json({ path: distPath, files: files });
-  });
-});
-
 const swaggerSpec = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'existing-api.json'), 'utf8'));
 
 const swaggerHtml = `<!DOCTYPE html>
 <html>
 <head>
   <title>API Documentation</title>
-  <link rel="stylesheet" href="/swagger-ui/swagger-ui.min.css">
+  <link rel="stylesheet" href="/swagger-ui/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="/swagger-ui/swagger-ui-bundle.min.js"></script>
+  <script src="/swagger-ui/swagger-ui-bundle.js"></script>
   <script>
     window.onload = function() {
       const ui = SwaggerUIBundle({
