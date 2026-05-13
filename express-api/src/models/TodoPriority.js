@@ -16,7 +16,8 @@ function toCamelCase(obj) {
 
 async function createTodoPriority(priorityName, prioritySort = 0) {
   const result = await db.query(
-    `INSERT INTO todo_priorities (priority_name, priority_sort) VALUES ($1, $2) RETURNING *`,
+    `INSERT INTO todo_priorities (priority_name, priority_sort, sync_dt)
+     VALUES ($1, $2, current_timestamp) RETURNING *`,
     [priorityName, prioritySort]
   );
   return toCamelCase(result.rows[0]);

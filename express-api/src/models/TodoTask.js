@@ -29,13 +29,12 @@ function formatDateForDb(value) {
 
 async function createTodoTask(data) {
   const result = await db.query(
-    `INSERT INTO todo_tasks (task_name, task_sort, created_dt, due_dt, is_completed, is_archived, todo_category_id, todo_priority_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO todo_tasks (task_name, task_sort, due_dt, is_completed, is_archived, todo_category_id, todo_priority_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
     [
       data.taskName || null,
       data.taskSort || 0,
-      formatDateForDb(data.createdDt) || new Date().toISOString(),
       formatDateForDb(data.dueDt),
       data.isCompleted || false,
       data.isArchived || false,
@@ -61,19 +60,17 @@ async function updateTodoTask(id, data) {
     `UPDATE todo_tasks SET
        task_name = COALESCE($1, task_name),
        task_sort = COALESCE($2, task_sort),
-       created_dt = COALESCE($3, created_dt),
-       due_dt = $4,
-       is_completed = COALESCE($5, is_completed),
-       is_archived = COALESCE($6, is_archived),
-       todo_category_id = $7,
-       todo_priority_id = $8,
+       due_dt = $3,
+       is_completed = COALESCE($4, is_completed),
+       is_archived = COALESCE($5, is_archived),
+       todo_category_id = $6,
+       todo_priority_id = $7,
        sync_dt = current_timestamp
-     WHERE id = $9
+     WHERE id = $8
      RETURNING *`,
     [
       data.taskName,
       data.taskSort,
-      formatDateForDb(data.createdDt),
       formatDateForDb(data.dueDt),
       data.isCompleted,
       data.isArchived,

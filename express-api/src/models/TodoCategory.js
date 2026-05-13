@@ -16,7 +16,8 @@ function toCamelCase(obj) {
 
 async function createTodoCategory(categoryName, categorySort = 0, tag = null) {
   const result = await db.query(
-    `INSERT INTO todo_categories (category_name, category_sort, tag) VALUES ($1, $2, $3) RETURNING *`,
+    `INSERT INTO todo_categories (category_name, category_sort, tag, sync_dt)
+     VALUES ($1, $2, $3, current_timestamp) RETURNING *`,
     [categoryName, categorySort, tag]
   );
   return toCamelCase(result.rows[0]);
