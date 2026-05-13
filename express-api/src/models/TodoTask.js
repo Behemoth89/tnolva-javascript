@@ -4,13 +4,13 @@ function toCamelCase(obj) {
   if (Array.isArray(obj)) {
     return obj.map(toCamelCase);
   }
-  if (obj && typeof obj === 'object') {
+  if (obj && typeof obj === 'object' && obj !== null) {
     return Object.keys(obj).reduce((acc, key) => {
       const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
       let value = obj[key];
       if (value instanceof Date) {
         value = value.toISOString();
-      } else if (value && typeof value === 'object') {
+      } else if (value && typeof value === 'object' && !(value instanceof Date)) {
         value = toCamelCase(value);
       }
       acc[camelKey] = value;
@@ -20,25 +20,14 @@ function toCamelCase(obj) {
   return obj;
 }
 
-function toISOString(value) {
-  if (!value) return null;
-  if (value instanceof Date) return value.toISOString();
-  return value;
-}
-
-function toISODate(value) {
-  if (!value) return null;
+function formatDateForDb(value) {
+  if (!value || value === '') return null;
   if (typeof value === 'string') return value;
   if (value instanceof Date) return value.toISOString();
-  if (typeof value === 'object' && Object.keys(value).length === 0) return null;
-  const parsed = new Date(value);
-  return isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  return String(value);
 }
 
 async function createTodoTask(data) {
-  const dueDt = toISODate(data.dueDt);
-  const createdDt = toISODate(data.createdDt) || new Date().toISOString();
-  
   const result = await db.query(
     `INSERT INTO todo_tasks (task_name, task_sort, created_dt, due_dt, is_completed, is_archived, todo_category_id, todo_priority_id)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -46,8 +35,8 @@ async function createTodoTask(data) {
     [
       data.taskName || null,
       data.taskSort || 0,
-      createdDt,
-      dueDt,
+      formatDateForDb(data.createdDt) || new Date().toISOString(),
+      formatDateForDb(data.dueDt),
       data.isCompleted || false,
       data.isArchived || false,
       data.todoCategoryId || null,
@@ -68,9 +57,6 @@ async function getTodoTaskById(id) {
 }
 
 async function updateTodoTask(id, data) {
-  const dueDt = data.dueDt === undefined ? null : toISODate(data.dueDt);
-  const createdDt = toISODate(data.createdDt);
-  
   const result = await db.query(
     `UPDATE todo_tasks SET
        task_name = COALESCE($1, task_name),
@@ -87,8 +73,8 @@ async function updateTodoTask(id, data) {
     [
       data.taskName,
       data.taskSort,
-      createdDt,
-      dueDt,
+      formatDateForDb(data.createdDt),
+      formatDateForDb(data.dueDt),
       data.isCompleted,
       data.isArchived,
       data.todoCategoryId,
