@@ -37,11 +37,7 @@ app.get('/', (req, res) => {
   res.send(swaggerHtml);
 });
 
-app.get('/api-docs', (req, res) => {
-  res.send(swaggerHtml);
-});
-
-app.get('/api-docs/', (req, res) => {
+app.get('/swagger-docs', (req, res) => {
   res.send(swaggerHtml);
 });
 
