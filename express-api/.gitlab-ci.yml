@@ -8,4 +8,4 @@ deploy:
   tags:
     - shared
   script:
-    - cd express-api && docker compose -p express-api up --build --remove-orphans --detach
+    - cd express-api && docker compose build --no-cache && docker compose -p express-api up --remove-orphans --detach
