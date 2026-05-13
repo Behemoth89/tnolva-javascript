@@ -30,10 +30,10 @@
 - DOCK-03: CORS is configured for API communication
 
 ### Plans
-- [ ] 01-01-PLAN.md — Scaffolding: Vite + Vue 3 + TypeScript, directory structure, ESLint + Prettier
-- [ ] 01-02-PLAN.md — PWA Configuration: vite-plugin-pwa, PWA icons, service worker, update prompt
-- [ ] 01-03-PLAN.md — Docker Setup: multi-stage Dockerfile, nginx config, docker-compose
-- [ ] 01-04-PLAN.md — Walking Skeleton verification: end-to-end dev + Docker verification, SKELETON.md
+- [x] 01-01-PLAN.md — Scaffolding: Vite + Vue 3 + TypeScript, directory structure, ESLint + Prettier
+- [x] 01-02-PLAN.md — PWA Configuration: vite-plugin-pwa, PWA icons, service worker, update prompt
+- [x] 01-03-PLAN.md — Docker Setup: multi-stage Dockerfile, nginx config, docker-compose
+- [x] 01-04-PLAN.md — Walking Skeleton verification: end-to-end dev + Docker verification, SKELETON.md
 
 ### Success Criteria
 1. App builds without errors
