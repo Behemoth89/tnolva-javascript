@@ -1,12 +1,17 @@
 import Dexie, { type Table } from 'dexie'
+import type { ActiveTeamRecord } from '@/types/team'
 
 export class NutikasAuth extends Dexie {
   auth!: Table<{ key: string; value: string }>
+  activeTeam!: Table<ActiveTeamRecord>
 
   constructor() {
     super('NutikasAuth')
     this.version(1).stores({
       auth: 'key' // primary key is 'jwt' or 'refreshToken'
+    })
+    this.version(2).stores({
+      activeTeam: 'id' // primary key is 'current' (constant)
     })
   }
 }
