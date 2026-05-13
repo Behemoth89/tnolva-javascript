@@ -17,20 +17,17 @@ const swaggerHtml = `<!DOCTYPE html>
 <html>
 <head>
   <title>API Documentation</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui@5.11.0/dist/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" charset="UTF-8"></script>
+  <script src="https://unpkg.com/swagger-ui@5.11.0/dist/swagger-ui-bundle.js"></script>
   <script>
     window.onload = function() {
       const ui = SwaggerUIBundle({
-        url: '/api.json',
+        spec: ${JSON.stringify(swaggerSpec)},
         dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-        ]
+        deepLinking: true
       });
       window.ui = ui;
     };
@@ -38,27 +35,11 @@ const swaggerHtml = `<!DOCTYPE html>
 </body>
 </html>`;
 
-app.get('/api.json', (req, res) => {
-  res.json(swaggerSpec);
-});
-
-app.get('/', (req, res) => {
-  res.send(swaggerHtml);
-});
-
 app.get('/', (req, res) => {
   res.send(swaggerHtml);
 });
 
 app.get('/swagger-docs', (req, res) => {
-  res.send(swaggerHtml);
-});
-
-app.get('/test', (req, res) => {
-  res.json({ message: 'test route works' });
-});
-
-app.get('/api-docs/', (req, res) => {
   res.send(swaggerHtml);
 });
 
