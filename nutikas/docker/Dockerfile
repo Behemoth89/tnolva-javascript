@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy package files first for better layer caching
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy source and build
 COPY . .
@@ -12,6 +12,10 @@ RUN npm run build
 
 # Stage 2: Serve with nginx
 FROM nginx:alpine
+
+# Create nginx directories for non-root operation
+RUN mkdir -p /var/cache/nginx/client_temp /var/run && \
+    chown -R nginx:nginx /var/cache/nginx /var/run /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/nginx.conf

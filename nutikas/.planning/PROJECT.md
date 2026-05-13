@@ -39,6 +39,17 @@ Participants complete checkpoints and finish the race with confidence their scor
 - [Multiple device login] — Single session per account in v1
 - [OAuth social login] — Email/password sufficient for v1
 
+## API Conventions
+
+**MUST READ before implementing any API-related code.** All agents implementing API features must first read:
+- `devhelp/api-spec.json` — Full OpenAPI 3.0.4 specification
+- `devhelp/user-flow.md` — End-to-end flow documentation
+
+Key conventions:
+- All endpoints return/accept JSON
+- Times are ISO 8601 UTC
+- Property names use **camelCase** on the wire (e.g., `isOpenForParticipation`, `userTeamId`)
+
 ## Context
 
 - Backend: Existing .NET/NestJS API in `nutikas/` directory, exposes `/api/v1/` REST endpoints with JWT authentication
