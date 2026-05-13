@@ -37,6 +37,14 @@ app.get('/', (req, res) => {
   res.send(swaggerHtml);
 });
 
+app.get('/api-docs', (req, res) => {
+  res.send(swaggerHtml);
+});
+
+app.get('/api-docs/', (req, res) => {
+  res.send(swaggerHtml);
+});
+
 const PORT = process.env.PORT || 3000;
 
 const authRoutes = require('./routes/auth');
