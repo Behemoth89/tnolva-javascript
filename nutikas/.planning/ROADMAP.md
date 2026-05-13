@@ -107,22 +107,8 @@
 - TEAM-03: User can view details of their registered team
 
 ### Plans
-
-#### Plan 4.1: Team Registration Form
-- Create team registration form
-- Input: team name, member names, class selection
-- POST to API, handle validation errors
-- Redirect to active race view on success
-
-#### Plan 4.2: My Teams View
-- Show user's teams in selected contest
-- Display team name, class, status
-- Link to team detail
-
-#### Plan 4.3: Team Store
-- Create Pinia team store
-- Store active team (userTeamId)
-- Persist active team for resume
+- [ ] 04-01-PLAN.md — Foundation: types, API client, team store, Dexie schema extension
+- [ ] 04-02-PLAN.md — UI: RegistrationModal, MyTeamsView, router route
 
 ### Success Criteria
 1. User can register team with name, members, class
