@@ -57,24 +57,10 @@
 - AUTH-06: App automatically refreshes JWT when expired
 
 ### Plans
-
-#### Plan 2.1: Auth Store
-- Create Pinia auth store
-- Store JWT, refreshToken, user info
-- Implement persist to IndexedDB via Dexie
-- Add computed isAuthenticated, currentUser
-
-#### Plan 2.2: API Client
-- Create Axios instance with base URL
-- Add request interceptor for JWT header
-- Add response interceptor for 401 handling
-- Implement token refresh flow
-
-#### Plan 2.3: Auth Views
-- Create login form component
-- Create registration form component
-- Implement form validation
-- Add route guards for protected pages
+- [ ] 02-01-PLAN.md — Auth Store: Pinia store with IndexedDB persistence via Dexie
+- [ ] 02-02-PLAN.md — API Client: Axios instance with JWT injection and 401 refresh (TDD)
+- [ ] 02-03-PLAN.md — Auth Endpoints: Typed API calls and useAuth composable
+- [ ] 02-04-PLAN.md — Auth Views: Login/Register components, router guards
 
 ### Success Criteria
 1. User can register and receives JWT
