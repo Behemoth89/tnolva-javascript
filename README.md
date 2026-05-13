@@ -11,6 +11,7 @@ A collection of my web development projects.
 | Vue Todo | Todo application built with Vue.js | ✅ Live | [tnolva-vue-todo.proxy.itcollege.ee](https://tnolva-vue-todo.proxy.itcollege.ee) |
 | React Todo | Todo application built with React | ✅ Live | [tnolva-react-todo.proxy.itcollege.ee](https://tnolva-react-todo.proxy.itcollege.ee) |
 | Express API | Express.js REST API | ✅ Live | [tnolva-express-api.proxy.itcollege.ee](https://tnolva-express-api.proxy.itcollege.ee) |
+| Vue Todo Express | Full-stack todo app with Vue.js + Express | ✅ Live | [tnolva-vue-todo-express.proxy.itcollege.ee](https://tnolva-vue-todo-express.proxy.itcollege.ee) |
 
 ---
 
@@ -21,6 +22,7 @@ A collection of my web development projects.
 - **Vue Todo**: [View Project](./vue-todo) | [Live Demo](https://tnolva-vue-todo.proxy.itcollege.ee)
 - **React Todo**: [View Project](./react-todo) | [Live Demo](https://tnolva-react-todo.proxy.itcollege.ee)
 - **Express API**: [View Project](./express-api) | [Live Demo](https://tnolva-express-api.proxy.itcollege.ee)
+- **Vue Todo Express**: [View Project](./vue-todo-express) | [Live Demo](https://tnolva-vue-todo-express.proxy.itcollege.ee)
 
 ---
 
