@@ -17,7 +17,7 @@
 ### Contests
 
 - [x] **CONT-01**: User can browse visible contests without logging in
-- [ ] **CONT-02**: User can view contest details with class options
+- [x] **CONT-02**: User can view contest details with class options
 - [ ] **CONT-03**: User can view contest results with team rankings
 - [ ] **CONT-04**: User can view individual team detail (markings visible after contest close)
 
