@@ -83,29 +83,10 @@
 - CONT-04: User can view individual team detail
 
 ### Plans
-
-#### Plan 3.1: Contest Store
-- Create Pinia contest store
-- Store current contest, results, team details
-- Add fetch methods for each endpoint
-
-#### Plan 3.2: Contest List View
-- Create contests list page
-- Filter to visible contests only
-- Show contest card with name, dates, status
-- Link to contest details
-
-#### Plan 3.3: Contest Detail View
-- Show contest header info
-- List contest classes with duration
-- Link to register (if open for participation)
-- Link to results
-
-#### Plan 3.4: Results View
-- Display ranked teams table
-- Group by contest class
-- Show score, time, final score
-- Link to team detail
+- [x] 03-01-PLAN.md — Contest Store: API client, Pinia store, TypeScript types
+- [x] 03-02-PLAN.md — Contest List View: card layout, /contests route
+- [x] 03-03-PLAN.md — Contest Detail View: header, classes, action links
+- [x] 03-04-PLAN.md — Results View: tabbed ranked table + team detail
 
 ### Success Criteria
 1. Visible contests are listed
