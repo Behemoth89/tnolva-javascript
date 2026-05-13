@@ -36,14 +36,42 @@ const options = {
 
 const specs = swaggerJsdoc(options);
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  swaggerOptions: {
-    persistAuthorization: true,
-    displayRequestDuration: true,
-  },
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'API 1.0',
-}));
+app.use('/api-docs', (req, res, next) => {
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API 1.0</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+  <style>.swagger-ui .topbar { display: none }</style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js" charset="UTF-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: '/swagger.json',
+        dom_id: '#swagger-ui',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIBundle.SwaggerUIStandalonePreset
+        ],
+        persistAuthorization: true,
+        displayRequestDuration: true,
+      });
+    };
+  </script>
+</body>
+</html>
+`;
+  res.send(html);
+});
+
+app.get('/swagger.json', (req, res) => {
+  res.json(specs);
+});
 
 const authRoutes = require('./routes/auth');
 const todoCategoriesRoutes = require('./routes/todoCategories');
