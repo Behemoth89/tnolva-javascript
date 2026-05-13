@@ -7,23 +7,35 @@ function toCamelCase(obj) {
   if (obj && typeof obj === 'object') {
     return Object.keys(obj).reduce((acc, key) => {
       const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-      acc[camelKey] = toCamelCase(obj[key]);
+      let value = obj[key];
+      if (value instanceof Date) {
+        value = value.toISOString();
+      } else if (value && typeof value === 'object') {
+        value = toCamelCase(value);
+      }
+      acc[camelKey] = value;
       return acc;
     }, {});
   }
   return obj;
 }
 
-function parseDate(value) {
+function toISOString(value) {
   if (!value) return null;
-  if (value instanceof Date) return value;
+  if (value instanceof Date) return value.toISOString();
+  return value;
+}
+
+function toISODate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value.toISOString();
   const parsed = new Date(value);
-  return isNaN(parsed.getTime()) ? null : parsed;
+  return isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
 
 async function createTodoTask(data) {
-  const dueDt = parseDate(data.dueDt);
-  const createdDt = parseDate(data.createdDt) || new Date();
+  const dueDt = toISODate(data.dueDt);
+  const createdDt = toISODate(data.createdDt) || new Date().toISOString();
   
   const result = await db.query(
     `INSERT INTO todo_tasks (task_name, task_sort, created_dt, due_dt, is_completed, is_archived, todo_category_id, todo_priority_id)
@@ -54,8 +66,8 @@ async function getTodoTaskById(id) {
 }
 
 async function updateTodoTask(id, data) {
-  const dueDt = parseDate(data.dueDt);
-  const createdDt = parseDate(data.createdDt);
+  const dueDt = data.dueDt === undefined ? null : toISODate(data.dueDt);
+  const createdDt = toISODate(data.createdDt);
   
   const result = await db.query(
     `UPDATE todo_tasks SET
