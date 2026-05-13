@@ -1,0 +1,5 @@
+{
+  "dbUrl": "postgres://postgres:postgres@postgres:5432/express_api",
+  "migrations-dir": "migrations",
+  "table": "pgmigrations"
+}
