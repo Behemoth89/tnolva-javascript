@@ -14,7 +14,17 @@ function toCamelCase(obj) {
   return obj;
 }
 
+function parseDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  const parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
 async function createTodoTask(data) {
+  const dueDt = parseDate(data.dueDt);
+  const createdDt = parseDate(data.createdDt) || new Date();
+  
   const result = await db.query(
     `INSERT INTO todo_tasks (task_name, task_sort, created_dt, due_dt, is_completed, is_archived, todo_category_id, todo_priority_id)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -22,8 +32,8 @@ async function createTodoTask(data) {
     [
       data.taskName || null,
       data.taskSort || 0,
-      data.createdDt || new Date(),
-      data.dueDt || null,
+      createdDt,
+      dueDt,
       data.isCompleted || false,
       data.isArchived || false,
       data.todoCategoryId || null,
@@ -44,6 +54,9 @@ async function getTodoTaskById(id) {
 }
 
 async function updateTodoTask(id, data) {
+  const dueDt = parseDate(data.dueDt);
+  const createdDt = parseDate(data.createdDt);
+  
   const result = await db.query(
     `UPDATE todo_tasks SET
        task_name = COALESCE($1, task_name),
@@ -60,8 +73,8 @@ async function updateTodoTask(id, data) {
     [
       data.taskName,
       data.taskSort,
-      data.createdDt,
-      data.dueDt,
+      createdDt,
+      dueDt,
       data.isCompleted,
       data.isArchived,
       data.todoCategoryId,
