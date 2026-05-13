@@ -16,16 +16,17 @@ const swaggerSpec = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'exist
 const swaggerHtml = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Swagger</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
+  <title>API Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui@4.15.5/dist/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui@4.15.5/dist/swagger-ui-bundle.js"></script>
   <script>
+    const spec = ${JSON.stringify(swaggerSpec)};
     window.onload = () => {
-      SwaggerUIBundle({
-        spec: ${JSON.stringify(swaggerSpec)},
+      window.ui = SwaggerUIBundle({
+        spec: spec,
         dom_id: '#swagger-ui',
       });
     };
