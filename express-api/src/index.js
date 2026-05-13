@@ -11,23 +11,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/swagger-ui', express.static(path.join(__dirname, 'node_modules', 'swagger-ui-dist')));
+
 const swaggerSpec = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'existing-api.json'), 'utf8'));
 
 const swaggerHtml = `<!DOCTYPE html>
 <html>
 <head>
   <title>API Documentation</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui@5.11.0/dist/swagger-ui.css">
+  <link rel="stylesheet" href="/swagger-ui/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui@5.11.0/dist/swagger-ui-bundle.js"></script>
+  <script src="/swagger-ui/swagger-ui-bundle.js"></script>
   <script>
     window.onload = function() {
       const ui = SwaggerUIBundle({
         spec: ${JSON.stringify(swaggerSpec)},
-        dom_id: '#swagger-ui',
-        deepLinking: true
+        dom_id: '#swagger-ui'
       });
       window.ui = ui;
     };
