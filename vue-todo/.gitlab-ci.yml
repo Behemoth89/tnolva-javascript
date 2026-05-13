@@ -1,7 +1,7 @@
 stages:
   - deploy
 
-deploy:
+deploy-taltech:
   stage: deploy
   only:
     - main
@@ -9,3 +9,12 @@ deploy:
     - shared
   script:
     - cd vue-todo && docker compose -p vue-todo up --build --remove-orphans --detach
+
+deploy-express:
+  stage: deploy
+  only:
+    - express
+  tags:
+    - shared
+  script:
+    - cd vue-todo && docker compose --env-file .env.express -p vue-todo-express up --build --remove-orphans --detach
