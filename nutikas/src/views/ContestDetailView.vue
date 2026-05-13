@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useContestStore } from '@/stores/contest'
+import RegistrationModal from '@/components/RegistrationModal.vue'
 
 const route = useRoute()
 const router = useRouter()
 const store = useContestStore()
 
 const id = route.params.id as string
+
+const showRegistrationModal = ref(false)
 
 onMounted(async () => {
   // Fetch contests if not already loaded (needed for status flags)
@@ -46,12 +49,16 @@ function formatDuration(minutes: number): string {
 
 // Navigate to registration
 function goToRegister() {
-  router.push(`/contests/${id}/register`)
+  showRegistrationModal.value = true
 }
 
 // Navigate to results
 function goToResults() {
   router.push(`/contests/${id}/results`)
+}
+
+function closeRegistrationModal() {
+  showRegistrationModal.value = false
 }
 </script>
 
@@ -123,6 +130,15 @@ function goToResults() {
     <div v-else class="empty-state">
       <p>Contest not found.</p>
     </div>
+
+    <!-- Registration Modal -->
+    <RegistrationModal
+      v-if="store.currentContest"
+      :show="showRegistrationModal"
+      :contest-id="id"
+      :contest-classes="contestClasses"
+      @close="closeRegistrationModal"
+    />
   </div>
 </template>
 
