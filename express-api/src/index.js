@@ -6,6 +6,8 @@ const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 
+const path = require('path');
+
 const swaggerOptions = {
   definition: {
     openapi: '3.0.4',
@@ -29,7 +31,7 @@ const swaggerOptions = {
     },
     security: [{ bearerAuth: [] }]
   },
-  apis: ['./src/routes/*.js']
+  apis: [path.join(__dirname, 'routes', '*.js')]
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
