@@ -10,6 +10,10 @@ const store = useContestStore()
 const id = route.params.id as string
 
 onMounted(async () => {
+  // Fetch contests if not already loaded (needed for status flags)
+  if (store.contests.length === 0) {
+    await store.fetchContests()
+  }
   await store.fetchContest(id)
 })
 
@@ -19,6 +23,16 @@ const contestClasses = computed(() => {
   return [...store.currentContest.contestClasses].sort(
     (a, b) => a.orderNr - b.orderNr
   )
+})
+
+// Get isOpenForParticipation and hasResults from the contests list
+// (these flags are on ContestListItem, not ContestDetails)
+const contestStatus = computed(() => {
+  const listItem = store.contests.find(c => c.id === id)
+  return {
+    isOpenForParticipation: listItem?.isOpenForParticipation ?? false,
+    hasResults: listItem?.hasResults ?? false
+  }
 })
 
 // Format duration in hours
@@ -86,18 +100,18 @@ function goToResults() {
 
       <!-- Action Links -->
       <section class="action-section">
-        <div v-if="store.currentContest.isOpenForParticipation" class="action-buttons">
+        <div v-if="contestStatus.isOpenForParticipation" class="action-buttons">
           <button class="btn btn-primary" @click="goToRegister">
             Register
           </button>
         </div>
-        <div v-if="store.currentContest.hasResults" class="action-buttons">
+        <div v-if="contestStatus.hasResults" class="action-buttons">
           <button class="btn btn-secondary" @click="goToResults">
             View Results
           </button>
         </div>
         <div
-          v-if="!store.currentContest.isOpenForParticipation && !store.currentContest.hasResults"
+          v-if="!contestStatus.isOpenForParticipation && !contestStatus.hasResults"
           class="no-actions"
         >
           <p>Registration is closed and results are not yet available.</p>
