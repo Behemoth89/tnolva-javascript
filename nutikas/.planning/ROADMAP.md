@@ -137,31 +137,10 @@
 - SCAN-05: App provides success/error feedback after scan
 
 ### Plans
-
-#### Plan 5.1: QR Scanner Component
-- Integrate vue-qrcode-reader
-- Create scanner view with camera stream
-- Handle permission requests
-- Extract CPID from decoded QR
-- Handle HTML entities in CP codes
-
-#### Plan 5.2: Marking Submission
-- POST marking to /api/v1/markings
-- Display response (statusOk, statusCode)
-- Show success/error message
-- Update local state with new score
-
-#### Plan 5.3: Live Scoreboard
-- Fetch current user team activation
-- Display score, bonus, penalty, finalScore
-- Fetch rankings for position
-- Calculate and show position in class
-- Auto-refresh every 30 seconds
-
-#### Plan 5.4: Race Flow UI
-- Pre-race: Show "Scan START to begin"
-- Active: Show scanner + live score
-- Post-race: Show final results with breakdown
+- [ ] 05-01-PLAN.md — Foundation: types, marking API, race store, toast composable
+- [ ] 05-02-PLAN.md — RaceScanner: QR camera, Estonian char decode, manual entry
+- [ ] 05-03-PLAN.md — ScoreCard + TeamInfoCard: live score display, position ordinal
+- [ ] 05-04-PLAN.md — RaceScorePanel + RaceView: collapsible breakdown, combined view, router
 
 ### Success Criteria
 1. Camera QR scanning works on mobile
