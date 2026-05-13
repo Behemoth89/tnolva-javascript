@@ -10,7 +10,7 @@ const { authenticateToken } = require('../middleware/authMiddleware');
  *     tags:
  *       - TodoTasks
  *     security:
- *       - Bearer: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: OK
@@ -24,7 +24,7 @@ const { authenticateToken } = require('../middleware/authMiddleware');
  *     tags:
  *       - TodoTasks
  *     security:
- *       - Bearer: []
+ *       - bearerAuth: []
  *     requestBody:
  *       content:
  *         application/json:
@@ -73,7 +73,7 @@ router.post('/', authenticateToken, todoTasksController.create);
  *     tags:
  *       - TodoTasks
  *     security:
- *       - Bearer: []
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -92,7 +92,7 @@ router.post('/', authenticateToken, todoTasksController.create);
  *     tags:
  *       - TodoTasks
  *     security:
- *       - Bearer: []
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -143,7 +143,7 @@ router.post('/', authenticateToken, todoTasksController.create);
  *     tags:
  *       - TodoTasks
  *     security:
- *       - Bearer: []
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path

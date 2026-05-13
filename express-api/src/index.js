@@ -2,12 +2,43 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.4',
+    info: {
+      title: 'Express Todo API',
+      version: '1.0',
+      description: 'Todo API with authentication'
+    },
+    servers: [
+      { url: `http://localhost:${process.env.PORT || 3000}`, description: 'Local server' }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Enter JWT token'
+        }
+      }
+    },
+    security: [{ bearerAuth: [] }]
+  },
+  apis: ['./src/routes/*.js']
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 const PORT = process.env.PORT || 3000;
 
@@ -20,6 +51,11 @@ app.use('/api/v1/Account', authRoutes);
 app.use('/api/v1/TodoCategories', todoCategoriesRoutes);
 app.use('/api/v1/TodoPriorities', todoPrioritiesRoutes);
 app.use('/api/v1/TodoTasks', todoTasksRoutes);
+
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocs);
+});
 
 app.get('/', (req, res) => {
   res.redirect('/api-docs');
