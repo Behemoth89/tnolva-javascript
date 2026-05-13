@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-05-13T19:23:51.428Z"
+last_updated: "2026-05-13T19:27:12.220Z"
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 12
-  completed_plans: 6
-  percent: 50
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -37,7 +37,7 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 |---|-------|--------|-------|----------|
 | 1 | Foundation | ✓ | 4/4 | 100%     |
 | 2 | Authentication | ✓ | 4/4 | 100%     |
-| 3 | Contest Views | ○ | 2/4 | 50%     |
+| 3 | Contest Views | ○ | 3/4 | 75%     |
 | 4 | Team Registration | ○ | 0/3 | 0%       |
 | 5 | Race Participation | ○ | 0/4 | 0%       |
 | 6 | Offline Support | ○ | 0/4 | 0%       |
@@ -48,8 +48,10 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 **Phase 3 — Contest Views** (In Progress)
 
 Plans completed:
+
 - 03-01: Contest Store — API client, Pinia store, TypeScript types ✓
 - 03-02: Contest List View — card layout, /contests route ✓
+- 03-03: Contest Detail View — header, classes list, register/results links ✓
 
 ## Active Milestone
 
