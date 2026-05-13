@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-05-13T19:09:16.125Z"
+last_updated: "2026-05-13T19:23:51.428Z"
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 8
-  completed_plans: 5
-  percent: 63
+  total_plans: 12
+  completed_plans: 6
+  percent: 50
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2025-05-13)
 
 **Core value:** Participants complete checkpoints and finish the race with confidence their scores are captured correctly and reflected live.
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase 03 — contest-views
 
 ## Project Info
 
@@ -37,7 +37,7 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 |---|-------|--------|-------|----------|
 | 1 | Foundation | ✓ | 4/4 | 100%     |
 | 2 | Authentication | ✓ | 4/4 | 100%     |
-| 3 | Contest Views | ○ | 0/4 | 0%       |
+| 3 | Contest Views | ○ | 2/4 | 50%     |
 | 4 | Team Registration | ○ | 0/3 | 0%       |
 | 5 | Race Participation | ○ | 0/4 | 0%       |
 | 6 | Offline Support | ○ | 0/4 | 0%       |
@@ -45,16 +45,11 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 
 ## Current Phase
 
-**Phase 2 — Authentication** (Complete)
+**Phase 3 — Contest Views** (In Progress)
 
-All 4 plans completed:
-
-- 02-01: Auth Store with IndexedDB ✓
-- 02-02: API Client with JWT Interceptors ✓
-- 02-03: Auth Endpoints and useAuth Composable ✓
-- 02-04: Login/Register Views and Router Guards ✓
-
-Run `/gsd-discuss-phase 3` to begin Phase 3.
+Plans completed:
+- 03-01: Contest Store — API client, Pinia store, TypeScript types ✓
+- 03-02: Contest List View — card layout, /contests route ✓
 
 ## Active Milestone
 

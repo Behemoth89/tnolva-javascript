@@ -85,8 +85,6 @@
 ### Plans
 - [x] 03-01-PLAN.md — Contest Store: API client, Pinia store, TypeScript types
 - [x] 03-02-PLAN.md — Contest List View: card layout, /contests route
-- [x] 03-03-PLAN.md — Contest Detail View: header, classes, action links
-- [x] 03-04-PLAN.md — Results View: tabbed ranked table + team detail
 
 ### Success Criteria
 1. Visible contests are listed
