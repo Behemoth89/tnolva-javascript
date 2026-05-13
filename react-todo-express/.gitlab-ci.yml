@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  tags:
+    - shared
+  script:
+    - cd react-todo-express && docker compose -p react-todo-express up --build --remove-orphans --detach

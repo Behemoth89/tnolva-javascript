@@ -1,0 +1,11 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "read": {
+      "C:/Kool/tnolva-javascript/react-todo/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "C:/Kool/tnolva-javascript/react-todo/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
