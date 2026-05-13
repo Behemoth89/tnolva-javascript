@@ -644,7 +644,7 @@ No external tools, services, or CLIs are required beyond the project scaffold fr
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| AUTH-01 | User can register with email, password, firstName, lastName | unit | `vitest run src/api/endpoints/identity.spec.ts -t "register"` | ❌ Wave 0 |
+| AUTH-01 | User can register with email, password, firstname, lastname | unit | `vitest run src/api/endpoints/identity.spec.ts -t "register"` | ❌ Wave 0 |
 | AUTH-02 | User can log in with email and password | unit | `vitest run src/api/endpoints/identity.spec.ts -t "login"` | ❌ Wave 0 |
 | AUTH-03 | User receives JWT on login/registration | unit | `vitest run src/stores/auth.spec.ts -t "setTokens"` | ❌ Wave 0 |
 | AUTH-04 | JWT persists across browser refresh | integration | `vitest run src/stores/auth.spec.ts -t "loadFromStorage"` | ❌ Wave 0 |
