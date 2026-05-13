@@ -1,0 +1,10 @@
+{
+  "permission": {
+    "read": {
+      "C:/Kool/tnolva-javascript/nutikas/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "C:/Kool/tnolva-javascript/nutikas/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
