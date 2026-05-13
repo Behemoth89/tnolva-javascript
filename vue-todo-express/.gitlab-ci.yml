@@ -8,4 +8,4 @@ deploy-taltech:
   tags:
     - shared
   script:
-    - cd vue-todo && docker compose -p vue-todo up --build --remove-orphans --detach
+    - cd vue-todo-express && docker compose -p vue-todo-express up --build --remove-orphans --detach
