@@ -28,7 +28,9 @@ function toISOString(value) {
 
 function toISODate(value) {
   if (!value) return null;
+  if (typeof value === 'string') return value;
   if (value instanceof Date) return value.toISOString();
+  if (typeof value === 'object' && Object.keys(value).length === 0) return null;
   const parsed = new Date(value);
   return isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
