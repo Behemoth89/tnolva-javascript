@@ -38,11 +38,16 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api-docs', swaggerUi.serve);
-app.get('/api-docs', swaggerUi.setup(swaggerDocs, {
-  swaggerUrl: '/api-docs.json',
-  customCss: '.swagger-ui .topbar { display: none }'
-}));
+
+app.get('/api-docs', swaggerUi.setup(swaggerDocs));
+
+app.get('/api-docs.json', (req, res) => {
+  res.json(swaggerDocs);
+});
+
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -55,15 +60,6 @@ app.use('/api/v1/Account', authRoutes);
 app.use('/api/v1/TodoCategories', todoCategoriesRoutes);
 app.use('/api/v1/TodoPriorities', todoPrioritiesRoutes);
 app.use('/api/v1/TodoTasks', todoTasksRoutes);
-
-app.get('/api-docs.json', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerDocs);
-});
-
-app.get('/', (req, res) => {
-  res.redirect('/api-docs');
-});
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
