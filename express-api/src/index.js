@@ -11,10 +11,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/swagger-ui', express.static(path.join(__dirname, 'node_modules', 'swagger-ui-dist')));
+app.use('/swagger-ui', express.static(path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist')));
 
 app.get('/swagger-ui-check', (req, res) => {
-  const distPath = path.join(__dirname, 'node_modules', 'swagger-ui-dist');
+  const distPath = path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist');
   fs.readdir(distPath, (err, files) => {
     if (err) return res.json({ error: err.message, path: distPath });
     res.json({ path: distPath, files: files });
