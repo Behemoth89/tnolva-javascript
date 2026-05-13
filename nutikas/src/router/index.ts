@@ -16,6 +16,12 @@ const routes: RouteRecordRaw[] = [
     meta: { guestOnly: true }
   },
   {
+    path: '/contests',
+    name: 'contests',
+    component: () => import('@/views/ContestsView.vue'),
+    meta: { guestOnly: false }
+  },
+  {
     path: '/contests/:id/results',
     name: 'contest-results',
     component: () => import('@/views/ContestResultsView.vue'),
