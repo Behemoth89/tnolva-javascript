@@ -7,7 +7,7 @@ services:
       args:
         - VITE_API_BASE_URL=https://nutikas.akaver.com
     ports:
-      - "3000:8080"
+      - "89:8080"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
