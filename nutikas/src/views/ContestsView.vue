@@ -1,26 +1,49 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useContestStore } from '@/stores/contest'
+import { useAuthStore } from '@/stores/auth'
+import { useTeamStore } from '@/stores/team'
 import type { ContestListItem } from '@/types/contest'
 
 const router = useRouter()
-const store = useContestStore()
+const contestStore = useContestStore()
+const auth = useAuthStore()
+const teamStore = useTeamStore()
+const myContestIds = ref<Set<string>>(new Set())
+const myTeamsByContest = ref<Map<string, string>>(new Map())
 
-onMounted(() => {
-  store.fetchContests()
+onMounted(async () => {
+  contestStore.fetchContests()
+  if (auth.isAuthenticated) {
+    await loadUserTeams()
+  }
 })
 
-// Filter to only visible contests (visibleFrom <= now, null means always visible)
+async function loadUserTeams(): Promise<void> {
+  const contests = contestStore.contests
+  for (const contest of contests) {
+    try {
+      await teamStore.fetchMyTeams(contest.id)
+      if (teamStore.myTeams.length > 0) {
+        myContestIds.value.add(contest.id)
+        for (const team of teamStore.myTeams) {
+          myTeamsByContest.value.set(contest.id, team.teamId)
+        }
+      }
+    } catch {
+    }
+  }
+}
+
 const visibleContests = computed(() => {
   const now = new Date()
-  return store.contests.filter((contest) => {
-    if (!contest.visibleFrom) return true // null means always visible
+  return contestStore.contests.filter((contest) => {
+    if (!contest.visibleFrom) return true
     return new Date(contest.visibleFrom) <= now
   })
 })
 
-// Determine status badge content and style
 function getStatusBadge(item: ContestListItem): { text: string; class: string } {
   if (item.isOpenForParticipation) {
     return { text: 'Open for Registration', class: 'bg-green-100 text-green-800' }
@@ -31,7 +54,6 @@ function getStatusBadge(item: ContestListItem): { text: string; class: string } 
   return { text: 'Coming Soon', class: 'bg-gray-100 text-gray-800' }
 }
 
-// Format date for display
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return 'N/A'
   return new Date(dateStr).toLocaleDateString(undefined, {
@@ -43,6 +65,11 @@ function formatDate(dateStr: string | null): string {
 
 function navigateToDetail(id: string) {
   router.push({ name: 'contest-detail', params: { id } })
+}
+
+function navigateToMyTeams(event: Event, id: string) {
+  event.stopPropagation()
+  router.push({ name: 'my-teams', params: { id } })
 }
 </script>
 
@@ -60,6 +87,7 @@ function navigateToDetail(id: string) {
         v-for="item in visibleContests"
         :key="item.id"
         class="contest-card"
+        :class="{ 'has-team': myContestIds.has(item.id) }"
         @click="navigateToDetail(item.id)"
         role="button"
         tabindex="0"
@@ -74,6 +102,13 @@ function navigateToDetail(id: string) {
         <div class="contest-dates">
           {{ formatDate(item.openFrom) }} → {{ formatDate(item.openTo) }}
         </div>
+        <button
+          v-if="myContestIds.has(item.id)"
+          class="my-teams-btn"
+          @click="navigateToMyTeams($event, item.id)"
+        >
+          My Teams
+        </button>
       </div>
     </div>
   </div>
@@ -102,6 +137,12 @@ function navigateToDetail(id: string) {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  position: relative;
+}
+
+.contest-card.has-team {
+  border: 2px solid #2563eb;
+  background: #f0f7ff;
 }
 
 .contest-card:focus {
@@ -133,5 +174,23 @@ function navigateToDetail(id: string) {
 .contest-dates {
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+.my-teams-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.my-teams-btn:hover {
+  background: #1d4ed8;
 }
 </style>

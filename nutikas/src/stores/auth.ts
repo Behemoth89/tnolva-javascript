@@ -5,8 +5,21 @@ import { db } from '@/db'
 export const useAuthStore = defineStore('auth', () => {
   const jwt = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
+  const userName = ref<string | null>(null)
+  const userFirstName = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!jwt.value)
+
+  function decodeJwt(token: string): void {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      userFirstName.value = payload.firstName ?? null
+      userName.value = payload.name ?? payload.email ?? null
+    } catch {
+      userFirstName.value = null
+      userName.value = null
+    }
+  }
 
   // Load tokens from IndexedDB on store initialization
   async function loadFromStorage(): Promise<void> {
@@ -14,6 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
     const rtRecord = await db.auth.get('refreshToken')
     jwt.value = jwtRecord?.value ?? null
     refreshToken.value = rtRecord?.value ?? null
+    if (jwt.value) decodeJwt(jwt.value)
   }
 
   // Persist tokens to IndexedDB
@@ -33,14 +47,17 @@ export const useAuthStore = defineStore('auth', () => {
   function setTokens(newJwt: string, newRefreshToken: string): void {
     jwt.value = newJwt
     refreshToken.value = newRefreshToken
+    decodeJwt(newJwt)
     saveToStorage()
   }
 
   function clearTokens(): void {
     jwt.value = null
     refreshToken.value = null
+    userName.value = null
+    userFirstName.value = null
     saveToStorage()
   }
 
-  return { jwt, refreshToken, isAuthenticated, loadFromStorage, setTokens, clearTokens }
+  return { jwt, refreshToken, userName, userFirstName, isAuthenticated, loadFromStorage, setTokens, clearTokens }
 })
