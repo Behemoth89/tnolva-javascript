@@ -44,6 +44,12 @@ const routes: RouteRecordRaw[] = [
     name: 'my-teams',
     component: () => import('@/views/MyTeamsView.vue'),
     meta: { guestOnly: false }
+  },
+  {
+    path: '/race/:contestId/:userTeamId',
+    name: 'race',
+    component: () => import('@/views/RaceView.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 
