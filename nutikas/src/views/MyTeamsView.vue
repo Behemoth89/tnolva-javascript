@@ -37,6 +37,10 @@ function goToContest() {
   router.push(`/contests/${contestId}`)
 }
 
+function startRace(team: UserTeamListItem) {
+  router.push(`/race/${contestId}/${team.id}`)
+}
+
 function formatDateTime(dt: string | null): string {
   if (!dt) return 'N/A'
   const date = new Date(dt)
@@ -119,6 +123,11 @@ function formatDateTime(dt: string | null): string {
           <div v-if="!isActive(team)" class="detail-actions">
             <button @click.stop="setActive(team)" class="btn btn-primary">
               Set as Active
+            </button>
+          </div>
+          <div v-else class="detail-actions">
+            <button @click.stop="startRace(team)" class="btn btn-race">
+              Start Race
             </button>
           </div>
         </div>
@@ -275,6 +284,12 @@ function formatDateTime(dt: string | null): string {
 
 .btn-primary {
   background: #1976d2;
+  color: white;
+  width: 100%;
+}
+
+.btn-race {
+  background: #2e7d32;
   color: white;
   width: 100%;
 }
