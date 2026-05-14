@@ -77,8 +77,8 @@ function navigateToMyTeams(event: Event, id: string) {
   <div class="page-container">
     <h1 class="text-2xl font-bold mb-6">Contests</h1>
 
-    <div v-if="store.loading" class="text-gray-500">Loading...</div>
-    <div v-else-if="store.error" class="text-red-600">{{ store.error }}</div>
+    <div v-if="contestStore.loading" class="text-gray-500">Loading...</div>
+    <div v-else-if="contestStore.error" class="text-red-600">{{ contestStore.error }}</div>
     <div v-else-if="visibleContests.length === 0" class="text-gray-500">
       No contests available
     </div>
