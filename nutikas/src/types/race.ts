@@ -4,7 +4,6 @@
  */
 
 import type { UserTeamActivation } from '@/types/team'
-import type { MarkingListItem } from '@/types/contest'
 
 // Marking request body for POST /api/v1/Markings
 export interface MarkingRequest {

@@ -1,5 +1,5 @@
 import { api } from '@/api'
-import type { MarkingRequest, MarkingResponse } from '@/types/race'
+import type { MarkingResponse } from '@/types/race'
 
 /**
  * Submit a marking (checkpoint scan) for the current user's team
