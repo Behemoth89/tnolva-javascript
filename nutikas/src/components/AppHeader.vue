@@ -26,8 +26,8 @@ async function handleLogout(): Promise<void> {
     <div class="header-right">
       <template v-if="auth.isAuthenticated">
         <div class="user-info">
+          <span class="user-firstname">{{ auth.userFirstName }}</span>
           <span class="user-name">{{ auth.userName }}</span>
-          <span class="user-subtitle">Logged in</span>
         </div>
         <button @click="handleLogout" class="logout-btn">Logout</button>
       </template>
@@ -75,12 +75,12 @@ async function handleLogout(): Promise<void> {
   margin-right: 0.5rem;
 }
 
-.user-name {
+.user-firstname {
   font-weight: 600;
   font-size: 0.875rem;
 }
 
-.user-subtitle {
+.user-name {
   font-size: 0.75rem;
   opacity: 0.8;
 }

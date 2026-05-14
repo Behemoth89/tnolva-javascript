@@ -137,7 +137,6 @@ function navigateToMyTeams(event: Event, id: string) {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  position: relative;
 }
 
 .contest-card.has-team {
@@ -177,9 +176,6 @@ function navigateToMyTeams(event: Event, id: string) {
 }
 
 .my-teams-btn {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
   background: #2563eb;
   color: white;
   border: none;
@@ -188,9 +184,7 @@ function navigateToMyTeams(event: Event, id: string) {
   font-size: 0.75rem;
   cursor: pointer;
   font-weight: 600;
-}
-
-.my-teams-btn:hover {
-  background: #1d4ed8;
+  margin-top: 0.25rem;
+  align-self: flex-start;
 }
 </style>
