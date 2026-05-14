@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-last_updated: "2026-05-14T09:37:15Z"
+last_updated: "2026-05-14T09:45:00Z"
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 14
-  completed_plans: 12
-  percent: 86
+  total_plans: 18
+  completed_plans: 13
+  percent: 72
 ---
 
 # Project State
@@ -39,7 +39,7 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 | 2 | Authentication | ✓ | 4/4 | 100%     |
 | 3 | Contest Views | ✓ | 4/4 | 100%     |
 | 4 | Team Registration | ○ | 0/3 | 0%       |
-| 5 | Race Participation | ○ | 1/4 | 25%      |
+| 5 | Race Participation | ○ | 2/4 | 50%      |
 | 6 | Offline Support | ○ | 0/4 | 0%       |
 | 7 | Polish & Deploy | ○ | 0/3 | 0%       |
 
@@ -50,6 +50,7 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 Plans completed:
 
 - 05-01: Race types, marking API, race store, toast composable ✓
+- 05-02: RaceScanner component with QR scanning, manual entry ✓
 
 ## Active Milestone
 
