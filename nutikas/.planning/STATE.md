@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-last_updated: "2026-05-14T07:32:30.263Z"
+last_updated: "2026-05-14T14:51:00.000Z"
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
   completed_plans: 15
   percent: 83
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2025-05-13)
 
 **Core value:** Participants complete checkpoints and finish the race with confidence their scores are captured correctly and reflected live.
-**Current focus:** Phase 05 — race-participation
+**Current focus:** Phase 06 — offline-support
 
 ## Project Info
 
@@ -45,18 +45,18 @@ See: .planning/PROJECT.md (updated 2025-05-13)
 
 ## Current Phase
 
-**Phase 5 — Race Participation** (In Progress)
+**Phase 6 — Offline Support** (Context gathered)
 
-Plans completed:
-
-- 05-01: Race types, marking API, race store, toast composable ✓
-- 05-02: RaceScanner component with QR scanning, manual entry ✓
-- 05-03: ScoreCard and TeamInfoCard components ✓
-- 05-04: RaceScorePanel and RaceView with state machine ✓
+Context captured:
+- Queue storage schema (8 fields with metadata)
+- Sync strategy (auto-sync on reconnect)
+- Offline indicator UI (header badge)
+- Pending count display (in offline badge)
+- Scan-while-offline behavior (allow and auto-queue)
 
 ## Active Milestone
 
 v1.0 — Mobile-first PWA for rogaine event participation
 
 ---
-*Last updated: 2026-05-14 after completing 05-01*
+*Last updated: 2026-05-14 after completing 06-CONTEXT.md*
