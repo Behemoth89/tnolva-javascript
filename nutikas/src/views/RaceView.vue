@@ -73,20 +73,19 @@ onMounted(async () => {
           if (teamStore.currentTeamDetail.teamName) {
             teamName.value = teamStore.currentTeamDetail.teamName
           }
-          if (teamStore.currentTeamDetail.contestClassId) {
-            contestClassId.value = teamStore.currentTeamDetail.contestClassId
-          }
+          // contestClassName is fetched from results API above
         }
       } catch {
         // Team detail might not exist yet - that's okay
       }
     }
 
-    // Get class name from contest
+    // Get class name from contest results
     if (contestClassId.value) {
       try {
         const results = await getContestResults(contestId.value)
-        const classInfo = results.find((r: TeamResultListItem) => r.contestClassId === contestClassId.value)
+        const classTeams = results.teams ?? []
+        const classInfo = classTeams.find((r: TeamResultListItem) => r.contestClassId === contestClassId.value)
         if (classInfo) {
           contestClassName.value = classInfo.contestClassName || ''
         }
@@ -113,7 +112,7 @@ async function refreshPosition(): Promise<void> {
   positionLoading.value = true
   try {
     const results = await getContestResults(contestId.value)
-    const classTeams = results.filter((r: TeamResultListItem) => r.contestClassId === contestClassId.value)
+    const classTeams = (results.teams ?? []).filter((r: TeamResultListItem) => r.contestClassId === contestClassId.value)
     const sorted = [...classTeams].sort((a: TeamResultListItem, b: TeamResultListItem) =>
       b.finalScore - a.finalScore ||
       (a.finishDT && b.finishDT
@@ -154,12 +153,16 @@ async function handleScoreRefresh(): Promise<void> {
 /**
  * Handle scan success events
  */
-function handleScanSuccess(checkPointId: string, displayCPId: string): void {
+function handleScanSuccess(_checkPointId: string, _displayCPId: string): void {
   // Score is updated in the race store via submitScan
   // Refresh position to show updated ranking
   if (racePhase.value !== 'pre') {
     refreshPosition()
   }
+}
+
+function retryLoad(): void {
+  window.location.reload()
 }
 </script>
 
@@ -173,7 +176,7 @@ function handleScanSuccess(checkPointId: string, displayCPId: string): void {
     <!-- Error state -->
     <div v-else-if="error" class="error">
       <p>{{ error }}</p>
-      <button @click="() => window.location.reload()">Retry</button>
+      <button @click="retryLoad">Retry</button>
     </div>
 
     <!-- Race content -->

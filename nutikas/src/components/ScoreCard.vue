@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { TeamResultListItem } from '@/types/contest'
 
-export interface Position {
+interface Position {
   ordinal: number
   total: number
 }
@@ -37,26 +36,7 @@ function toOrdinal(n: number): string {
   }
 }
 
-/**
- * Compute position within class from contest results
- * Pattern from 05-RESEARCH.md computePosition
- */
-// Position computation helper - exported for parent components
-export function computePosition(
-  results: TeamResultListItem[],
-  userTeamId: string,
-  contestClassId: string
-): Position | null {
-  const classTeams = results.filter(t => t.contestClassId === contestClassId)
-  const sorted = [...classTeams].sort((a, b) =>
-    b.finalScore - a.finalScore ||
-    (a.finishDT && b.finishDT
-      ? new Date(a.finishDT).getTime() - new Date(b.finishDT).getTime()
-      : 0)
-  )
-  const index = sorted.findIndex(t => t.id === userTeamId)
-  return index >= 0 ? { ordinal: index + 1, total: sorted.length } : null
-}
+
 
 /**
  * Handle refresh button click

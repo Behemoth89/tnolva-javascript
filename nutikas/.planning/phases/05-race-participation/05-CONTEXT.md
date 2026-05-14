@@ -41,7 +41,7 @@ QR scanning and live scoring during an active rogaine event. Participants scan S
 - **D-14:** Collapsible cards layout — score as hero element at top, breakdown sections below that expand/collapse
 
 ### Re-scan Handling
-- **D-15:** When re-scanning an already-scanned checkpoint, show toast "Already scanned" — no error state, no duplicate API submission beyond what the backend already handles (statusCode 0 with score=0 per user-flow.md)
+- **D-15:** When re-scanning an already-scanned checkpoint, show toast "Already scanned" — no error state. API call IS made (backend accepts gracefully with statusCode 0 and score=0 per user-flow.md §4.7), but no error is surfaced to user.
 
 ### Position Display
 - **D-16:** Team position shown as ordinal within class (e.g., "3rd of 12") after each scan, once the ranking data is fetched
