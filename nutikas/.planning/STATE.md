@@ -60,3 +60,11 @@ v1.0 — Mobile-first PWA for rogaine event participation
 
 ---
 *Last updated: 2026-05-14 after completing 06-CONTEXT.md*
+
+## Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260514-tqy | make root redirect to contacts. make header to page. put login and register buttons to header to right. when logged in then display logout button the right. left from logout button display logged in user name and underneath username. make home button to header. display contests where i have registred my team diferently. make my teams button for contests that have my registred team | 2026-05-14 | cdf0402 | [260514-tqy-make-root-redirect-to-contacts-make-head](./quick/260514-tqy-make-root-redirect-to-contacts-make-head/) |
+
+Last activity: 2026-05-14 - Completed quick task 260514-tqy: UI header and auth controls
