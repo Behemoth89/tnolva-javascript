@@ -137,10 +137,10 @@
 - SCAN-05: App provides success/error feedback after scan
 
 ### Plans
-- [ ] 05-01-PLAN.md — Foundation: types, marking API, race store, toast composable
-- [ ] 05-02-PLAN.md — RaceScanner: QR camera, Estonian char decode, manual entry
-- [ ] 05-03-PLAN.md — ScoreCard + TeamInfoCard: live score display, position ordinal
-- [ ] 05-04-PLAN.md — RaceScorePanel + RaceView: collapsible breakdown, combined view, router
+- [x] 05-01-PLAN.md — Foundation: types, marking API, race store, toast composable
+- [x] 05-02-PLAN.md — RaceScanner: QR camera, Estonian char decode, manual entry
+- [x] 05-03-PLAN.md — ScoreCard + TeamInfoCard: live score display, position ordinal
+- [x] 05-04-PLAN.md — RaceScorePanel + RaceView: collapsible breakdown, combined view, router
 
 ### Success Criteria
 1. Camera QR scanning works on mobile
