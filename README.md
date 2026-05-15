@@ -13,6 +13,7 @@ A collection of my web development projects.
 | Express API | Express.js REST API | ✅ Live | [tnolva-express-api.proxy.itcollege.ee](https://tnolva-express-api.proxy.itcollege.ee) |
 | Vue Todo Express | Full-stack todo app with Vue.js + Express | ✅ Live | [tnolva-vue-todo-express.proxy.itcollege.ee](https://tnolva-vue-todo-express.proxy.itcollege.ee) |
 | React Todo Express | Full-stack todo app with React + Express | ✅ Live | [tnolva-react-todo-express.proxy.itcollege.ee](https://tnolva-react-todo-express.proxy.itcollege.ee) |
+| Nutikas | Frontend project | 🚧 In Development | [tnolva-nutikas.proxy.itcollege.ee](https://tnolva-nutikas.proxy.itcollege.ee) |
 
 ---
 
@@ -25,6 +26,7 @@ A collection of my web development projects.
 - **Express API**: [View Project](./express-api) | [Live Demo](https://tnolva-express-api.proxy.itcollege.ee)
 - **Vue Todo Express**: [View Project](./vue-todo-express) | [Live Demo](https://tnolva-vue-todo-express.proxy.itcollege.ee)
 - **React Todo Express**: [View Project](./react-todo-express) | [Live Demo](https://tnolva-react-todo-express.proxy.itcollege.ee)
+- **Nutikas**: [Live Demo](https://tnolva-nutikas.proxy.itcollege.ee) (Development)
 
 ---
 
