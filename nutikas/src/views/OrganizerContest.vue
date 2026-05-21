@@ -124,9 +124,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-
-import { organiserApi } from '@/api/endpoints/organiser'
 import { ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
+import { organiserApi } from '@/api/endpoints/organiser'
 import type {
   OrganiserContestDetails,
   OrganiserContestClassDetails,
@@ -142,6 +142,7 @@ import CheckpointForm from '@/components/Organizer/CheckpointForm.vue'
 import TeamForm from '@/components/Organizer/TeamForm.vue'
 import MarkingForm from '@/components/Organizer/MarkingForm.vue'
 
+const auth = useAuthStore()
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -168,6 +169,13 @@ const contestId = computed(() => route.params.id as string)
 
 onMounted(async () => {
   await loadContest()
+  if (contest.value && contest.value.createdBy !== auth.userId) {
+    ElMessageBox.alert(t('organizer.notOwner'), t('common.error'), {
+      confirmButtonText: 'OK',
+      callback: () => router.push('/organizer')
+    })
+    return
+  }
   await Promise.all([loadClasses(), loadCheckpoints(), loadTeams(), loadMarkings()])
 })
 

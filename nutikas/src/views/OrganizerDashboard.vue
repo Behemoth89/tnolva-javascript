@@ -25,7 +25,7 @@
 
     <!-- Contests list -->
     <div v-else class="contests-list">
-      <el-table :data="store.contests" stripe>
+      <el-table :data="myContests" stripe>
         <el-table-column prop="name" :label="t('contest.name')" />
         <el-table-column :label="t('contest.date')">
           <template #default="{ row }">
@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -62,6 +63,8 @@ import type { OrganiserContestDetails } from '@/types/api'
 const { t } = useI18n()
 const router = useRouter()
 const store = useOrganiserStore()
+
+const myContests = computed(() => store.myContests)
 
 onMounted(async () => {
   try {
@@ -93,8 +96,7 @@ function getStatusType(contest: OrganiserContestDetails): 'success' | 'warning' 
 }
 
 function createContest() {
-  // TODO: Navigate to contest creation form
-  ElMessage.info(t('organizer.createContestHint'))
+  router.push('/organizer/contest/new')
 }
 
 function manageContest(id: string) {

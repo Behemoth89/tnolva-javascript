@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { identityApi } from '@/api/endpoints/identity'
@@ -19,18 +18,6 @@ async function handleLogout(): Promise<void> {
   }
 }
 
-const isOrganiser = computed(() => {
-  if (!auth.jwt) return false
-  try {
-    const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
-    return Array.isArray(payload.role)
-      ? payload.role.includes('organiser')
-      : payload.role === 'organiser'
-  } catch {
-    return false
-  }
-})
-
 function goToOrganizer() {
   router.push('/organizer')
 }
@@ -42,7 +29,7 @@ function goToOrganizer() {
 
     <div class="header-right">
       <template v-if="auth.isAuthenticated">
-        <div v-if="isOrganiser" class="organiser-btn">
+        <div v-if="auth.isAuthenticated" class="organiser-btn">
           <button @click="goToOrganizer" class="organiser-link">Organiser</button>
         </div>
         <div class="user-info">

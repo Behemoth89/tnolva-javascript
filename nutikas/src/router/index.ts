@@ -59,25 +59,25 @@ const routes: RouteRecordRaw[] = [
     path: '/organizer',
     name: 'organizer-dashboard',
     component: () => import('@/views/OrganizerDashboard.vue'),
-    meta: { requiresAuth: true, requiresRole: 'organiser' }
+    meta: { requiresAuth: true }
   },
   {
     path: '/organizer/contest/:id',
     name: 'organizer-contest',
     component: () => import('@/views/OrganizerContest.vue'),
-    meta: { requiresAuth: true, requiresRole: 'organiser' }
+    meta: { requiresAuth: true }
   },
   {
     path: '/organizer/contest/:contestId/print',
     name: 'organizer-print',
     component: () => import('@/views/OrganizerPrint.vue'),
-    meta: { requiresAuth: true, requiresRole: 'organiser' }
+    meta: { requiresAuth: true }
   },
   {
     path: '/organizer/contest/:contestId/markings',
     name: 'organizer-markings',
     component: () => import('@/views/OrganizerMarkings.vue'),
-    meta: { requiresAuth: true, requiresRole: 'organiser' }
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -101,21 +101,5 @@ router.beforeEach(async (to) => {
     return { name: 'contests' }
   }
 
-  // Organiser role guard
-  if (to.meta.requiresRole === 'organiser') {
-    if (!auth.jwt) {
-      return { name: 'login' }
-    }
-    try {
-      const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
-      const hasRole = Array.isArray(payload.role)
-        ? payload.role.includes('organiser')
-        : payload.role === 'organiser'
-      if (!hasRole) {
-        return { name: 'contests' } // Redirect non-organisers away
-      }
-    } catch {
-      return { name: 'login' }
-    }
-  }
+  // Role guard removed - access is now data-based (user can only see/edit their own contests)
 })

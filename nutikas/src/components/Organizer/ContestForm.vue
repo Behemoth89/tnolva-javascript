@@ -28,8 +28,14 @@
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 import type { OrganiserContestUpsertRequest, OrganiserContestDetails } from '@/types/api'
 import { organiserApi } from '@/api/endpoints/organiser'
+
+const auth = useAuthStore()
+const { t } = useI18n()
+const visible = ref(false)
+const isEdit = computed(() => !!props.contest)
 
 const props = defineProps<{
   contest?: OrganiserContestDetails | null
@@ -39,10 +45,6 @@ const emit = defineEmits<{
   saved: []
 }>()
 
-const { t } = useI18n()
-const visible = ref(false)
-const isEdit = computed(() => !!props.contest)
-
 const form = ref<OrganiserContestUpsertRequest>({
   name: '',
   visibleFrom: '',
@@ -51,7 +53,8 @@ const form = ref<OrganiserContestUpsertRequest>({
   bonusTimeStart: null,
   bonusTimeEnd: null,
   bonusPerMarking: 0,
-  organisationId: ''
+  organisationId: '',
+  createdBy: ''
 })
 
 watch(() => props.contest, (c) => {
@@ -72,7 +75,8 @@ function open(existingContest?: OrganiserContestDetails | null) {
       bonusTimeStart: null,
       bonusTimeEnd: null,
       bonusPerMarking: 0,
-      organisationId: ''
+      organisationId: '',
+      createdBy: auth.userId ?? ''
     }
   }
   visible.value = true

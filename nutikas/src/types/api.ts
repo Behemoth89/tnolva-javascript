@@ -39,6 +39,7 @@ export interface OrganiserContestUpsertRequest {
   bonusTimeEnd?: string | null
   bonusPerMarking: number
   organisationId: string
+  createdBy: string
 }
 
 export interface OrganiserContestDetails extends OrganiserContestUpsertRequest {

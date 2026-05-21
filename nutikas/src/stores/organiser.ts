@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import type {
   OrganisationItem,
   OrganiserContestDetails
@@ -7,6 +8,7 @@ import type {
 import { organiserApi } from '@/api/endpoints/organiser'
 
 export const useOrganiserStore = defineStore('organiser', () => {
+  const auth = useAuthStore()
   const organisations = ref<OrganisationItem[]>([])
   const currentOrgId = ref<string | null>(null)
   const contests = ref<OrganiserContestDetails[]>([])
@@ -22,12 +24,15 @@ export const useOrganiserStore = defineStore('organiser', () => {
     contests.value.find(c => c.id === currentContestId.value) ?? null
   )
 
+  const myContests = computed(() =>
+    contests.value.filter(c => c.createdBy === auth.userId)
+  )
+
   async function loadOrganisations() {
     isLoading.value = true
     error.value = null
     try {
       organisations.value = await organiserApi.getOrganisations()
-      // Auto-select first org if none selected
       if (!currentOrgId.value && organisations.value.length > 0) {
         currentOrgId.value = organisations.value[0].id
       }
@@ -44,7 +49,6 @@ export const useOrganiserStore = defineStore('organiser', () => {
     error.value = null
     try {
       contests.value = await organiserApi.getContests()
-      // Filter by org if specified (API returns all for now)
       if (orgId) {
         contests.value = contests.value.filter(c => c.organisationId === orgId)
       }
@@ -58,7 +62,6 @@ export const useOrganiserStore = defineStore('organiser', () => {
 
   function setCurrentOrg(orgId: string) {
     currentOrgId.value = orgId
-    // Reload contests for the new org
     loadContests(orgId)
   }
 
@@ -70,22 +73,25 @@ export const useOrganiserStore = defineStore('organiser', () => {
     error.value = null
   }
 
+  function canEditContest(contest: OrganiserContestDetails): boolean {
+    return contest.createdBy === auth.userId
+  }
+
   return {
-    // State
     organisations,
     currentOrgId,
     contests,
     currentContestId,
     isLoading,
     error,
-    // Computed
     currentOrg,
     currentContest,
-    // Actions
+    myContests,
     loadOrganisations,
     loadContests,
     setCurrentOrg,
     setCurrentContest,
-    clearError
+    clearError,
+    canEditContest
   }
 })

@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = ref<string | null>(null)
   const userName = ref<string | null>(null)
   const userFirstName = ref<string | null>(null)
+  const userId = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!jwt.value)
 
@@ -15,9 +16,11 @@ export const useAuthStore = defineStore('auth', () => {
       const payload = JSON.parse(atob(token.split('.')[1]))
       userFirstName.value = payload.firstName ?? null
       userName.value = payload.name ?? payload.email ?? null
+      userId.value = payload.sub ?? payload.userId ?? null
     } catch {
       userFirstName.value = null
       userName.value = null
+      userId.value = null
     }
   }
 
@@ -59,5 +62,5 @@ export const useAuthStore = defineStore('auth', () => {
     saveToStorage()
   }
 
-  return { jwt, refreshToken, userName, userFirstName, isAuthenticated, loadFromStorage, setTokens, clearTokens }
+  return { jwt, refreshToken, userName, userFirstName, userId, isAuthenticated, loadFromStorage, setTokens, clearTokens }
 })
