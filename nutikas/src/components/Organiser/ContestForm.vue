@@ -6,7 +6,9 @@
       </el-form-item>
       <el-form-item label="Organisation" required>
         <el-select v-model="form.organisationId" placeholder="Select organisation">
-          <el-option v-for="org in organisations" :key="org.id" :value="org.id" :label="org.name" />
+          <el-option v-for="org in organisations" :key="org.id" :value="org.id" :label="org.name">
+            {{ org.name }}
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="Visible From" required>

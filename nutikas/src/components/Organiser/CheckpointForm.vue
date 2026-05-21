@@ -101,10 +101,14 @@ function open(existingCheckpoint?: OrganiserCheckPointDetails) {
 
 async function submit() {
   try {
+    const data: any = { ...form.value }
+    // Ensure lat/lon are numbers
+    data.lat = Number(data.lat)
+    data.lon = Number(data.lon)
     if (isEdit.value && props.checkpoint) {
-      await organiserApi.updateCheckpoint(props.checkpoint.id, form.value)
+      await organiserApi.updateCheckpoint(props.checkpoint.id, data)
     } else {
-      await organiserApi.createCheckpoint(props.contestId, form.value)
+      await organiserApi.createCheckpoint(props.contestId, data)
     }
     emit('saved')
     visible.value = false

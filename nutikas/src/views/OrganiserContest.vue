@@ -228,7 +228,7 @@ function _goBack() {
 }
 
 function _editContest() {
-  contestFormRef.value?.open()
+  contestFormRef.value?.open(contest.value)
 }
 
 function addClass() {
