@@ -172,7 +172,10 @@ const contestId = computed(() => route.params.id as string)
 const isNewContest = computed(() => contestId.value === 'new')
 
 onMounted(async () => {
-  if (isNewContest.value) return
+  if (isNewContest.value) {
+    contestFormRef.value?.open()
+    return
+  }
   await Promise.all([loadContest(), loadClasses(), loadCheckpoints(), loadTeams(), loadMarkings()])
 })
 
