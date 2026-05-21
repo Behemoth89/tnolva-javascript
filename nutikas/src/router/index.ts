@@ -66,6 +66,18 @@ const routes: RouteRecordRaw[] = [
     name: 'organizer-contest',
     component: () => import('@/views/OrganizerContest.vue'),
     meta: { requiresAuth: true, requiresRole: 'organiser' }
+  },
+  {
+    path: '/organizer/contest/:contestId/print',
+    name: 'organizer-print',
+    component: () => import('@/views/OrganizerPrint.vue'),
+    meta: { requiresAuth: true, requiresRole: 'organiser' }
+  },
+  {
+    path: '/organizer/contest/:contestId/markings',
+    name: 'organizer-markings',
+    component: () => import('@/views/OrganizerMarkings.vue'),
+    meta: { requiresAuth: true, requiresRole: 'organiser' }
   }
 ]
 
