@@ -6,7 +6,15 @@
 <domain>
 ## Phase Boundary
 
-Organizer dashboard for rogaine event management. Organizers can create contests, manage classes, define checkpoints, generate QR codes for printing, and view event results. This is separate from the participant flow but shares the auth system.
+Organizer dashboard for rogaine event management — following the `organizer-flow.md` end-to-end path:
+1. Auth + org discovery (organisations endpoint)
+2. Contest CRUD
+3. Class configuration (duration, maxDuration, penalties)
+4. Checkpoint configuration + QR code generation
+5. Team management (create, add members)
+6. Live markings monitoring during event
+7. On-behalf marking, corrections
+8. Closing (no explicit close — governed by openTo)
 
 </domain>
 
@@ -14,21 +22,37 @@ Organizer dashboard for rogaine event management. Organizers can create contests
 ## Implementation Decisions
 
 ### Authorization & Navigation
-- **D-01:** Organizer dashboard protected by `organiser` role claim in JWT
+- **D-01:** JWT auth + `organiser` role claim required for all `/api/v1/organiser/*` endpoints
 - **D-02:** Route guard on `/organizer` checks JWT claim before rendering dashboard
 - **D-03:** No separate login — same auth system as participants, role determines access
-- **D-04:** Organizer enters via dashboard entry (button in header → full-screen dashboard)
-- **D-05:** Organizer sees all contests within their organization (org-scoped via `organisationId`)
+- **D-04:** Dashboard entry from header button → full-screen dashboard
+- **D-05:** Exit dashboard via logo/home navigation
 
-### Navigation Flow
-- **D-06:** Organizer dashboard is a separate route section (`/organizer`)
-- **D-07:** Exit dashboard via logo/home navigation
-- **D-08:** From dashboard, organizer can navigate to contest-specific management views
+### Org & Contest Scoping
+- **D-06:** On login, call `GET /api/v1/organiser/organisations` to get organizer's organisations
+- **D-07:** Organizer sees all contests within their organization (org-scoped via `organisationId`)
 
 ### Dashboard Layout
-- **D-09:** Dashboard shows list view of organizer's contests
-- **D-10:** List includes: date, name, status (draft/open/closed), actions
-- **D-11:** Support all three states: manage existing events, create-first prompt, new organizer empty state with CTA
+- **D-08:** Dashboard shows list view of organizer's contests
+- **D-09:** List includes: date, name, status, actions
+- **D-10:** Support all states: manage existing events, create-first prompt, new organizer empty state with CTA
+
+### Class Configuration
+- **D-11:** Class fields: name, orderNr, duration (seconds), maxDuration (seconds), overDurationUnit (seconds), overDurationPenalty (score deducted per unit)
+
+### Checkpoint Configuration
+- **D-12:** Checkpoint fields: cpid (QR payload, unique within contest), cpCode (human label for print), checkPointType (1=Regular, 2=Finish, 3=Start, 4=NoScore), score, lat, lon
+- **D-13:** QR codes encode the `cpid` string — scanner reads cpid, not the GUID
+
+### Markings & Corrections
+- **D-14:** List markings paginated (default 25, max 100), ordered newest-first
+- **D-15:** On-behalf marking uses `checkPointId` as GUID (not cpid string)
+- **D-16:** Edit/delete raw marking — does NOT recompute team score; manually update team totals afterwards if needed
+
+### Team Management
+- **D-18:** Organizer team management is for pre-seeding teams on behalf of participants (for events that don't use self-registration)
+- **D-19:** Regular team registration (participants creating teams) is handled in Phase 4 (Team Registration) via `POST /api/v1/contests/{contestId}/teams`
+- **D-17:** No explicit "close contest" call — contest closes automatically when `openTo <= now`
 
 </decisions>
 
@@ -37,17 +61,17 @@ Organizer dashboard for rogaine event management. Organizers can create contests
 
 **Downstream agents MUST read these before planning or implementing.**
 
-### API Specification
-- `devhelp/api-spec.json` — Full OpenAPI 3.0.4 with organiser endpoints (POST /api/v1/organiser/Contests, /contest-classes, /check-points, etc.)
-- `devhelp/user-flow.md` — End-to-end flow documentation
+### Organizer API
+- `devhelp/organizer-flow.md` — **PRIMARY reference** — complete end-to-end flow, all endpoints, request/response shapes, validation rules
+
+### Supporting Docs
+- `devhelp/api-spec.json` — Full OpenAPI 3.0.4 with organiser endpoints
+- `devhelp/user-flow.md` — Participant flow (for context on how markings work)
 
 ### Project Context
-- `.planning/PROJECT.md` — Overall project definition (Vue 3 PWA, NestJS backend, offline-first)
+- `.planning/PROJECT.md` — Vue 3 PWA, NestJS backend, offline-first
 - `.planning/REQUIREMENTS.md` — Requirements traceability
 - `.planning/ROADMAP.md` — Phase 8 goal definition
-
-### Auth References
-- `.opencode/get-shit-done/workflows/discuss-phase/modes/default.md` — Role check flow
 
 </canonical_refs>
 
@@ -55,23 +79,25 @@ Organizer dashboard for rogaine event management. Organizers can create contests
 ## Existing Code Insights
 
 ### Reusable Assets
-- `src/stores/auth.ts` — Auth store with JWT handling, can be extended for role checking
-- `src/composables/useAuth.ts` — Auth composable, extend for role checks
-- `src/router/index.ts` — Vue Router, add organizer routes with guards
-- `src/components/AppHeader.vue` — Existing header, add organizer nav element
-
-### Established Patterns
-- Pinia stores for state management
-- Axios for API calls (same pattern as contest API)
-- JWT auth with claim checking
+- `src/stores/auth.ts` — Auth store with JWT handling, extend for role checking
+- `src/composables/useAuth.ts` — Auth composable
+- `src/router/index.ts` — Vue Router, add `/organizer` routes with auth guard
+- `src/components/AppHeader.vue` — Add organizer nav element
+- `src/api/index.ts` — API client pattern to follow for organiser endpoints
 
 ### Integration Points
-- `/api/v1/organiser/Contests` — List/create contests (GET, POST)
-- `/api/v1/organiser/Contests/{id}` — Get/update/delete single contest
-- `/api/v1/organiser/contests/{contestId}/contest-classes` — Class management
-- `/api/v1/organiser/contests/{contestId}/check-points` — Checkpoint management
-- `/api/v1/organiser/contests/{contestId}/markings` — View all markings
-- `src/api/index.ts` — API client structure to follow
+- `GET /api/v1/organiser/organisations` — List organizer's orgs (first call after login)
+- `GET /api/v1/organiser/contests` — List org's contests (dashboard)
+- `POST/PUT/DELETE /api/v1/organiser/contests/{id}` — Contest CRUD
+- `POST/PUT/DELETE /api/v1/organiser/contests/{contestId}/contest-classes` — Class CRUD
+- `POST/PUT/DELETE /api/v1/organiser/contests/{contestId}/check-points` — Checkpoint CRUD
+- `GET /api/v1/organiser/contests/{contestId}/check-points` — List checkpoints (for QR generation)
+- `POST/PUT/DELETE /api/v1/organiser/teams/{id}` — Team management
+- `GET /api/v1/organiser/contests/{contestId}/teams` — List teams
+- `GET/POST/DELETE /api/v1/organiser/teams/{teamId}/user-teams` — Team membership
+- `GET /api/v1/organiser/contests/{contestId}/markings` — Live markings view
+- `POST /api/v1/organiser/teams/{teamId}/markings` — On-behalf marking
+- `PUT/DELETE /api/v1/organiser/markings/{id}` — Edit/delete raw marking
 
 </codebase_context>
 
@@ -79,14 +105,16 @@ Organizer dashboard for rogaine event management. Organizers can create contests
 ## Specific Ideas
 
 - Role provisioning: organiser role is assigned by system administrator (e.g. via seeded `organiser@taltech.ee` account or via `Areas/UserAdmin`)
-- Org-scoped contest filtering: backend returns contests filtered by the organizer's `organisationId` — organizer sees all events within their organization, not just ones they personally created
+- QR code generation: jsPDF or similar client-side library — one QR per `cpid` value
+- Contest deletion: clean up in order — markings → user-teams → teams → checkpoints → classes → contest
+- Team registration is participant-driven (Phase 4) — participants register via `POST /api/v1/contests/{contestId}/teams`. Organizer pre-seeding is optional and only for events that need it.
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-None — discussion stayed within phase scope
+None — following organizer-flow.md for full scope
 
 ---
 
