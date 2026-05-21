@@ -20,10 +20,5 @@ export const identityApi = {
   async refreshToken(info: TokenRefreshInfo): Promise<JWTResponse> {
     const response = await api.post('/identity/Account/RefreshTokenData', info)
     return response.data
-  },
-
-  async becomeOrganizer(): Promise<JWTResponse> {
-    const response = await api.post('/identity/Account/BecomeOrganizer')
-    return response.data
   }
 }
