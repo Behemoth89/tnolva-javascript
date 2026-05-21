@@ -5,7 +5,7 @@
  * State machine: pre-race → active → post-race
  */
 
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, provide } from 'vue'
 import { useRoute } from 'vue-router'
 import { useRaceStore } from '@/stores/race'
 import { useTeamStore } from '@/stores/team'
@@ -42,6 +42,12 @@ const contestClassName = ref('')
 const memberNames = ref<string | null>(null)
 const contestClassId = ref('')
 
+// Location state
+const locationPermissionGranted = ref(false)
+
+// Provide location permission for child components
+provide('locationPermissionGranted', locationPermissionGranted)
+
 // Derived race phase
 const racePhase = computed((): 'pre' | 'active' | 'post' => {
   const state = raceStore.raceState
@@ -53,6 +59,9 @@ const racePhase = computed((): 'pre' | 'active' | 'post' => {
 // Load initial data
 onMounted(async () => {
   try {
+    // Request location permission early so it's ready when racing starts
+    requestLocationPermission()
+
     // Load active team from IndexedDB
     await teamStore.loadActiveTeam()
 
@@ -161,9 +170,30 @@ function handleScanSuccess(_checkPointId: string, _displayCPId: string): void {
   }
 }
 
+function requestLocationPermission(): void {
+  if (!navigator.geolocation) {
+    locationPermissionGranted.value = false
+    return
+  }
+  navigator.geolocation.getCurrentPosition(
+    () => {
+      locationPermissionGranted.value = true
+    },
+    () => {
+      locationPermissionGranted.value = false
+    },
+    { timeout: 5000 }
+  )
+}
+
 function retryLoad(): void {
   window.location.reload()
 }
+
+// Expose for child components
+defineExpose({
+  locationPermissionGranted
+})
 </script>
 
 <template>
@@ -212,6 +242,8 @@ function retryLoad(): void {
             :userTeamId="userTeamId"
             :contestClassId="contestClassId"
             :isLoading="positionLoading"
+            :currentLat="raceStore.raceState.currentLat"
+            :currentLon="raceStore.raceState.currentLon"
             @refresh="handleScoreRefresh"
           />
         </div>

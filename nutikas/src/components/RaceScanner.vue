@@ -23,6 +23,7 @@ const toast = useToast()
 const pause = ref(false)
 const manualInput = ref('')
 const isSubmitting = ref(false)
+const scanResult = ref<{ success: boolean; message: string } | null>(null)
 
 /**
  * Handle a detected or manually-entered CP ID
@@ -36,7 +37,7 @@ async function handleCPId(cpId: string): Promise<void> {
   let lon: string | null = null
   const dt = new Date().toISOString()
 
-  // Try to get current location
+  // Get current location (always try since permission was requested at mount)
   try {
     const position = await new Promise<GeolocationPosition>((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
@@ -44,7 +45,7 @@ async function handleCPId(cpId: string): Promise<void> {
     lat = position.coords.latitude.toFixed(6)
     lon = position.coords.longitude.toFixed(6)
   } catch {
-    // Location not available - that's okay
+    // Location not available - proceed without
   }
 
   try {
@@ -54,14 +55,22 @@ async function handleCPId(cpId: string): Promise<void> {
 
     if (result.isAlreadyScanned) {
       toast.info('Already scanned')
+      scanResult.value = { success: true, message: 'Already scanned' }
     } else if (!result.statusOk) {
       const msg = result.message || 'Scan failed'
       toast.error(msg)
       emit('scan-error', msg)
+      scanResult.value = { success: false, message: msg }
     } else {
       toast.success(`Scanned: ${displayCPId}`)
       emit('scan-success', cpId, displayCPId)
+      scanResult.value = { success: true, message: `OK: ${displayCPId}` }
     }
+
+    // Clear result after a delay
+    setTimeout(() => {
+      scanResult.value = null
+    }, 2000)
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Scan failed'
     toast.error(msg)
@@ -147,9 +156,13 @@ function handleManualSubmit(): void {
         @error="onCameraError"
       />
 
-      <!-- Scanning overlay when paused -->
-      <div v-if="pause" class="scanning-overlay">
-        <span class="scanning-text">Scanning...</span>
+      <!-- Scanning overlay when paused or showing result -->
+      <div v-if="pause || scanResult" class="scanning-overlay" :class="{ 'result-overlay': scanResult }">
+        <span v-if="scanResult" class="scan-result" :class="scanResult.success ? 'success' : 'error'">
+          {{ scanResult.success ? '✓' : '✗' }}
+          <span class="result-message">{{ scanResult.message }}</span>
+        </span>
+        <span v-else class="scanning-text">Scanning...</span>
       </div>
     </div>
 
@@ -209,6 +222,34 @@ function handleManualSubmit(): void {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.5);
+}
+
+.result-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.scan-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.scan-result.success {
+  color: #4caf50;
+}
+
+.scan-result.error {
+  color: #f44336;
+}
+
+.result-message {
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 0 1rem;
 }
 
 .scanning-text {

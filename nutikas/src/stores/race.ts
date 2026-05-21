@@ -4,14 +4,16 @@ import { submitMarking } from '@/api/marking'
 import type { RaceState, MarkingSubmitResult } from '@/types/race'
 import type { UserTeamActivation } from '@/types/team'
 
-const initialRaceState = (): RaceState => ({
+const initialRaceState = (): RaceState & { currentLat: string | null; currentLon: string | null } => ({
   startDT: null,
   finishDT: null,
   score: 0,
   bonus: 0,
   penalty: 0,
   finalScore: 0,
-  scannedCPIds: []
+  scannedCPIds: [],
+  currentLat: null,
+  currentLon: null
 })
 
 export const useRaceStore = defineStore('race', () => {
@@ -68,6 +70,10 @@ export const useRaceStore = defineStore('race', () => {
         raceState.value.scannedCPIds.push(checkPointId)
       }
 
+      // Update current location if provided
+      if (extras?.lat) raceState.value.currentLat = extras.lat
+      if (extras?.lon) raceState.value.currentLon = extras.lon
+
       return result
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to submit scan'
@@ -105,6 +111,11 @@ export const useRaceStore = defineStore('race', () => {
     }
   }
 
+  function updateLocation(lat: string, lon: string): void {
+    raceState.value.currentLat = lat
+    raceState.value.currentLon = lon
+  }
+
   return {
     // State
     raceState,
@@ -116,6 +127,7 @@ export const useRaceStore = defineStore('race', () => {
     // Actions
     submitScan,
     resetRace,
-    loadRaceState
+    loadRaceState,
+    updateLocation
   }
 })

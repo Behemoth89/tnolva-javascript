@@ -16,16 +16,14 @@ const props = defineProps<{
   userTeamId: string
   contestClassId: string
   isLoading: boolean
+  currentLat?: string | null
+  currentLon?: string | null
 }>()
 
 const emit = defineEmits<{
   refresh: []
 }>()
 
-/**
- * Convert numeric position to ordinal word
- * 1 -> 1st, 2 -> 2nd, 3 -> 3rd, etc.
- */
 function toOrdinal(n: number): string {
   if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`
   switch (n % 10) {
@@ -36,23 +34,23 @@ function toOrdinal(n: number): string {
   }
 }
 
-
-
-/**
- * Handle refresh button click
- * Emits refresh event for manual score refresh (D-08)
- */
 function handleRefresh() {
   emit('refresh')
 }
 
-// Display values
 const displayPosition = computed(() => {
   if (!props.position) return null
   return {
     ordinal: toOrdinal(props.position.ordinal),
     total: props.position.total
   }
+})
+
+const displayLocation = computed(() => {
+  if (props.currentLat && props.currentLon) {
+    return `${props.currentLat}, ${props.currentLon}`
+  }
+  return null
 })
 </script>
 
@@ -94,6 +92,10 @@ const displayPosition = computed(() => {
     <div v-if="displayPosition" class="position-display">
       <span class="position-label">Position:</span>
       <span class="position-value">{{ displayPosition.ordinal }} of {{ displayPosition.total }}</span>
+    </div>
+    <div v-else-if="displayLocation" class="position-display">
+      <span class="position-label">Location:</span>
+      <span class="position-value location">{{ displayLocation }}</span>
     </div>
     <div v-else class="position-display">
       <span class="position-label">Position:</span>
@@ -237,5 +239,9 @@ const displayPosition = computed(() => {
 
 .position-value.empty {
   color: #bbb;
+}
+
+.location-value {
+  font-size: 0.85rem;
 }
 </style>

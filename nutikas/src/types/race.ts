@@ -30,7 +30,9 @@ export interface RaceState {
   bonus: number
   penalty: number
   finalScore: number
-  scannedCPIds: string[]  // track scanned CP IDs for "Already scanned" detection (array for JSON serialization)
+  scannedCPIds: string[]
+  currentLat: string | null
+  currentLon: string | null
 }
 
 // Normalized result from submitMarking handling

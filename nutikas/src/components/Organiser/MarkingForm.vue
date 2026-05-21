@@ -7,7 +7,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="Checkpoint" required>
-        <el-select v-model="form.checkPointId" placeholder="Select checkpoint" style="width: 100%">
+        <el-select v-model="form.checkPointId" :disabled="!!editingMarking" placeholder="Select checkpoint" style="width: 100%">
           <el-option
             v-for="cp in availableCheckpoints"
             :key="cp.id"
@@ -129,7 +129,9 @@ async function submit() {
       await organiserApi.updateMarking(editingMarking.value.id, {
         dt: data.dt,
         lat: data.lat,
-        lon: data.lon
+        lon: data.lon,
+        checkPointId: form.value.checkPointId,
+        userTeamId: form.value.teamId
       })
     } else {
       const result = await organiserApi.createMarking(form.value.teamId, data)
