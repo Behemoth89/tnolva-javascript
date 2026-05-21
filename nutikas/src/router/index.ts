@@ -89,7 +89,7 @@ export const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
-  if (!auth.jwt && !auth.refreshToken) {
+  if (!auth.jwt) {
     await auth.loadFromStorage()
   }
 
@@ -103,6 +103,11 @@ router.beforeEach(async (to) => {
 
   // Role guard for organiser routes
   if (to.meta.requiresRole === 'organiser') {
+    console.log('Organiser route check:', { 
+      jwt: auth.jwt ? 'exists' : 'null', 
+      isOrganiser: auth.isOrganiser,
+      userId: auth.userId 
+    })
     if (!auth.isOrganiser) {
       return { name: 'contests' }
     }
