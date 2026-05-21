@@ -1,39 +1,37 @@
 <template>
-  <el-dialog v-model="visible" :title="isEdit ? t('organizer.editContest') : t('organizer.createContest')" width="600px">
+  <el-dialog v-model="visible" :title="isEdit ? 'Edit Contest' : 'Create Contest'" width="600px">
     <el-form :model="form" label-width="140px">
-      <el-form-item :label="t('contest.name')" required>
+      <el-form-item label="Name" required>
         <el-input v-model="form.name" />
       </el-form-item>
-      <el-form-item :label="t('contest.visibleFrom')" required>
+      <el-form-item label="Visible From" required>
         <el-date-picker v-model="form.visibleFrom" type="datetime" />
       </el-form-item>
-      <el-form-item :label="t('contest.openFrom')" required>
+      <el-form-item label="Open From" required>
         <el-date-picker v-model="form.openFrom" type="datetime" />
       </el-form-item>
-      <el-form-item :label="t('contest.openTo')" required>
+      <el-form-item label="Open To" required>
         <el-date-picker v-model="form.openTo" type="datetime" />
       </el-form-item>
-      <el-form-item :label="t('contest.bonusPerMarking')">
+      <el-form-item label="Bonus Per Marking">
         <el-input-number v-model="form.bonusPerMarking" :min="0" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="visible = false">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="submit">{{ t('common.save') }}</el-button>
+      <el-button @click="visible = false">Cancel</el-button>
+      <el-button type="primary" @click="submit">Save</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import type { OrganiserContestUpsertRequest, OrganiserContestDetails } from '@/types/api'
 import { organiserApi } from '@/api/endpoints/organiser'
 
 const auth = useAuthStore()
-const { t } = useI18n()
 const visible = ref(false)
 const isEdit = computed(() => !!props.contest)
 
@@ -92,7 +90,7 @@ async function submit() {
     emit('saved')
     visible.value = false
   } catch (e: any) {
-    ElMessage.error(e.message ?? t('common.saveError'))
+    ElMessage.error(e.message ?? 'Save failed')
   }
 }
 

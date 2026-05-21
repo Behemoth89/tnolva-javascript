@@ -1,26 +1,26 @@
 <template>
   <div class="organizer-markings">
     <div class="markings-header">
-      <el-button @click="goBack">{{ t('common.back') }}</el-button>
-      <h2>{{ t('organizer.liveMarkings') }}: {{ contest?.name }}</h2>
-      <el-tag type="success" v-if="isPolling">{{ t('organizer.live') }}</el-tag>
+      <el-button @click="goBack">Back</el-button>
+      <h2>Live Markings: {{ contest?.name }}</h2>
+      <el-tag type="success" v-if="isPolling">LIVE</el-tag>
     </div>
 
     <div class="markings-info">
-      <span>{{ t('organizer.totalMarkings') }}: {{ totalCount }}</span>
-      <el-button size="small" @click="refresh">{{ t('common.refresh') }}</el-button>
+      <span>Total: {{ totalCount }}</span>
+      <el-button size="small" @click="refresh">Refresh</el-button>
     </div>
 
     <el-table :data="markings" stripe>
-      <el-table-column prop="teamName" :label="t('marking.team')" />
-      <el-table-column prop="cpCode" :label="t('marking.cp')" />
-      <el-table-column prop="score" :label="t('marking.score')" />
-      <el-table-column :label="t('marking.time')">
+      <el-table-column prop="teamName" label="Team" />
+      <el-table-column prop="cpCode" label="CP" />
+      <el-table-column prop="score" label="Score" />
+      <el-table-column label="Time">
         <template #default="{ row }">
           {{ formatDateTime(row.dt) }}
         </template>
       </el-table-column>
-      <el-table-column :label="t('marking.location')">
+      <el-table-column label="Location">
         <template #default="{ row }">
           {{ row.lat?.toFixed(5) ?? '-' }}, {{ row.lon?.toFixed(5) ?? '-' }}
         </template>
@@ -39,12 +39,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { organiserApi } from '@/api/endpoints/organiser'
 import type { OrganiserContestDetails, OrganiserMarkingListItem } from '@/types/api'
 
-const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 

@@ -1,31 +1,30 @@
 <template>
-  <el-dialog v-model="visible" :title="isEdit ? t('organizer.editCheckpoint') : t('organizer.addCheckpoint')" width="600px">
+  <el-dialog v-model="visible" :title="isEdit ? 'Edit Checkpoint' : 'Add Checkpoint'" width="600px">
     <el-form :model="form" label-width="140px">
-      <el-form-item :label="t('checkpoint.cpid')" required>
+      <el-form-item label="CPID" required>
         <el-input v-model="form.cpid" :disabled="isEdit" />
-        <span class="form-hint">{{ t('checkpoint.cpidHint') }}</span>
+        <span class="form-hint">Unique checkpoint identifier</span>
       </el-form-item>
-      <el-form-item :label="t('checkpoint.cpCode')" required>
+      <el-form-item label="Code" required>
         <el-input v-model="form.cpCode" />
       </el-form-item>
-      <el-form-item :label="t('checkpoint.type')" required>
+      <el-form-item label="Type" required>
         <el-select v-model="form.checkPointType">
-          <el-option :value="1" :label="t('checkpoint.type.regular')" />
-          <el-option :value="2" :label="t('checkpoint.type.finish')" />
-          <el-option :value="3" :label="t('checkpoint.type.start')" />
-          <el-option :value="4" :label="t('checkpoint.type.noscore')" />
+          <el-option :value="1" label="Regular" />
+          <el-option :value="2" label="Finish" />
+          <el-option :value="3" label="Start" />
+          <el-option :value="4" label="No Score" />
         </el-select>
       </el-form-item>
-      <el-form-item :label="t('checkpoint.score')">
+      <el-form-item label="Score">
         <el-input-number v-model="form.score" :min="0" />
       </el-form-item>
-      <el-form-item :label="t('checkpoint.lat')">
+      <el-form-item label="Latitude">
         <el-input-number v-model="form.lat" :precision="6" />
       </el-form-item>
-      <el-form-item :label="t('checkpoint.lon')">
+      <el-form-item label="Longitude">
         <el-input-number v-model="form.lon" :precision="6" />
       </el-form-item>
-      <!-- QR Preview -->
       <el-form-item v-if="form.cpid">
         <div class="qr-preview">
           <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR Code" />
@@ -34,15 +33,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="visible = false">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="submit">{{ t('common.save') }}</el-button>
+      <el-button @click="visible = false">Cancel</el-button>
+      <el-button type="primary" @click="submit">Save</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { OrganiserCheckPointUpsertRequest, OrganiserCheckPointDetails } from '@/types/api'
 import { organiserApi } from '@/api/endpoints/organiser'
@@ -58,7 +56,6 @@ const emit = defineEmits<{
   saved: []
 }>()
 
-const { t } = useI18n()
 const { generateQrDataUrl } = useQrCode()
 const visible = ref(false)
 const isEdit = computed(() => !!props.checkpoint)
@@ -112,7 +109,7 @@ async function submit() {
     emit('saved')
     visible.value = false
   } catch (e: any) {
-    ElMessage.error(e.message ?? t('common.saveError'))
+    ElMessage.error(e.message ?? 'Save failed')
   }
 }
 

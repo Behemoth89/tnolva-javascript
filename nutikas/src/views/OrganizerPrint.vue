@@ -1,14 +1,14 @@
 <template>
   <div class="organizer-print">
     <div class="print-header">
-      <el-button @click="goBack">{{ t('common.back') }}</el-button>
-      <h2>{{ t('organizer.printQrs') }}: {{ contest?.name }}</h2>
+      <el-button @click="goBack">Back</el-button>
+      <h2>Print QR Codes: {{ contest?.name }}</h2>
       <el-button type="primary" @click="generatePdf">
-        {{ t('organizer.downloadPdf') }}
+        Download PDF
       </el-button>
     </div>
 
-    <div v-if="qrMapLoading" class="loading">{{ t('common.loading') }}</div>
+    <div v-if="qrMapLoading" class="loading">Loading...</div>
 
     <div v-else class="qr-grid">
       <div v-for="cp in checkpoints" :key="cp.id" class="qr-cell">
@@ -22,14 +22,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { jsPDF } from 'jspdf'
 import { organiserApi } from '@/api/endpoints/organiser'
 import { useQrCode } from '@/composables/useQrCode'
 import type { OrganiserContestDetails, OrganiserCheckPointDetails } from '@/types/api'
 
-const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { generateQrDataUrl } = useQrCode()

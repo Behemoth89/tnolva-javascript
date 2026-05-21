@@ -1,12 +1,12 @@
 <template>
-  <el-dialog v-model="visible" :title="isEdit ? t('organizer.editMarking') : t('organizer.addMarking')">
+  <el-dialog v-model="visible" :title="isEdit ? 'Edit Marking' : 'Add Marking'">
     <el-form :model="form" label-width="140px">
-      <el-form-item :label="t('marking.team')" required>
+      <el-form-item label="Team" required>
         <el-select v-model="form.teamId" @change="loadTeamCheckpoints">
           <el-option v-for="team in teams" :key="team.id" :value="team.id" :label="team.name" />
         </el-select>
       </el-form-item>
-      <el-form-item :label="t('marking.checkpoint')" required>
+      <el-form-item label="Checkpoint" required>
         <el-select v-model="form.checkPointId" placeholder="Select checkpoint">
           <el-option
             v-for="cp in availableCheckpoints"
@@ -15,28 +15,27 @@
             :label="`${cp.cpCode} (${cp.cpid})`"
           />
         </el-select>
-        <span class="form-hint">{{ t('marking.checkpointGuidHint') }}</span>
+        <span class="form-hint">Select checkpoint GUID, not cpid</span>
       </el-form-item>
-      <el-form-item :label="t('marking.dt')">
+      <el-form-item label="Time">
         <el-date-picker v-model="form.dt" type="datetime" />
       </el-form-item>
-      <el-form-item :label="t('marking.lat')">
+      <el-form-item label="Latitude">
         <el-input-number v-model="form.lat" :precision="6" />
       </el-form-item>
-      <el-form-item :label="t('marking.lon')">
+      <el-form-item label="Longitude">
         <el-input-number v-model="form.lon" :precision="6" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="visible = false">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="submit">{{ t('common.submit') }}</el-button>
+      <el-button @click="visible = false">Cancel</el-button>
+      <el-button type="primary" @click="submit">Submit</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { OrganiserTeamDetails, OrganiserCheckPointDetails, OrganiserMarkingCreateRequest, OrganiserMarkingListItem } from '@/types/api'
 import { organiserApi } from '@/api/endpoints/organiser'
@@ -51,12 +50,9 @@ const emit = defineEmits<{
   saved: []
 }>()
 
-const { t } = useI18n()
 const visible = ref(false)
-const isEdit = computed(() => false) // For now, only create mode
+const isEdit = computed(() => false)
 const availableCheckpoints = ref<OrganiserCheckPointDetails[]>([])
-
-// Editing state
 const editingMarking = ref<OrganiserMarkingListItem | null>(null)
 
 const form = ref<OrganiserMarkingCreateRequest & { teamId: string }>({
@@ -68,7 +64,6 @@ const form = ref<OrganiserMarkingCreateRequest & { teamId: string }>({
 })
 
 function loadTeamCheckpoints(_teamId: string) {
-  // Filter checkpoints to show all (or filter by team's class)
   availableCheckpoints.value = props.checkpoints
 }
 
@@ -101,15 +96,13 @@ async function submit() {
   try {
     const { teamId, ...data } = form.value
     if (editingMarking.value) {
-      // Update existing marking
       await organiserApi.updateMarking(editingMarking.value.id, {
-        score: 0, // Would need to get score from form
+        score: 0,
         dt: data.dt,
         lat: data.lat,
         lon: data.lon
       })
     } else {
-      // Create new marking
       const result = await organiserApi.createMarking(teamId, data as OrganiserMarkingCreateRequest)
       if (!result.statusOk) {
         ElMessage.warning(result.message)
@@ -119,7 +112,7 @@ async function submit() {
     emit('saved')
     visible.value = false
   } catch (e: any) {
-    ElMessage.error(e.message ?? t('common.saveError'))
+    ElMessage.error(e.message ?? 'Save failed')
   }
 }
 

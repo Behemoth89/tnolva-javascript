@@ -1,48 +1,44 @@
 <template>
   <div class="organizer-dashboard">
     <div class="dashboard-header">
-      <h1>{{ t('organizer.title') }}</h1>
+      <h1>Organizer Dashboard</h1>
       <el-button type="primary" @click="createContest">
-        {{ t('organizer.createContest') }}
+        Create Contest
       </el-button>
     </div>
 
-    <!-- Loading state -->
     <div v-if="store.isLoading" class="loading">
-      {{ t('common.loading') }}
+      Loading...
     </div>
 
-    <!-- Error state -->
     <el-alert v-if="store.error" type="error" :title="store.error" @close="store.clearError()" />
 
-    <!-- Empty state for new organizers -->
-    <div v-else-if="store.contests.length === 0" class="empty-state">
-      <p>{{ t('organizer.noContests') }}</p>
+    <div v-else-if="myContests.length === 0" class="empty-state">
+      <p>No contests yet</p>
       <el-button type="primary" @click="createContest">
-        {{ t('organizer.createFirst') }}
+        Create Your First Contest
       </el-button>
     </div>
 
-    <!-- Contests list -->
     <div v-else class="contests-list">
       <el-table :data="myContests" stripe>
-        <el-table-column prop="name" :label="t('contest.name')" />
-        <el-table-column :label="t('contest.date')">
+        <el-table-column prop="name" label="Name" />
+        <el-table-column label="Date">
           <template #default="{ row }">
             {{ formatDate(row.openFrom) }}
           </template>
         </el-table-column>
-        <el-table-column :label="t('contest.status')">
+        <el-table-column label="Status">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row)">
               {{ getStatus(row) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.actions')">
+        <el-table-column label="Actions">
           <template #default="{ row }">
             <el-button size="small" @click="manageContest(row.id)">
-              {{ t('organizer.manage') }}
+              Manage
             </el-button>
           </template>
         </el-table-column>
@@ -52,15 +48,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useOrganiserStore } from '@/stores/organiser'
 import type { OrganiserContestDetails } from '@/types/api'
 
-const { t } = useI18n()
 const router = useRouter()
 const store = useOrganiserStore()
 
@@ -71,7 +64,7 @@ onMounted(async () => {
     await store.loadOrganisations()
     await store.loadContests()
   } catch (e: any) {
-    ElMessage.error(e.message ?? t('organizer.loadError'))
+    ElMessage.error(e.message ?? 'Failed to load')
   }
 })
 
@@ -83,15 +76,15 @@ function getStatus(contest: OrganiserContestDetails): string {
   const now = new Date()
   const openFrom = new Date(contest.openFrom)
   const openTo = new Date(contest.openTo)
-  if (now < openFrom) return t('contest.status.upcoming')
-  if (now > openTo) return t('contest.status.closed')
-  return t('contest.status.open')
+  if (now < openFrom) return 'Upcoming'
+  if (now > openTo) return 'Closed'
+  return 'Open'
 }
 
 function getStatusType(contest: OrganiserContestDetails): 'success' | 'warning' | 'info' {
   const status = getStatus(contest)
-  if (status === 'closed') return 'info'
-  if (status === 'open') return 'success'
+  if (status === 'Closed') return 'info'
+  if (status === 'Open') return 'success'
   return 'warning'
 }
 

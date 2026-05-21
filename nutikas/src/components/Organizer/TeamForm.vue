@@ -1,25 +1,24 @@
 <template>
-  <el-dialog v-model="visible" :title="isEdit ? t('organizer.editTeam') : t('organizer.addTeam')">
+  <el-dialog v-model="visible" :title="isEdit ? 'Edit Team' : 'Add Team'">
     <el-form :model="form" label-width="120px">
-      <el-form-item :label="t('team.name')" required>
+      <el-form-item label="Name" required>
         <el-input v-model="form.name" />
       </el-form-item>
-      <el-form-item :label="t('team.class')" required>
+      <el-form-item label="Class" required>
         <el-select v-model="form.classId" placeholder="Select class">
           <el-option v-for="cls in classes" :key="cls.id" :value="cls.id" :label="cls.name" />
         </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="visible = false">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="submit">{{ t('common.save') }}</el-button>
+      <el-button @click="visible = false">Cancel</el-button>
+      <el-button type="primary" @click="submit">Save</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { OrganiserTeamUpsertRequest, OrganiserTeamDetails, OrganiserContestClassDetails } from '@/types/api'
 import { organiserApi } from '@/api/endpoints/organiser'
@@ -34,7 +33,6 @@ const emit = defineEmits<{
   saved: []
 }>()
 
-const { t } = useI18n()
 const visible = ref(false)
 const isEdit = computed(() => !!props.team)
 
@@ -67,7 +65,7 @@ async function submit() {
     emit('saved')
     visible.value = false
   } catch (e: any) {
-    ElMessage.error(e.message ?? t('common.saveError'))
+    ElMessage.error(e.message ?? 'Save failed')
   }
 }
 
