@@ -13,6 +13,9 @@ const teamStore = useTeamStore()
 const myContestIds = ref<Set<string>>(new Set())
 const myTeamsByContest = ref<Map<string, string>>(new Map())
 
+const searchQuery = ref('')
+const showMyTeamsOnly = ref(false)
+
 onMounted(async () => {
   contestStore.fetchContests()
   if (auth.isAuthenticated) {
@@ -41,6 +44,15 @@ const visibleContests = computed(() => {
   return contestStore.contests.filter((contest) => {
     if (!contest.visibleFrom) return true
     return new Date(contest.visibleFrom) <= now
+  }).filter((contest) => {
+    if (showMyTeamsOnly.value && !myContestIds.value.has(contest.id)) {
+      return false
+    }
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase()
+      return contest.name?.toLowerCase().includes(query) ?? false
+    }
+    return true
   })
 })
 
@@ -76,6 +88,22 @@ function navigateToMyTeams(event: Event, id: string) {
 <template>
   <div class="page-container">
     <h1 class="text-2xl font-bold mb-6">Contests</h1>
+
+    <div class="filters">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search contests..."
+        class="search-input"
+      />
+      <label class="toggle-filter">
+        <input
+          v-model="showMyTeamsOnly"
+          type="checkbox"
+        />
+        <span>My teams only</span>
+      </label>
+    </div>
 
     <div v-if="contestStore.loading" class="text-gray-500">Loading...</div>
     <div v-else-if="contestStore.error" class="text-red-600">{{ contestStore.error }}</div>
@@ -119,6 +147,37 @@ function navigateToMyTeams(event: Event, id: string) {
   padding: 1rem;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.toggle-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.toggle-filter input {
+  width: 1rem;
+  height: 1rem;
 }
 
 .contest-list {

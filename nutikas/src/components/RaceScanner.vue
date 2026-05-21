@@ -67,20 +67,26 @@ async function handleCPId(cpId: string): Promise<void> {
       scanResult.value = { success: true, message: `OK: ${displayCPId}` }
     }
 
-    // Clear result after a delay
-    setTimeout(() => {
-      scanResult.value = null
-    }, 2000)
+    // Clear result after a delay (longer for errors)
+    if (scanResult.value?.success) {
+      setTimeout(() => {
+        scanResult.value = null
+      }, 2000)
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Scan failed'
     toast.error(msg)
     emit('scan-error', msg)
+    scanResult.value = { success: false, message: msg }
   } finally {
     isSubmitting.value = false
     pause.value = true
     setTimeout(() => {
       pause.value = false
-    }, 2000)
+      if (scanResult.value?.success) {
+        scanResult.value = null
+      }
+    }, scanResult.value?.success ? 2000 : 4000)
   }
 }
 
