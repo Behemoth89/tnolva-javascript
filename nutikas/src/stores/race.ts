@@ -32,13 +32,14 @@ export const useRaceStore = defineStore('race', () => {
    */
   async function submitScan(
     checkPointId: string,
-    userTeamId: string
+    userTeamId: string,
+    extras?: { lat?: string | null; lon?: string | null; dt?: string }
   ): Promise<MarkingSubmitResult> {
     loading.value = true
     error.value = null
 
     try {
-      const response = await submitMarking({ checkPointId, userTeamId })
+      const response = await submitMarking({ checkPointId, userTeamId, ...extras })
 
       // Detect if this CP was already scanned
       const isAlreadyScanned = raceState.value.scannedCPIds.includes(checkPointId)

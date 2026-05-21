@@ -32,14 +32,27 @@ async function handleCPId(cpId: string): Promise<void> {
 
   isSubmitting.value = true
 
+  let lat: string | null = null
+  let lon: string | null = null
+  const dt = new Date().toISOString()
+
+  // Try to get current location
   try {
-    // Decode Estonian characters for display (e.g. "&Auml;" -> "Ä")
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
+    })
+    lat = position.coords.latitude.toFixed(6)
+    lon = position.coords.longitude.toFixed(6)
+  } catch {
+    // Location not available - that's okay
+  }
+
+  try {
     const displayCPId = he.decode(cpId)
 
-    const result = await raceStore.submitScan(cpId, props.userTeamId)
+    const result = await raceStore.submitScan(cpId, props.userTeamId, { lat, lon, dt })
 
     if (result.isAlreadyScanned) {
-      // D-15: Re-scanned CPs show "Already scanned" toast, not error
       toast.info('Already scanned')
     } else if (!result.statusOk) {
       const msg = result.message || 'Scan failed'
@@ -55,7 +68,6 @@ async function handleCPId(cpId: string): Promise<void> {
     emit('scan-error', msg)
   } finally {
     isSubmitting.value = false
-    // Pause scanner to prevent rapid re-scanning
     pause.value = true
     setTimeout(() => {
       pause.value = false

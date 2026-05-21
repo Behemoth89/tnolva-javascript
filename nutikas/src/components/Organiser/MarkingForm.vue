@@ -2,32 +2,29 @@
   <el-dialog v-model="visible" :title="isEdit ? 'Edit Marking' : 'Add Marking'">
     <el-form :model="form" label-width="140px">
       <el-form-item label="Team" required>
-        <el-select v-model="form.teamId" @change="loadTeamCheckpoints" placeholder="Select team">
-          <el-option v-for="team in teams" :key="team.id" :value="team.id" :label="team.name">
-            {{ team.name }}
-          </el-option>
+        <el-select v-model="form.teamId" @change="loadTeamCheckpoints" placeholder="Select team" style="width: 100%">
+          <el-option v-for="team in teams" :key="team.id" :value="team.id" :label="team.name" />
         </el-select>
       </el-form-item>
       <el-form-item label="Checkpoint" required>
-        <el-select v-model="form.checkPointId" placeholder="Select checkpoint">
+        <el-select v-model="form.checkPointId" placeholder="Select checkpoint" style="width: 100%">
           <el-option
             v-for="cp in availableCheckpoints"
             :key="cp.id"
             :value="cp.id"
             :label="`${cp.cpCode} (${cp.cpid})`"
-          >
-            {{ cp.cpCode }} ({{ cp.cpid }})
-          </el-option>
+          />
         </el-select>
       </el-form-item>
+      <el-form-item label="Location">
+        <div class="location-row">
+          <el-input v-model="form.lat" placeholder="Latitude" style="width: 45%" />
+          <el-input v-model="form.lon" placeholder="Longitude" style="width: 45%" />
+          <el-button type="primary" @click="captureLocation" :loading="capturing">Capture</el-button>
+        </div>
+      </el-form-item>
       <el-form-item label="Time">
-        <el-date-picker v-model="form.dt" type="datetime" />
-      </el-form-item>
-      <el-form-item label="Latitude">
-        <el-input v-model="form.lat" />
-      </el-form-item>
-      <el-form-item label="Longitude">
-        <el-input v-model="form.lon" />
+        <el-input v-model="form.dt" placeholder="ISO datetime" style="width: 100%" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -57,6 +54,7 @@ const visible = ref(false)
 const isEdit = computed(() => false)
 const availableCheckpoints = ref<OrganiserCheckPointDetails[]>([])
 const editingMarking = ref<OrganiserMarkingListItem | null>(null)
+const capturing = ref(false)
 
 const form = ref({
   teamId: '',
@@ -70,17 +68,37 @@ function loadTeamCheckpoints(_teamId: string) {
   availableCheckpoints.value = props.checkpoints
 }
 
+function captureLocation() {
+  if (!navigator.geolocation) {
+    ElMessage.warning('Geolocation not supported')
+    return
+  }
+  capturing.value = true
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      form.value.lat = position.coords.latitude.toFixed(6)
+      form.value.lon = position.coords.longitude.toFixed(6)
+      form.value.dt = new Date().toISOString()
+      capturing.value = false
+    },
+    (error) => {
+      ElMessage.error('Failed to get location: ' + error.message)
+      capturing.value = false
+    }
+  )
+}
+
 function open(existingMarking?: OrganiserMarkingListItem) {
   if (existingMarking) {
     editingMarking.value = existingMarking
     form.value = {
-      teamId: existingMarking.userTeamId,
+      teamId: existingMarking.teamId ?? existingMarking.userTeamId,
       checkPointId: existingMarking.checkPointId,
       dt: existingMarking.dt,
       lat: existingMarking.lat ?? '',
       lon: existingMarking.lon ?? ''
     }
-    loadTeamCheckpoints(existingMarking.userTeamId)
+    loadTeamCheckpoints(existingMarking.teamId ?? existingMarking.userTeamId)
   } else {
     editingMarking.value = null
     form.value = {
@@ -96,10 +114,14 @@ function open(existingMarking?: OrganiserMarkingListItem) {
 }
 
 async function submit() {
+  if (!form.value.teamId || !form.value.checkPointId) {
+    ElMessage.warning('Please select team and checkpoint')
+    return
+  }
   try {
     const data: any = {
       checkPointId: form.value.checkPointId,
-      dt: form.value.dt ? new Date(form.value.dt).toISOString() : null,
+      dt: form.value.dt || new Date().toISOString(),
       lat: form.value.lat || null,
       lon: form.value.lon || null
     }
@@ -125,3 +147,11 @@ async function submit() {
 
 defineExpose({ open })
 </script>
+
+<style scoped>
+.location-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+</style>
