@@ -1,9 +1,16 @@
 <template>
   <div class="organizer-contest">
+    <template v-if="isNewContest">
+      <div class="new-contest-header">
+        <h2>{{ t('organizer.createContest') }}</h2>
+      </div>
+      <ContestForm ref="contestFormRef" @saved="onContestCreated" />
+    </template>
+    <template v-else>
     <div class="contest-header">
-      <el-button @click="goBack">{{ t('common.back') }}</el-button>
+      <el-button @click="_goBack">{{ t('common.back') }}</el-button>
       <h2>{{ contest?.name ?? t('organizer.contest') }}</h2>
-      <el-button type="primary" @click="editContest">{{ t('organizer.edit') }}</el-button>
+      <el-button type="primary" @click="_editContest">{{ t('organizer.edit') }}</el-button>
     </div>
 
     <el-tabs v-model="activeTab" class="contest-tabs">
@@ -112,11 +119,12 @@
     </el-tabs>
 
     <!-- Form dialogs -->
-    <ContestForm ref="contestFormRef" :contest="contest" @saved="loadContest" />
+    <ContestForm v-if="!isNewContest" ref="contestFormRef" :contest="contest" @saved="loadContest" />
     <ClassForm ref="classFormRef" :contest-id="contestId" @saved="loadClasses" />
     <CheckpointForm ref="checkpointFormRef" :contest-id="contestId" :checkpoint="selectedCheckpoint" @saved="onCheckpointSaved" />
     <TeamForm ref="teamFormRef" :contest-id="contestId" :classes="classes" @saved="loadTeams" />
     <MarkingForm ref="markingFormRef" :contest-id="contestId" :teams="teams" :checkpoints="checkpoints" @saved="loadMarkings" />
+    </template>
   </div>
 </template>
 
@@ -166,8 +174,10 @@ const markingFormRef = ref<InstanceType<typeof MarkingForm> | null>(null)
 const selectedCheckpoint = ref<OrganiserCheckPointDetails | undefined>(undefined)
 
 const contestId = computed(() => route.params.id as string)
+const isNewContest = computed(() => contestId.value === 'new')
 
 onMounted(async () => {
+  if (isNewContest.value) return
   await loadContest()
   if (contest.value && contest.value.createdBy !== auth.userId) {
     ElMessageBox.alert(t('organizer.notOwner'), t('common.error'), {
@@ -199,6 +209,10 @@ async function loadMarkings() {
   markings.value = await organiserApi.getMarkings(contestId.value, markingsPage.value, 25)
 }
 
+function onContestCreated() {
+  router.push('/organizer')
+}
+
 function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
@@ -219,11 +233,11 @@ function formatDateTime(dateStr: string): string {
   return new Date(dateStr).toLocaleString()
 }
 
-function goBack() {
+function _goBack() {
   router.push('/organizer')
 }
 
-function editContest() {
+function _editContest() {
   contestFormRef.value?.open()
 }
 
