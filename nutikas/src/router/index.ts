@@ -54,6 +54,18 @@ const routes: RouteRecordRaw[] = [
     name: 'race',
     component: () => import('@/views/RaceView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/organizer',
+    name: 'organizer-dashboard',
+    component: () => import('@/views/OrganizerDashboard.vue'),
+    meta: { requiresAuth: true, requiresRole: 'organiser' }
+  },
+  {
+    path: '/organizer/contest/:id',
+    name: 'organizer-contest',
+    component: () => import('@/views/OrganizerContest.vue'),
+    meta: { requiresAuth: true, requiresRole: 'organiser' }
   }
 ]
 
@@ -75,5 +87,23 @@ router.beforeEach(async (to) => {
 
   if (to.meta.guestOnly && auth.isAuthenticated) {
     return { name: 'contests' }
+  }
+
+  // Organiser role guard
+  if (to.meta.requiresRole === 'organiser') {
+    if (!auth.jwt) {
+      return { name: 'login' }
+    }
+    try {
+      const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
+      const hasRole = Array.isArray(payload.role)
+        ? payload.role.includes('organiser')
+        : payload.role === 'organiser'
+      if (!hasRole) {
+        return { name: 'contests' } // Redirect non-organisers away
+      }
+    } catch {
+      return { name: 'login' }
+    }
   }
 })

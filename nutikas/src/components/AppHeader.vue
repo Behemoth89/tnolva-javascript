@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { identityApi } from '@/api/endpoints/identity'
@@ -17,6 +18,22 @@ async function handleLogout(): Promise<void> {
     router.push('/contests')
   }
 }
+
+const isOrganiser = computed(() => {
+  if (!auth.jwt) return false
+  try {
+    const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
+    return Array.isArray(payload.role)
+      ? payload.role.includes('organiser')
+      : payload.role === 'organiser'
+  } catch {
+    return false
+  }
+})
+
+function goToOrganizer() {
+  router.push('/organizer')
+}
 </script>
 
 <template>
@@ -25,6 +42,9 @@ async function handleLogout(): Promise<void> {
 
     <div class="header-right">
       <template v-if="auth.isAuthenticated">
+        <div v-if="isOrganiser" class="organiser-btn">
+          <button @click="goToOrganizer" class="organiser-link">Organiser</button>
+        </div>
         <div class="user-info">
           <span class="user-firstname">{{ auth.userFirstName }}</span>
           <span class="user-name">{{ auth.userName }}</span>
@@ -109,6 +129,25 @@ async function handleLogout(): Promise<void> {
 }
 
 .logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.organiser-btn {
+  margin-right: 0.5rem;
+}
+
+.organiser-link {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.organiser-link:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 </style>
