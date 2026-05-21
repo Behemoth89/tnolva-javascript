@@ -82,8 +82,8 @@
 | Org-scoped | User belongs to Organisation X, sees all contests under that org | |
 | All contests | All contests are visible to all organizers (system admin assigns role) | |
 
-**User's choice:** Owner-based
-**Notes:** Backend returns only contests where ownerId matches authenticated user.
+**User's choice:** Org-scoped
+**Notes:** Backend returns contests filtered by organizer's organisationId. User clarified organizer sees ALL events of their organization, not just ones they personally created.
 
 ---
 

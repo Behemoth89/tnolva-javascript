@@ -18,7 +18,7 @@ Organizer dashboard for rogaine event management. Organizers can create contests
 - **D-02:** Route guard on `/organizer` checks JWT claim before rendering dashboard
 - **D-03:** No separate login — same auth system as participants, role determines access
 - **D-04:** Organizer enters via dashboard entry (button in header → full-screen dashboard)
-- **D-05:** Organizer sees only contests they created (owner-based scoping)
+- **D-05:** Organizer sees all contests within their organization (org-scoped via `organisationId`)
 
 ### Navigation Flow
 - **D-06:** Organizer dashboard is a separate route section (`/organizer`)
@@ -79,7 +79,7 @@ Organizer dashboard for rogaine event management. Organizers can create contests
 ## Specific Ideas
 
 - Role provisioning: organiser role is assigned by system administrator (e.g. via seeded `organiser@taltech.ee` account or via `Areas/UserAdmin`)
-- Owner-based contest filtering: backend returns only contests where `ownerId` matches authenticated user
+- Org-scoped contest filtering: backend returns contests filtered by the organizer's `organisationId` — organizer sees all events within their organization, not just ones they personally created
 
 </specifics>
 
