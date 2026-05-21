@@ -4,6 +4,11 @@
       <el-form-item label="Name" required>
         <el-input v-model="form.name" />
       </el-form-item>
+      <el-form-item label="Organisation" required>
+        <el-select v-model="form.organisationId" placeholder="Select organisation">
+          <el-option v-for="org in organisations" :key="org.id" :value="org.id" :label="org.name" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="Visible From" required>
         <el-date-picker v-model="form.visibleFrom" type="datetime" />
       </el-form-item>
@@ -28,12 +33,13 @@
 import { ref, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
-import type { OrganiserContestUpsertRequest, OrganiserContestDetails } from '@/types/api'
+import type { OrganiserContestUpsertRequest, OrganiserContestDetails, OrganisationItem } from '@/types/api'
 import { organiserApi } from '@/api/endpoints/organiser'
 
 const auth = useAuthStore()
 const visible = ref(false)
 const isEdit = computed(() => !!props.contest)
+const organisations = ref<OrganisationItem[]>([])
 
 const props = defineProps<{
   contest?: OrganiserContestDetails | null
@@ -62,6 +68,7 @@ watch(() => props.contest, (c) => {
 }, { immediate: true })
 
 function open(existingContest?: OrganiserContestDetails | null) {
+  loadOrganisations()
   if (existingContest) {
     form.value = { ...existingContest }
   } else {
@@ -80,12 +87,29 @@ function open(existingContest?: OrganiserContestDetails | null) {
   visible.value = true
 }
 
+async function loadOrganisations() {
+  try {
+    organisations.value = await organiserApi.getOrganisations()
+  } catch (e) {
+    ElMessage.error('Failed to load organisations')
+  }
+}
+
 async function submit() {
   try {
+    const data: any = { ...form.value }
+    if (!isEdit.value) {
+      data.createdBy = auth.userId ?? ''
+    }
+    // Format dates for API
+    if (data.visibleFrom instanceof Date) data.visibleFrom = data.visibleFrom.toISOString()
+    if (data.openFrom instanceof Date) data.openFrom = data.openFrom.toISOString()
+    if (data.openTo instanceof Date) data.openTo = data.openTo.toISOString()
+    
     if (isEdit.value && props.contest) {
-      await organiserApi.updateContest(props.contest.id, form.value)
+      await organiserApi.updateContest(props.contest.id, data)
     } else {
-      await organiserApi.createContest(form.value)
+      await organiserApi.createContest(data)
     }
     emit('saved')
     visible.value = false
