@@ -61,12 +61,13 @@ export interface OrganiserContestClassDetails extends OrganiserContestClassUpser
   contestId: string
 }
 
-export enum ECheckPointType {
-  Regular = 1,
-  Finish = 2,
-  Start = 3,
-  NoScore = 4
-}
+export const ECheckPointType = {
+  Regular: 1,
+  Finish: 2,
+  Start: 3,
+  NoScore: 4
+} as const
+export type ECheckPointType = typeof ECheckPointType[keyof typeof ECheckPointType]
 
 export interface OrganiserCheckPointUpsertRequest {
   cpid: string
@@ -145,10 +146,11 @@ export interface PagedResponse<T> {
   totalPages: number
 }
 
-export enum EApiStatusCode {
-  OK = 0,
-  DomainError = 1
-}
+export const EApiStatusCode = {
+  OK: 0,
+  DomainError: 1
+} as const
+export type EApiStatusCode = typeof EApiStatusCode[keyof typeof EApiStatusCode]
 
 export interface MarkingResponse {
   statusOk: boolean

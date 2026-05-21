@@ -124,17 +124,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+
 import { organiserApi } from '@/api/endpoints/organiser'
+import { ElMessageBox } from 'element-plus'
 import type {
   OrganiserContestDetails,
   OrganiserContestClassDetails,
   OrganiserCheckPointDetails,
   OrganiserTeamDetails,
   OrganiserMarkingListItem,
-  PagedResponse,
-  ECheckPointType
+  PagedResponse
 } from '@/types/api'
+import { ECheckPointType } from '@/types/api'
 import ContestForm from '@/components/Organizer/ContestForm.vue'
 import ClassForm from '@/components/Organizer/ClassForm.vue'
 import CheckpointForm from '@/components/Organizer/CheckpointForm.vue'

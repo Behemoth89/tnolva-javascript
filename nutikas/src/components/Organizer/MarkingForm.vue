@@ -67,7 +67,7 @@ const form = ref<OrganiserMarkingCreateRequest & { teamId: string }>({
   lon: undefined
 })
 
-function loadTeamCheckpoints(teamId: string) {
+function loadTeamCheckpoints(_teamId: string) {
   // Filter checkpoints to show all (or filter by team's class)
   availableCheckpoints.value = props.checkpoints
 }

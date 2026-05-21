@@ -54,7 +54,7 @@ const totalCount = ref(0)
 const page = ref(1)
 const pageSize = 50
 const isPolling = ref(false)
-let pollInterval: number | null = null
+let pollInterval: ReturnType<typeof setInterval> | null = null
 
 const contestId = computed(() => route.params.contestId as string)
 
