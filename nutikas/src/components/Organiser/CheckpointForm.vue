@@ -103,6 +103,8 @@ async function submit() {
   try {
     const data: any = { ...form.value }
     data.score = Number(data.score)
+    data.lat = data.lat != null ? String(data.lat) : null
+    data.lon = data.lon != null ? String(data.lon) : null
     if (isEdit.value && props.checkpoint) {
       await organiserApi.updateCheckpoint(props.checkpoint.id, data)
     } else {
