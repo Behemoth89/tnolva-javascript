@@ -15,8 +15,13 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]))
       userFirstName.value = payload.firstName ?? null
-      userName.value = payload.name ?? payload.email ?? null
-      userId.value = payload.sub ?? payload.userId ?? null
+      userName.value = payload.name 
+        ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
+        ?? payload.email
+        ?? null
+      userId.value = payload.sub 
+        ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+        ?? null
     } catch {
       userFirstName.value = null
       userName.value = null
@@ -28,7 +33,12 @@ export const useAuthStore = defineStore('auth', () => {
     if (!jwt.value) return false
     try {
       const payload = JSON.parse(atob(jwt.value.split('.')[1]))
-      const role = payload.role ?? payload.roles ?? null
+      // Check various possible role claim names
+      const role = payload.role 
+        ?? payload.roles 
+        ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+        ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role']
+        ?? null
       if (!role) return false
       return Array.isArray(role) ? role.includes(roleName) : role === roleName
     } catch {
