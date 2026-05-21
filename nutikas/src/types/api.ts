@@ -32,14 +32,14 @@ export interface OrganisationItem {
 
 export interface OrganiserContestUpsertRequest {
   name: string
-  visibleFrom: string  // ISO 8601 UTC
-  openFrom: string      // ISO 8601 UTC
-  openTo: string        // ISO 8601 UTC
+  visibleFrom?: string  // ISO 8601 UTC
+  openFrom?: string      // ISO 8601 UTC
+  openTo?: string        // ISO 8601 UTC
   bonusTimeStart?: string | null
   bonusTimeEnd?: string | null
-  bonusPerMarking: number
-  organisationId: string
-  createdBy: string
+  bonusPerMarking?: number
+  organisationId?: string
+  createdBy?: string
 }
 
 export interface OrganiserContestDetails extends OrganiserContestUpsertRequest {
@@ -75,8 +75,8 @@ export interface OrganiserCheckPointUpsertRequest {
   cpCode: string
   checkPointType: ECheckPointType
   score: number
-  lat: number
-  lon: number
+  lat?: string | null
+  lon?: string | null
 }
 
 export interface OrganiserCheckPointDetails extends OrganiserCheckPointUpsertRequest {
@@ -86,8 +86,10 @@ export interface OrganiserCheckPointDetails extends OrganiserCheckPointUpsertReq
 
 export interface OrganiserTeamUpsertRequest {
   name: string
-  classId: string
-  members: string[]  // emails
+  memberNames: string  // comma-separated emails
+  contestClassId?: string
+  startDT?: string | null
+  finishDT?: string | null
 }
 
 export interface OrganiserTeamDetails {

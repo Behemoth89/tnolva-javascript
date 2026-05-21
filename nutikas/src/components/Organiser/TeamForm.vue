@@ -5,9 +5,14 @@
         <el-input v-model="form.name" />
       </el-form-item>
       <el-form-item label="Class" required>
-        <el-select v-model="form.classId" placeholder="Select class">
-          <el-option v-for="cls in classes" :key="cls.id" :value="cls.id" :label="cls.name" />
+        <el-select v-model="form.contestClassId" placeholder="Select class">
+          <el-option v-for="cls in classes" :key="cls.id" :value="cls.id" :label="cls.name">
+            {{ cls.name }}
+          </el-option>
         </el-select>
+      </el-form-item>
+      <el-form-item label="Members (emails)">
+        <el-input v-model="form.memberNames" placeholder="comma separated emails" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -38,29 +43,41 @@ const isEdit = computed(() => !!props.team)
 
 const form = ref<OrganiserTeamUpsertRequest>({
   name: '',
-  classId: '',
-  members: []
+  memberNames: '',
+  contestClassId: ''
 })
 
 watch(() => props.team, (team) => {
-  if (team) form.value = { name: team.name, classId: team.classId, members: [] }
+  if (team) {
+    form.value = { 
+      name: team.name, 
+      memberNames: '', 
+      contestClassId: team.classId 
+    }
+  }
 }, { immediate: true })
 
 function open(existingTeam?: OrganiserTeamDetails) {
   if (existingTeam) {
-    form.value = { name: existingTeam.name, classId: existingTeam.classId, members: [] }
+    form.value = { 
+      name: existingTeam.name, 
+      memberNames: '', 
+      contestClassId: existingTeam.classId 
+    }
   } else {
-    form.value = { name: '', classId: '', members: [] }
+    form.value = { name: '', memberNames: '', contestClassId: '' }
   }
   visible.value = true
 }
 
 async function submit() {
   try {
+    const data: any = { ...form.value }
+    if (!data.contestClassId) delete data.contestClassId
     if (isEdit.value && props.team) {
-      await organiserApi.updateTeam(props.team.id, form.value)
+      await organiserApi.updateTeam(props.team.id, data)
     } else {
-      await organiserApi.createTeam(props.contestId, form.value)
+      await organiserApi.createTeam(props.contestId, data)
     }
     emit('saved')
     visible.value = false

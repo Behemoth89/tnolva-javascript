@@ -74,10 +74,10 @@ function formatDate(dateStr: string): string {
 
 function getStatus(contest: OrganiserContestDetails): string {
   const now = new Date()
-  const openFrom = new Date(contest.openFrom)
-  const openTo = new Date(contest.openTo)
-  if (now < openFrom) return 'Upcoming'
-  if (now > openTo) return 'Closed'
+  const openFrom = contest.openFrom ? new Date(contest.openFrom) : null
+  const openTo = contest.openTo ? new Date(contest.openTo) : null
+  if (openFrom && now < openFrom) return 'Upcoming'
+  if (openTo && now > openTo) return 'Closed'
   return 'Open'
 }
 
