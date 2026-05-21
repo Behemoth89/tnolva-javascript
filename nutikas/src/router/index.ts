@@ -56,6 +56,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/debug-token',
+    name: 'debug-token',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { guestOnly: true }
+  },
+  {
     path: '/organizer',
     name: 'organizer-dashboard',
     component: () => import('@/views/OrganizerDashboard.vue'),
@@ -89,6 +95,11 @@ export const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
+  if (to.name === 'debug-token') {
+    if (auth.jwt) console.log('JWT payload:', JSON.parse(atob(auth.jwt.split('.')[1])))
+    return
+  }
+
   if (!auth.jwt) {
     await auth.loadFromStorage()
   }
@@ -103,11 +114,6 @@ router.beforeEach(async (to) => {
 
   // Role guard for organiser routes
   if (to.meta.requiresRole === 'organiser') {
-    console.log('Organiser route check:', { 
-      jwt: auth.jwt ? 'exists' : 'null', 
-      isOrganiser: auth.isOrganiser,
-      userId: auth.userId 
-    })
     if (!auth.isOrganiser) {
       return { name: 'contests' }
     }

@@ -23,14 +23,7 @@ function goToOrganizer() {
   router.push('/organizer')
 }
 
-const isOrganiser = computed(() => {
-  console.log('isOrganiser computed:', { 
-    isAuthenticated: auth.isAuthenticated,
-    isOrganiser: auth.isOrganiser,
-    jwt: auth.jwt ? 'exists' : 'null'
-  })
-  return auth.isOrganiser
-})
+const isOrganiser = computed(() => auth.isOrganiser)
 </script>
 
 <template>
