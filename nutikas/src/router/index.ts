@@ -58,8 +58,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/debug-token',
     name: 'debug-token',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { guestOnly: true }
+    component: () => import('@/views/DebugToken.vue'),
+    meta: { }
   },
   {
     path: '/organizer',
