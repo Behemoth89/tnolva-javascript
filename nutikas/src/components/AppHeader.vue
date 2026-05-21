@@ -19,8 +19,8 @@ async function handleLogout(): Promise<void> {
   }
 }
 
-function goToOrganizer() {
-  router.push('/organizer')
+function goToOrganiser() {
+  router.push('/organiser')
 }
 
 const isOrganiser = computed(() => auth.isOrganiser)
@@ -33,7 +33,7 @@ const isOrganiser = computed(() => auth.isOrganiser)
     <div class="header-right">
       <template v-if="auth.isAuthenticated">
         <div v-if="isOrganiser" class="organiser-btn">
-          <button @click="goToOrganizer" class="organiser-link">Organiser</button>
+          <button @click="goToOrganiser" class="organiser-link">Organiser</button>
         </div>
         <div class="user-info">
           <span class="user-firstname">{{ auth.userFirstName }}</span>

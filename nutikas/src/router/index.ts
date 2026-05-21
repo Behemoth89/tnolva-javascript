@@ -56,33 +56,27 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/debug-token',
-    name: 'debug-token',
-    component: () => import('@/views/DebugToken.vue'),
-    meta: { debug: true }
-  },
-  {
-    path: '/organizer',
-    name: 'organizer-dashboard',
-    component: () => import('@/views/OrganizerDashboard.vue'),
+    path: '/organiser',
+    name: 'organiser-dashboard',
+    component: () => import('@/views/OrganiserDashboard.vue'),
     meta: { requiresAuth: true, requiresRole: 'organiser' }
   },
   {
-    path: '/organizer/contest/:id',
-    name: 'organizer-contest',
-    component: () => import('@/views/OrganizerContest.vue'),
+    path: '/organiser/contest/:id',
+    name: 'organiser-contest',
+    component: () => import('@/views/OrganiserContest.vue'),
     meta: { requiresAuth: true, requiresRole: 'organiser' }
   },
   {
-    path: '/organizer/contest/:contestId/print',
-    name: 'organizer-print',
-    component: () => import('@/views/OrganizerPrint.vue'),
+    path: '/organiser/contest/:contestId/print',
+    name: 'organiser-print',
+    component: () => import('@/views/OrganiserPrint.vue'),
     meta: { requiresAuth: true, requiresRole: 'organiser' }
   },
   {
-    path: '/organizer/contest/:contestId/markings',
-    name: 'organizer-markings',
-    component: () => import('@/views/OrganizerMarkings.vue'),
+    path: '/organiser/contest/:contestId/markings',
+    name: 'organiser-markings',
+    component: () => import('@/views/OrganiserMarkings.vue'),
     meta: { requiresAuth: true, requiresRole: 'organiser' }
   }
 ]
@@ -93,8 +87,6 @@ export const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  if (to.meta.debug) return
-
   const auth = useAuthStore()
 
   if (!auth.jwt) {

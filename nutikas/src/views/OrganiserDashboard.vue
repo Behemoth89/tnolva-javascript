@@ -89,11 +89,11 @@ function getStatusType(contest: OrganiserContestDetails): 'success' | 'warning' 
 }
 
 function createContest() {
-  router.push('/organizer/contest/new')
+  router.push('/organiser/contest/new')
 }
 
 function manageContest(id: string) {
-  router.push(`/organizer/contest/${id}`)
+  router.push(`/organiser/contest/${id}`)
 }
 </script>
 

@@ -52,7 +52,7 @@ onMounted(async () => {
 })
 
 function goBack() {
-  router.push(`/organizer/contest/${contestId.value}`)
+  router.push(`/organiser/contest/${contestId.value}`)
 }
 
 async function generatePdf() {

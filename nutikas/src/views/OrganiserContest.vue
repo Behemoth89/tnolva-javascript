@@ -1,10 +1,12 @@
 <template>
   <div class="organizer-contest">
     <template v-if="isNewContest">
-      <div class="new-contest-header">
-        <h2>Create Contest</h2>
+      <div class="new-contest-page">
+        <div class="new-contest-header">
+          <h2>Create Contest</h2>
+        </div>
+        <ContestForm ref="contestFormRef" @saved="onContestCreated" />
       </div>
-      <ContestForm ref="contestFormRef" @saved="onContestCreated" />
     </template>
     <template v-else>
     <div class="contest-header">
@@ -141,11 +143,11 @@ import type {
   PagedResponse
 } from '@/types/api'
 import { ECheckPointType } from '@/types/api'
-import ContestForm from '@/components/Organizer/ContestForm.vue'
-import ClassForm from '@/components/Organizer/ClassForm.vue'
-import CheckpointForm from '@/components/Organizer/CheckpointForm.vue'
-import TeamForm from '@/components/Organizer/TeamForm.vue'
-import MarkingForm from '@/components/Organizer/MarkingForm.vue'
+import ContestForm from '@/components/Organiser/ContestForm.vue'
+import ClassForm from '@/components/Organiser/ClassForm.vue'
+import CheckpointForm from '@/components/Organiser/CheckpointForm.vue'
+import TeamForm from '@/components/Organiser/TeamForm.vue'
+import MarkingForm from '@/components/Organiser/MarkingForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -195,7 +197,7 @@ async function loadMarkings() {
 }
 
 function onContestCreated() {
-  router.push('/organizer')
+  router.push('/organiser')
 }
 
 function formatDuration(seconds: number): string {
@@ -219,7 +221,7 @@ function formatDateTime(dateStr: string): string {
 }
 
 function _goBack() {
-  router.push('/organizer')
+  router.push('/organiser')
 }
 
 function _editContest() {
@@ -257,7 +259,7 @@ async function deleteCheckpoint(id: string) {
 }
 
 function printQrs() {
-  router.push(`/organizer/contest/${contestId.value}/print`)
+  router.push(`/organiser/contest/${contestId.value}/print`)
 }
 
 function addTeam() {
@@ -288,7 +290,7 @@ function onCheckpointSaved() {
 }
 
 function openLiveMarkings() {
-  router.push(`/organizer/contest/${contestId.value}/markings`)
+  router.push(`/organiser/contest/${contestId.value}/markings`)
 }
 </script>
 
@@ -313,7 +315,13 @@ function openLiveMarkings() {
   margin-bottom: 15px;
 }
 
-.new-contest-header {
-  padding: 20px 0;
+.new-contest-page {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}
+
+.new-contest-page .new-contest-header {
+  padding: 40px 20px 20px;
 }
 </style>
