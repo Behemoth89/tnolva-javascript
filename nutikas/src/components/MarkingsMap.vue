@@ -4,6 +4,22 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { MarkingListItem } from '@/types/contest'
 
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+})
+
+const defaultIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+})
+
 const props = defineProps<{
   markings: MarkingListItem[]
   height?: string
@@ -19,9 +35,13 @@ function initMap() {
 
   if (validMarkings.length === 0) return
 
+  const sortedMarkings = [...validMarkings].sort((a, b) =>
+    new Date(a.dt).getTime() - new Date(b.dt).getTime()
+  )
+
   const center: L.LatLngExpression = [
-    parseFloat(validMarkings[0].lat!),
-    parseFloat(validMarkings[0].lon!)
+    parseFloat(sortedMarkings[0].lat!),
+    parseFloat(sortedMarkings[0].lon!)
   ]
 
   mapInstance = L.map(mapContainer.value).setView(center, 14)
@@ -30,18 +50,36 @@ function initMap() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(mapInstance)
 
-  validMarkings.forEach((marking, index) => {
+  const trackPoints: L.LatLngExpression[] = sortedMarkings.map(m => [
+    parseFloat(m.lat!),
+    parseFloat(m.lon!)
+  ])
+
+  L.polyline(trackPoints, {
+    color: '#2563eb',
+    weight: 3,
+    opacity: 0.7,
+    dashArray: '5, 10'
+  }).addTo(mapInstance)
+
+  sortedMarkings.forEach((marking, index) => {
     const lat = parseFloat(marking.lat!)
     const lon = parseFloat(marking.lon!)
     const label = marking.checkPointCPCode || marking.checkPointCPID || `CP${index + 1}`
 
-    L.marker([lat, lon])
+    L.marker([lat, lon], { icon: defaultIcon })
+      .bindTooltip(label, {
+        permanent: true,
+        direction: 'top',
+        offset: [12, -20],
+        className: 'cp-label'
+      })
       .bindPopup(`${label}<br>${formatTime(marking.dt)}`)
       .addTo(mapInstance!)
   })
 
-  if (validMarkings.length > 1) {
-    const group = L.featureGroup(validMarkings.map(m => L.marker([parseFloat(m.lat!), parseFloat(m.lon!)])))
+  if (sortedMarkings.length > 1) {
+    const group = L.featureGroup(sortedMarkings.map(m => L.marker([parseFloat(m.lat!), parseFloat(m.lon!)])))
     mapInstance.fitBounds(group.getBounds().pad(0.1))
   }
 }
@@ -116,5 +154,21 @@ onUnmounted(() => {
 
 .markings-map :deep(.leaflet-popup-content) {
   font-size: 0.875rem;
+}
+
+.markings-map :deep(.cp-label) {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: monospace;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.markings-map :deep(.cp-label::before) {
+  border-top-color: #2563eb;
 }
 </style>
