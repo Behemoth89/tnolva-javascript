@@ -246,9 +246,9 @@
 **Plans:** 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Organiser API Foundation: types, API client, Pinia store
-- [ ] 08-02-PLAN.md — Organiser Dashboard UI: role guard, dashboard view, header button
-- [ ] 08-03-PLAN.md — Contest Detail Views: class/config/checkpoint/team/marking management, QR generation, PDF print
+- [x] 08-01-PLAN.md — Organiser API Foundation: types, API client, Pinia store
+- [x] 08-02-PLAN.md — Organiser Dashboard UI: role guard, dashboard view, header button
+- [x] 08-03-PLAN.md — Contest Detail Views: class/config/checkpoint/team/marking management, QR generation, PDF print
 
 ---
 
