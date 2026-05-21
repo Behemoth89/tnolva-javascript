@@ -23,17 +23,7 @@ function goToOrganizer() {
   router.push('/organizer')
 }
 
-const isOrganiser = computed(() => {
-  if (!auth.jwt) return false
-  try {
-    const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
-    return Array.isArray(payload.role)
-      ? payload.role.includes('organiser')
-      : payload.role === 'organiser'
-  } catch {
-    return false
-  }
-})
+const isOrganiser = computed(() => auth.isOrganiser)
 </script>
 
 <template>

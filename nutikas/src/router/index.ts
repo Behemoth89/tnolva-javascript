@@ -103,19 +103,8 @@ router.beforeEach(async (to) => {
 
   // Role guard for organiser routes
   if (to.meta.requiresRole === 'organiser') {
-    if (!auth.jwt) {
-      return { name: 'login' }
-    }
-    try {
-      const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
-      const hasRole = Array.isArray(payload.role)
-        ? payload.role.includes('organiser')
-        : payload.role === 'organiser'
-      if (!hasRole) {
-        return { name: 'contests' }
-      }
-    } catch {
-      return { name: 'login' }
+    if (!auth.isOrganiser) {
+      return { name: 'contests' }
     }
   }
 })

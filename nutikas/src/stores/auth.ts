@@ -24,7 +24,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Load tokens from IndexedDB on store initialization
+  function hasRole(roleName: string): boolean {
+    if (!jwt.value) return false
+    try {
+      const payload = JSON.parse(atob(jwt.value.split('.')[1]))
+      const role = payload.role ?? payload.roles ?? null
+      if (!role) return false
+      return Array.isArray(role) ? role.includes(roleName) : role === roleName
+    } catch {
+      return false
+    }
+  }
+
+  const isOrganiser = computed(() => hasRole('organiser'))
+
   async function loadFromStorage(): Promise<void> {
     const jwtRecord = await db.auth.get('jwt')
     const rtRecord = await db.auth.get('refreshToken')
@@ -33,7 +46,6 @@ export const useAuthStore = defineStore('auth', () => {
     if (jwt.value) decodeJwt(jwt.value)
   }
 
-  // Persist tokens to IndexedDB
   async function saveToStorage(): Promise<void> {
     if (jwt.value) {
       await db.auth.put({ key: 'jwt', value: jwt.value })
@@ -62,5 +74,5 @@ export const useAuthStore = defineStore('auth', () => {
     saveToStorage()
   }
 
-  return { jwt, refreshToken, userName, userFirstName, userId, isAuthenticated, loadFromStorage, setTokens, clearTokens }
+  return { jwt, refreshToken, userName, userFirstName, userId, isAuthenticated, isOrganiser, hasRole, loadFromStorage, setTokens, clearTokens }
 })
