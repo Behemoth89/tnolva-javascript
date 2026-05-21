@@ -2,6 +2,7 @@
 import { onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useContestStore } from '@/stores/contest'
+import MarkingsMap from '@/components/MarkingsMap.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,7 +15,6 @@ onMounted(async () => {
   await store.fetchTeamDetail(contestId, teamId)
 })
 
-// Format datetime for display
 function formatDateTime(dt: string | null): string {
   if (!dt) return '-'
   try {
@@ -24,17 +24,18 @@ function formatDateTime(dt: string | null): string {
   }
 }
 
-// Navigate back to results
 function goBack() {
   router.push(`/contests/${contestId}/results`)
 }
 
-// Team data shortcuts
 const team = computed(() => store.currentTeamDetail)
 
-// Check if markings are available
 const hasMarkings = computed(() => {
   return team.value?.markings != null && team.value.markings.length > 0
+})
+
+const hasMapMarkings = computed(() => {
+  return team.value?.markings?.some(m => m.lat && m.lon) ?? false
 })
 </script>
 
@@ -128,10 +129,12 @@ const hasMarkings = computed(() => {
             <div class="marking-score">+{{ marking.score }}</div>
           </div>
         </div>
-        
+
         <div v-else class="markings-empty">
           <p>No markings yet.</p>
         </div>
+
+        <MarkingsMap v-if="hasMapMarkings" :markings="team.markings || []" height="350px" />
       </section>
     </template>
 
