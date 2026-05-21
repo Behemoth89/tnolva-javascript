@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { identityApi } from '@/api/endpoints/identity'
@@ -18,9 +19,30 @@ async function handleLogout(): Promise<void> {
   }
 }
 
+async function becomeOrganizer(): Promise<void> {
+  try {
+    const response = await identityApi.becomeOrganizer()
+    auth.setTokens(response.jwt, response.refreshToken)
+  } catch (e) {
+    console.error('Failed to become organizer:', e)
+  }
+}
+
 function goToOrganizer() {
   router.push('/organizer')
 }
+
+const isOrganiser = computed(() => {
+  if (!auth.jwt) return false
+  try {
+    const payload = JSON.parse(atob(auth.jwt.split('.')[1]))
+    return Array.isArray(payload.role)
+      ? payload.role.includes('organiser')
+      : payload.role === 'organiser'
+  } catch {
+    return false
+  }
+})
 </script>
 
 <template>
@@ -29,8 +51,11 @@ function goToOrganizer() {
 
     <div class="header-right">
       <template v-if="auth.isAuthenticated">
-        <div v-if="auth.isAuthenticated" class="organiser-btn">
+        <div v-if="isOrganiser" class="organiser-btn">
           <button @click="goToOrganizer" class="organiser-link">Organiser</button>
+        </div>
+        <div v-else-if="auth.isAuthenticated">
+          <button @click="becomeOrganizer" class="become-btn">Become Organizer</button>
         </div>
         <div class="user-info">
           <span class="user-firstname">{{ auth.userFirstName }}</span>
@@ -135,6 +160,21 @@ function goToOrganizer() {
 }
 
 .organiser-link:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.become-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.become-btn:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 </style>

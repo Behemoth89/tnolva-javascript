@@ -21,7 +21,7 @@
     </div>
 
     <div v-else class="contests-list">
-      <el-table :data="myContests" stripe>
+      <el-table :data="store.contests" stripe>
         <el-table-column prop="name" label="Name" />
         <el-table-column label="Date">
           <template #default="{ row }">
@@ -57,7 +57,7 @@ import type { OrganiserContestDetails } from '@/types/api'
 const router = useRouter()
 const store = useOrganiserStore()
 
-const myContests = computed(() => store.myContests)
+const myContests = computed(() => store.contests)
 
 onMounted(async () => {
   try {

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import type {
   OrganisationItem,
   OrganiserContestDetails
@@ -8,7 +7,6 @@ import type {
 import { organiserApi } from '@/api/endpoints/organiser'
 
 export const useOrganiserStore = defineStore('organiser', () => {
-  const auth = useAuthStore()
   const organisations = ref<OrganisationItem[]>([])
   const currentOrgId = ref<string | null>(null)
   const contests = ref<OrganiserContestDetails[]>([])
@@ -22,10 +20,6 @@ export const useOrganiserStore = defineStore('organiser', () => {
 
   const currentContest = computed(() =>
     contests.value.find(c => c.id === currentContestId.value) ?? null
-  )
-
-  const myContests = computed(() =>
-    contests.value.filter(c => c.createdBy === auth.userId)
   )
 
   async function loadOrganisations() {
@@ -73,10 +67,6 @@ export const useOrganiserStore = defineStore('organiser', () => {
     error.value = null
   }
 
-  function canEditContest(contest: OrganiserContestDetails): boolean {
-    return contest.createdBy === auth.userId
-  }
-
   return {
     organisations,
     currentOrgId,
@@ -86,12 +76,10 @@ export const useOrganiserStore = defineStore('organiser', () => {
     error,
     currentOrg,
     currentContest,
-    myContests,
     loadOrganisations,
     loadContests,
     setCurrentOrg,
     setCurrentContest,
-    clearError,
-    canEditContest
+    clearError
   }
 })

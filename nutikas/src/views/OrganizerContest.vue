@@ -131,7 +131,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { useAuthStore } from '@/stores/auth'
 import { organiserApi } from '@/api/endpoints/organiser'
 import type {
   OrganiserContestDetails,
@@ -148,7 +147,6 @@ import CheckpointForm from '@/components/Organizer/CheckpointForm.vue'
 import TeamForm from '@/components/Organizer/TeamForm.vue'
 import MarkingForm from '@/components/Organizer/MarkingForm.vue'
 
-const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -173,15 +171,7 @@ const isNewContest = computed(() => contestId.value === 'new')
 
 onMounted(async () => {
   if (isNewContest.value) return
-  await loadContest()
-  if (contest.value && contest.value.createdBy !== auth.userId) {
-    ElMessageBox.alert('You do not own this contest', 'Error', {
-      confirmButtonText: 'OK',
-      callback: () => router.push('/organizer')
-    })
-    return
-  }
-  await Promise.all([loadClasses(), loadCheckpoints(), loadTeams(), loadMarkings()])
+  await Promise.all([loadContest(), loadClasses(), loadCheckpoints(), loadTeams(), loadMarkings()])
 })
 
 async function loadContest() {
