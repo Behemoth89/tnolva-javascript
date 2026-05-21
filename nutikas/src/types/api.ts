@@ -114,15 +114,18 @@ export interface OrganiserUserTeamItem {
 
 export interface OrganiserMarkingListItem {
   id: string
-  userTeamId: string
-  checkPointId: string
-  cpid: string
+  dt: string
+  markingType: number
   score: number
-  dt: string  // ISO 8601 UTC
-  lat: number
-  lon: number
-  teamName: string
-  cpCode: string
+  lat: string | null
+  lon: string | null
+  checkPointId: string
+  checkPointCPID: string | null
+  checkPointCPCode: string | null
+  checkPointType: number
+  userTeamId: string
+  teamId: string
+  teamName: string | null
 }
 
 export interface OrganiserMarkingCreateRequest {
@@ -135,10 +138,13 @@ export interface OrganiserMarkingCreateRequest {
 export interface OrganiserMarkingDetails extends OrganiserMarkingListItem {}
 
 export interface OrganiserMarkingUpdateRequest {
-  score: number
-  dt?: string
-  lat?: number
-  lon?: number
+  dt?: string | null
+  lat?: string | null
+  lon?: string | null
+  markingType?: number
+  score?: number
+  checkPointId?: string
+  userTeamId?: string
 }
 
 export interface PagedResponse<T> {

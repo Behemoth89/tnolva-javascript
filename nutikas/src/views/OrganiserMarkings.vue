@@ -13,7 +13,7 @@
 
     <el-table :data="markings" stripe>
       <el-table-column prop="teamName" label="Team" />
-      <el-table-column prop="cpCode" label="CP" />
+      <el-table-column prop="checkPointCPCode" label="CP" />
       <el-table-column prop="score" label="Score" />
       <el-table-column label="Time">
         <template #default="{ row }">
@@ -22,7 +22,7 @@
       </el-table-column>
       <el-table-column label="Location">
         <template #default="{ row }">
-          {{ row.lat?.toFixed(5) ?? '-' }}, {{ row.lon?.toFixed(5) ?? '-' }}
+          {{ row.lat ?? '-' }}, {{ row.lon ?? '-' }}
         </template>
       </el-table-column>
     </el-table>

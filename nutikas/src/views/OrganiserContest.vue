@@ -96,7 +96,7 @@
         </div>
         <el-table :data="markings.items" stripe>
           <el-table-column prop="teamName" label="Team" />
-          <el-table-column prop="cpCode" label="CP" />
+          <el-table-column prop="checkPointCPCode" label="CP" />
           <el-table-column prop="score" label="Score" />
           <el-table-column label="Time">
             <template #default="{ row }">
