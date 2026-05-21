@@ -238,6 +238,18 @@
 
 **Total:** 35 requirements across 6 delivery phases
 
+### Phase 8: Implement Organizer Flow: create event, classes, checkpoints, QR codes and print view, event results
+
+**Goal:** Organizer dashboard for rogaine event management — create contests, configure classes and checkpoints, generate printable QR codes, manage teams, monitor live markings
+**Requirements**: TBD
+**Depends on:** Phase 7
+**Plans:** 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Organiser API Foundation: types, API client, Pinia store
+- [ ] 08-02-PLAN.md — Organiser Dashboard UI: role guard, dashboard view, header button
+- [ ] 08-03-PLAN.md — Contest Detail Views: class/config/checkpoint/team/marking management, QR generation, PDF print
+
 ---
 
 *Roadmap created: 2025-05-13*
