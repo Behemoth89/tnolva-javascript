@@ -1,11 +1,16 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS deps
 WORKDIR /app
-
-COPY package*.json tsconfig.json ./
+RUN apk add --no-cache python3 make g++ libc6-compat
+COPY package*.json ./
 RUN npm ci
 
+FROM node:20-alpine AS builder
+WORKDIR /app
+RUN apk add --no-cache python3 make g++ libc6-compat
+COPY --from=deps /app/node_modules ./node_modules
+COPY package*.json tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
@@ -13,10 +18,10 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
+RUN apk add --no-cache libc6-compat wget
 
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3001
