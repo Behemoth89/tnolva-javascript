@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: chat-interface-backend:dev
+    container_name: chat-interface-backend
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: "3001"
+      NODE_ENV: "production"
+    networks:
+      - chatnet
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+    image: chat-interface-frontend:dev
+    container_name: chat-interface-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - chatnet
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+networks:
+  chatnet:
+    name: chat-interface-net
+    driver: bridge

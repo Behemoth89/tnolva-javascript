@@ -8,6 +8,10 @@ dist/
 build/
 out/
 *.tsbuildinfo
+backend/dist/
+backend/coverage/
+frontend/dist/
+frontend/coverage/
 
 # Logs
 logs/
@@ -49,6 +53,10 @@ coverage/
 !*.config.js
 !jest.config.js
 !*.d.ts
+vite.config.d.ts
+vite.config.js
+tsconfig.tsbuildinfo
+tsconfig.node.tsbuildinfo
 
 # Optional npm/ yarn integrity files
 .npm/
