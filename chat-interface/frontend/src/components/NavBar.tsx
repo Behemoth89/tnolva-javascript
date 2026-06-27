@@ -43,17 +43,41 @@ export function NavBar() {
           </li>
         )}
         {isAdmin && (
-          <li>
-            <NavLink
-              to="/admin"
-              data-testid="nav-admin-link"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles['link--active']}` : styles.link
-              }
-            >
-              Admin
-            </NavLink>
-          </li>
+          <>
+            <li>
+              <NavLink
+                to="/admin"
+                data-testid="nav-admin-link"
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles['link--active']}` : styles.link
+                }
+              >
+                Admin
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin/llm-providers"
+                data-testid="nav-llm-providers-link"
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles['link--active']}` : styles.link
+                }
+              >
+                LLM providers
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin/llm-provider-models"
+                data-testid="nav-llm-provider-models-link"
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles['link--active']}` : styles.link
+                }
+              >
+                LLM models
+              </NavLink>
+            </li>
+          </>
         )}
         {isAuthenticated ? (
           <li>

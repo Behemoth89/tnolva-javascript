@@ -9,6 +9,8 @@ import ChatPanel from './components/ChatPanel';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
+import AdminLLMProviders from './pages/AdminLLMProviders';
+import AdminLLMProviderModels from './pages/AdminLLMProviderModels';
 
 function App() {
   return (
@@ -42,6 +44,22 @@ function App() {
               element={
                 <RouteGuard>
                   <Admin />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/admin/llm-providers"
+              element={
+                <RouteGuard>
+                  <AdminLLMProviders />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/admin/llm-provider-models"
+              element={
+                <RouteGuard>
+                  <AdminLLMProviderModels />
                 </RouteGuard>
               }
             />

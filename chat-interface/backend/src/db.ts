@@ -33,6 +33,29 @@ export function initDb(databasePath: string): DbHandle {
   handle.exec(`
     CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
   `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS llm_providers (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT    UNIQUE NOT NULL,
+      url        TEXT    NOT NULL,
+      api_key    TEXT    NOT NULL,
+      type       TEXT    NOT NULL CHECK (type IN ('openai_completions','openai_responses','anthropic')),
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS llm_provider_models (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      llm_provider_id INTEGER NOT NULL REFERENCES llm_providers(id) ON DELETE CASCADE,
+      name            TEXT    NOT NULL,
+      created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (llm_provider_id, name)
+    );
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_llm_provider_models_provider_id
+      ON llm_provider_models(llm_provider_id);
+  `);
   db = handle;
   return handle;
 }
