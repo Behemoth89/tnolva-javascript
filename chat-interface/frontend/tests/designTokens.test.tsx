@@ -40,6 +40,6 @@ describe('design tokens + glass scoping', () => {
       .map((el) => el.getAttribute('data-testid'))
       .filter(Boolean)
       .sort();
-    expect(testIds).toEqual(['message-input-form', 'sidebar']);
+    expect(testIds).toEqual(['chat-composer', 'chat-sidebar']);
   });
 });

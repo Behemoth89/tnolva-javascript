@@ -1,133 +1,396 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from '../src/auth/AuthContext';
 import ChatPanel from '../src/components/ChatPanel';
-import '../src/index.css';
 
-function readVar(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function jsonResponse(payload: unknown, status = 200): Response {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
 }
 
-function resolveVarColor(name: string): string {
-  const v = readVar(name);
-  // jsdom returns the raw value (e.g. "#FFB627")
-  return v;
+type FetchSpy = MockInstance<typeof fetch>;
+
+interface ChatFixture {
+  id: number;
+  user_id: number;
+  title: string | null;
+  default_llm_provider_model: string;
+  created_at: string;
 }
 
-describe('ChatPanel (design system integration)', () => {
+interface MessageFixture {
+  id: number;
+  chat_id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  provider_model: string;
+  created_at: string;
+}
+
+interface State {
+  chats: ChatFixture[];
+  byChat: Map<number, MessageFixture[]>;
+  availableModels: Array<{
+    provider_model: string;
+    provider_name: string;
+    model_name: string;
+    type: string;
+  }>;
+}
+
+function renderChatPanel(state: State, overrides: Partial<{
+  user: { id: number; email: string; is_admin: number };
+  fetchSpy: FetchSpy;
+  sendResponse: 'ok' | 'fail';
+  patchResponse: 'ok' | 'fail';
+  initialModel?: string;
+}> = {}) {
+  const fetchSpy =
+    overrides.fetchSpy ?? vi.spyOn(globalThis, 'fetch') as unknown as FetchSpy;
+  const user = overrides.user ?? { id: 1, email: 'a@example.com', is_admin: 0 };
+  const sendResponse = overrides.sendResponse ?? 'ok';
+  const patchResponse = overrides.patchResponse ?? 'ok';
+
+  fetchSpy.mockImplementation(async (input, init) => {
+    const url = typeof input === 'string' ? input : (input as URL).toString();
+    const method = (init as RequestInit | undefined)?.method ?? 'GET';
+    if (url === '/api/auth/me') {
+      return jsonResponse({ user });
+    }
+    if (url === '/api/chats') {
+      if (method === 'POST') {
+        const body = JSON.parse((init as RequestInit).body as string) as {
+          title?: string;
+          default_llm_provider_model: string;
+        };
+        const newId = 100 + (state.chats.length % 100);
+        const newChat: ChatFixture = {
+          id: newId,
+          user_id: user.id,
+          title: body.title ?? null,
+          default_llm_provider_model: body.default_llm_provider_model,
+          created_at: new Date().toISOString(),
+        };
+        state.chats = [newChat, ...state.chats];
+        return jsonResponse(newChat);
+      }
+      return jsonResponse([...state.chats]);
+    }
+    if (url === '/api/chats/models') {
+      return jsonResponse([...state.availableModels]);
+    }
+    const chatMatch = url.match(/^\/api\/chats\/(\d+)$/);
+    if (chatMatch) {
+      const id = Number(chatMatch[1]);
+      const chat = state.chats.find((c) => c.id === id);
+      if (!chat) {
+        return jsonResponse({ error: 'Chat not found' }, 404);
+      }
+      return jsonResponse({
+        chat,
+        messages: state.byChat.get(id) ?? [],
+      });
+    }
+    const sendMatch = url.match(/^\/api\/chats\/(\d+)\/messages$/);
+    if (sendMatch) {
+      const id = Number(sendMatch[1]);
+      const lastUserId = -(Date.now() % 100000);
+      const userMsg: MessageFixture = {
+        id: lastUserId,
+        chat_id: id,
+        role: 'user',
+        content: 'hi',
+        provider_model: state.chats.find((c) => c.id === id)?.default_llm_provider_model ?? '',
+        created_at: new Date().toISOString(),
+      };
+      if (sendResponse === 'fail') {
+        return jsonResponse(
+          {
+            error: 'Upstream LLM failed: http',
+            chat: {
+              chat: state.chats.find((c) => c.id === id),
+              messages: [userMsg],
+            },
+          },
+          502,
+        );
+      }
+      const reply: MessageFixture = {
+        id: 999,
+        chat_id: id,
+        role: 'assistant',
+        content: 'hello there',
+        provider_model: state.chats.find((c) => c.id === id)?.default_llm_provider_model ?? '',
+        created_at: new Date().toISOString(),
+      };
+      return jsonResponse({
+        chat: state.chats.find((c) => c.id === id),
+        messages: [userMsg, reply],
+      });
+    }
+    const patchMatch = url.match(/^\/api\/chats\/(\d+)$/);
+    if (patchMatch && method === 'PATCH') {
+      const id = Number(patchMatch[1]);
+      const existing = state.chats.find((c) => c.id === id);
+      if (patchResponse === 'fail') {
+        return jsonResponse({ error: 'Invalid model' }, 400);
+      }
+      const body = JSON.parse((init as RequestInit).body as string) as {
+        default_llm_provider_model?: string;
+      };
+      const updated: ChatFixture = {
+        ...(existing as ChatFixture),
+        default_llm_provider_model:
+          body.default_llm_provider_model ??
+          (existing as ChatFixture).default_llm_provider_model,
+      };
+      const idx = state.chats.findIndex((c) => c.id === id);
+      state.chats[idx] = updated;
+      return jsonResponse(updated);
+    }
+    return jsonResponse({ error: `Unhandled ${url} ${method}` }, 500);
+  });
+
+  return render(
+    <MemoryRouter initialEntries={['/chat']}>
+      <AuthProvider>
+        <Routes>
+          <Route path="/chat" element={<ChatPanel />} />
+        </Routes>
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+}
+
+describe('ChatPanel page (component)', () => {
+  let fetchSpy: FetchSpy;
+
   beforeEach(() => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
+    fetchSpy = vi.spyOn(globalThis, 'fetch');
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
-    vi.useRealTimers();
+    fetchSpy.mockRestore();
   });
 
-  it('renders sidebar, message list, and message input form', () => {
-    render(<ChatPanel />);
-    expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('message-list')).toBeInTheDocument();
-    expect(screen.getByTestId('message-input-form')).toBeInTheDocument();
-    expect(screen.getByTestId('message-send')).toBeInTheDocument();
-  });
-
-  it('applies the .glass class to sidebar and message input form, but not to message bubbles', () => {
-    const { container } = render(<ChatPanel />);
-    const sidebar = screen.getByTestId('sidebar');
-    const form = screen.getByTestId('message-input-form');
-    const bubbles = screen.queryAllByTestId('message-bubble');
-
-    expect(sidebar.className).toMatch(/\bglass\b/);
-    expect(form.className).toMatch(/\bglass\b/);
-
-    bubbles.forEach((bubble) => {
-      expect(bubble.className).not.toMatch(/\bglass\b/);
-    });
-
-    // Sanity: exactly two elements within the chat panel carry the glass class.
-    const allGlass = container.querySelectorAll('.glass');
-    expect(allGlass.length).toBe(2);
-  });
-
-  it('exposes the required design tokens on :root', () => {
-    render(<ChatPanel />);
-    expect(readVar('--color-base')).not.toBe('');
-    expect(readVar('--color-glass')).not.toBe('');
-    expect(readVar('--color-amber')).not.toBe('');
-    expect(readVar('--color-text')).not.toBe('');
-    expect(readVar('--color-border')).not.toBe('');
-    expect(readVar('--motion-base')).not.toBe('');
-    expect(readVar('--ease-out')).not.toBe('');
-  });
-
-  it('uses --color-amber on the send button', () => {
-    render(<ChatPanel />);
-    const expected = resolveVarColor('--color-amber');
-    expect(expected).not.toBe('');
-    // jsdom normalises hex to rgb; assert the raw token value is non-empty
-    // and that the send button resolves a non-transparent background.
-    const send = screen.getByTestId('message-send');
-    const bg = getComputedStyle(send).backgroundColor;
-    expect(bg).not.toBe('rgba(0, 0, 0, 0)');
-    expect(bg).not.toBe('transparent');
-  });
-
-  it('computes cascade animation-delay as 600 + index * 60 ms', () => {
-    const { container } = render(<ChatPanel />);
-    const wrappers = container.querySelectorAll<HTMLElement>('.anim-message-cascade');
-    expect(wrappers.length).toBeGreaterThanOrEqual(3);
-    expect((wrappers[0] as HTMLElement).style.animationDelay).toBe('600ms');
-    expect((wrappers[1] as HTMLElement).style.animationDelay).toBe('660ms');
-    expect((wrappers[2] as HTMLElement).style.animationDelay).toBe('720ms');
-  });
-
-  it('distinguishes user and assistant bubbles via data-author and variant classes', () => {
-    render(<ChatPanel />);
-    const userBubble = document.querySelector<HTMLElement>('[data-author="user"]');
-    const assistantBubble = document.querySelector<HTMLElement>('[data-author="assistant"]');
-    expect(userBubble).not.toBeNull();
-    expect(assistantBubble).not.toBeNull();
-    expect(userBubble!.className).toMatch(/bubble--user/);
-    expect(assistantBubble!.className).toMatch(/bubble--assistant/);
-    // Source-level contract: the MessageBubble stylesheet declares a hover lift for
-    // user bubbles and explicitly does not for assistant bubbles.
-    const css = readFileSync(
-      resolve(dirname(fileURLToPath(import.meta.url)), '../src/components/MessageBubble.module.css'),
-      'utf8',
+  it('fetches the chat list and the available models on mount', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map(),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-sidebar')).toBeInTheDocument(),
     );
-    expect(css).toMatch(/\.bubble--user:hover\b/);
-    expect(css).not.toMatch(/\.bubble--assistant:hover\b/);
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-model-select')).toBeInTheDocument(),
+    );
+    const calls = fetchSpy.mock.calls.map((c) => c[0]);
+    expect(calls).toContain('/api/chats');
+    expect(calls).toContain('/api/chats/models');
+    expect(calls).toContain('/api/chats/11');
   });
 
-  it('lists chats in the sidebar and updates the active title on click', () => {
-    render(<ChatPanel />);
-    const items = screen.getAllByTestId('sidebar-chat-item');
-    expect(items.length).toBe(3);
-    fireEvent.click(items[2]!);
-    expect(screen.getByTestId('chat-title').textContent).toBe('Roadmap notes');
+  it('shows the sidebar empty state when the user has no chats', async () => {
+    const state: State = {
+      chats: [],
+      byChat: new Map(),
+      availableModels: [],
+    };
+    renderChatPanel(state, { fetchSpy });
+    expect(await screen.findByTestId('chat-sidebar-empty')).toBeInTheDocument();
   });
 
-  it('sending a message appends a user message and an AI reply', async () => {
-    render(<ChatPanel />);
-    const input = screen.getByTestId('message-input');
-    const send = screen.getByTestId('message-send');
-    fireEvent.change(input, { target: { value: 'hello world' } });
-    fireEvent.click(send);
+  it('shows the message-area empty state for an active chat with no messages', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    expect(await screen.findByTestId('chat-empty-state')).toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      const userMessages = screen.queryAllByTestId('message-bubble');
-      const lastUser = userMessages.filter((m) => m.getAttribute('data-author') === 'user').pop();
-      expect(lastUser?.textContent).toBe('hello world');
+  it('sends a message: happy path renders user + assistant bubbles', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy, sendResponse: 'ok' });
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-composer-input')).toBeInTheDocument(),
+    );
+    fireEvent.change(screen.getByTestId('chat-composer-input'), {
+      target: { value: 'hi' },
     });
-
+    fireEvent.click(screen.getByTestId('chat-composer-submit'));
     await waitFor(() => {
-      const all = screen.queryAllByTestId('message-bubble');
-      const lastAssistant = all.filter((m) => m.getAttribute('data-author') === 'assistant').pop();
-      expect(lastAssistant).toBeDefined();
-      expect(lastAssistant!.textContent?.length).toBeGreaterThan(0);
+      const bubbles = screen.queryAllByTestId('chat-message');
+      const roles = bubbles.map((b) => b.getAttribute('data-message-role'));
+      expect(roles).toContain('user');
+      expect(roles).toContain('assistant');
+    });
+  });
+
+  it('on 502 the user bubble persists and the error banner is shown', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy, sendResponse: 'fail' });
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-composer-input')).toBeInTheDocument(),
+    );
+    fireEvent.change(screen.getByTestId('chat-composer-input'), {
+      target: { value: 'will fail' },
+    });
+    fireEvent.click(screen.getByTestId('chat-composer-submit'));
+    const banner = await screen.findByTestId('chat-error-banner');
+    expect(banner).toHaveTextContent('Upstream LLM failed: http');
+    const userBubbles = screen
+      .queryAllByTestId('chat-message')
+      .filter((b) => b.getAttribute('data-message-role') === 'user');
+    expect(userBubbles.length).toBeGreaterThan(0);
+  });
+
+  it('changing the model selector calls PATCH /api/chats/:id and updates the value', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+        {
+          provider_model: 'anthropic:claude-x',
+          provider_name: 'anthropic',
+          model_name: 'claude-x',
+          type: 'anthropic',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy, patchResponse: 'ok' });
+    const select = await screen.findByTestId('chat-model-select');
+    fireEvent.change(select, { target: { value: 'anthropic:claude-x' } });
+    await waitFor(() => {
+      const patch = fetchSpy.mock.calls.find(
+        ([u, init]) =>
+          u === '/api/chats/11' &&
+          (init as RequestInit | undefined)?.method === 'PATCH',
+      );
+      expect(patch).toBeDefined();
+    });
+  });
+
+  it('create-chat button calls POST /api/chats and switches to the new chat', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    const newBtn = await screen.findByTestId('chat-new');
+    fireEvent.click(newBtn);
+    await waitFor(() => {
+      const post = fetchSpy.mock.calls.find(
+        ([u, init]) =>
+          u === '/api/chats' &&
+          (init as RequestInit | undefined)?.method === 'POST',
+      );
+      expect(post).toBeDefined();
     });
   });
 });

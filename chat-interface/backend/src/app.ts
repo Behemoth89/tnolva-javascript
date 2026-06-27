@@ -10,6 +10,7 @@ import SqliteStoreFactory from 'better-sqlite3-session-store';
 import healthRouter from './routes/health';
 import authRouter from './auth/router';
 import adminRouter from './admin/router';
+import chatsRouter from './chats/chatsRouter';
 import { config } from './config';
 import { authRateLimiter, createAuthRateLimiter } from './auth/rateLimit';
 
@@ -103,6 +104,7 @@ export function createApp(options: CreateAppOptions = {}): Express {
   }
   app.use('/api/auth', authRouter);
   app.use('/api/admin', adminRouter);
+  app.use('/api/chats', chatsRouter);
 
   return app;
 }

@@ -5,12 +5,13 @@ import type { Message } from '../chat/types';
 
 interface MessageListProps {
   messages: Message[];
+  pendingUserMessageId?: number | null;
 }
 
 const CASCADE_BASE_DELAY_MS = 600;
 const CASCADE_STEP_MS = 60;
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({ messages, pendingUserMessageId = null }: MessageListProps) {
   const mountedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -21,16 +22,19 @@ export function MessageList({ messages }: MessageListProps) {
 
   if (messages.length === 0) {
     return (
-      <div data-testid="message-list" className={styles.list}>
-        <p className={styles.empty}>No messages yet. Say hi to start the conversation.</p>
+      <div data-testid="chat-message-list" className={styles.list}>
+        <p data-testid="chat-empty-state" className={styles.empty}>
+          Send a message to start.
+        </p>
       </div>
     );
   }
 
   return (
-    <div data-testid="message-list" className={styles.list}>
+    <div data-testid="chat-message-list" className={styles.list}>
       {messages.map((message, index) => {
         const delay = `${CASCADE_BASE_DELAY_MS + index * CASCADE_STEP_MS}ms`;
+        const isPending = pendingUserMessageId === message.id;
         return (
           <div
             key={message.id}
@@ -38,6 +42,15 @@ export function MessageList({ messages }: MessageListProps) {
             style={{ animationDelay: delay, display: 'flex' }}
           >
             <MessageBubble message={message} />
+            {isPending && (
+              <span
+                data-testid="chat-thinking-indicator"
+                className={styles.thinking}
+                aria-live="polite"
+              >
+                thinking…
+              </span>
+            )}
           </div>
         );
       })}

@@ -56,6 +56,32 @@ export function initDb(databasePath: string): DbHandle {
     CREATE INDEX IF NOT EXISTS idx_llm_provider_models_provider_id
       ON llm_provider_models(llm_provider_id);
   `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS chats (
+      id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id                     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title                       TEXT,
+      default_llm_provider_model  TEXT    NOT NULL,
+      created_at                  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      chat_id         INTEGER NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+      role            TEXT    NOT NULL CHECK (role IN ('user','assistant')),
+      content         TEXT    NOT NULL,
+      provider_model  TEXT    NOT NULL,
+      created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_chats_user_id ON chats(user_id);
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_id
+      ON chat_messages(chat_id);
+  `);
   db = handle;
   return handle;
 }
