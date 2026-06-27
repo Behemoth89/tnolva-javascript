@@ -1,0 +1,44 @@
+.backdrop-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--color-base);
+  overflow: hidden;
+  opacity: 0;
+}
+
+.backdrop-mesh__blob {
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  will-change: transform;
+}
+
+.backdrop-mesh__blob--a {
+  top: -20vmax;
+  left: -10vmax;
+  background: radial-gradient(circle, var(--color-amber) 0%, transparent 70%);
+  animation: mesh-drift-a 24s ease-in-out infinite alternate;
+}
+
+.backdrop-mesh__blob--b {
+  bottom: -25vmax;
+  right: -15vmax;
+  background: radial-gradient(circle, var(--color-amber) 0%, transparent 70%);
+  opacity: 0.22;
+  animation: mesh-drift-b 30s ease-in-out infinite alternate;
+}
+
+@keyframes mesh-drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(10vmax, 6vmax) scale(1.1); }
+}
+
+@keyframes mesh-drift-b {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-8vmax, -4vmax) scale(1.15); }
+}

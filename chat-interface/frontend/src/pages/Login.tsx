@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import styles from './Login.module.css';
 
 export function Login() {
   const { login } = useAuth();
@@ -25,11 +26,11 @@ export function Login() {
   }
 
   return (
-    <section aria-labelledby="login-title" data-testid="login-page">
-      <h1 id="login-title">Sign in</h1>
-      <form onSubmit={onSubmit} noValidate>
-        <div>
-          <label htmlFor="login-email">Email</label>
+    <section aria-labelledby="login-title" data-testid="login-page" className={styles.page}>
+      <h1 id="login-title" className={styles.title}>Sign in</h1>
+      <form onSubmit={onSubmit} noValidate className={styles.form}>
+        <div className={styles.field}>
+          <label htmlFor="login-email" className={styles.label}>Email</label>
           <input
             id="login-email"
             name="email"
@@ -39,10 +40,11 @@ export function Login() {
             required
             autoComplete="username"
             data-testid="login-email"
+            className={styles.input}
           />
         </div>
-        <div>
-          <label htmlFor="login-password">Password</label>
+        <div className={styles.field}>
+          <label htmlFor="login-password" className={styles.label}>Password</label>
           <input
             id="login-password"
             name="password"
@@ -52,18 +54,19 @@ export function Login() {
             required
             autoComplete="current-password"
             data-testid="login-password"
+            className={styles.input}
           />
         </div>
         {error && (
-          <p role="alert" data-testid="login-error" style={{ color: '#dc2626' }}>
+          <p role="alert" data-testid="login-error" className={styles.error}>
             {error}
           </p>
         )}
-        <button type="submit" disabled={pending} data-testid="login-submit">
+        <button type="submit" disabled={pending} data-testid="login-submit" className={styles.submit}>
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p>
+      <p className={styles.alt}>
         New here? <Link to="/register" data-testid="login-register-link">Create an account</Link>
       </p>
     </section>

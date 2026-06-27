@@ -3,6 +3,9 @@ import { AuthProvider } from './auth/AuthContext';
 import NavBar from './components/NavBar';
 import RouteGuard from './components/RouteGuard';
 import HealthCheck from './components/HealthCheck';
+import BackdropMesh from './components/BackdropMesh';
+import CursorGlow from './components/CursorGlow';
+import ChatPanel from './components/ChatPanel';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
@@ -10,12 +13,22 @@ import Admin from './pages/Admin';
 function App() {
   return (
     <AuthProvider>
+      <BackdropMesh />
+      <CursorGlow />
       <BrowserRouter>
         <NavBar />
         <main>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route
+              path="/chat"
+              element={
+                <RouteGuard>
+                  <ChatPanel />
+                </RouteGuard>
+              }
+            />
             <Route
               path="/"
               element={

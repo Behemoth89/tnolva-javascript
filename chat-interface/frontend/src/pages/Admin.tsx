@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import * as authApi from '../api/auth';
 import type { PublicUser } from '../api/auth';
 import { useAuth } from '../auth/AuthContext';
+import styles from './Admin.module.css';
 
 export function Admin() {
   const { user } = useAuth();
@@ -36,9 +37,9 @@ export function Admin() {
 
   if (!isAdmin) {
     return (
-      <section aria-labelledby="admin-title" data-testid="admin-denied">
-        <h1 id="admin-title">Admin</h1>
-        <p role="alert" data-testid="admin-denied-message">
+      <section aria-labelledby="admin-title" data-testid="admin-denied" className={styles.page}>
+        <h1 id="admin-title" className={styles.title}>Admin</h1>
+        <p role="alert" data-testid="admin-denied-message" className={styles.denied}>
           Admin privileges required.
         </p>
       </section>
@@ -46,17 +47,17 @@ export function Admin() {
   }
 
   return (
-    <section aria-labelledby="admin-title" data-testid="admin-page">
-      <h1 id="admin-title">Admin</h1>
-      <h2>Registered users</h2>
-      {loading && <p data-testid="admin-loading">Loading users…</p>}
+    <section aria-labelledby="admin-title" data-testid="admin-page" className={styles.page}>
+      <h1 id="admin-title" className={styles.title}>Admin</h1>
+      <h2 className={styles.subtitle}>Registered users</h2>
+      {loading && <p data-testid="admin-loading" className={styles.loading}>Loading users…</p>}
       {error && (
-        <p role="alert" data-testid="admin-error" style={{ color: '#dc2626' }}>
+        <p role="alert" data-testid="admin-error" className={styles.error}>
           {error}
         </p>
       )}
       {users && !loading && !error && (
-        <table data-testid="admin-users-table">
+        <table data-testid="admin-users-table" className={styles.table}>
           <thead>
             <tr>
               <th>ID</th>

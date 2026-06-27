@@ -1,0 +1,27 @@
+.cursor-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  contain: strict;
+}
+
+.cursor-glow__radial {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 480px;
+  height: 480px;
+  transform: translate3d(calc(var(--glow-x, 0px) - 240px), calc(var(--glow-y, 0px) - 240px), 0);
+  background: radial-gradient(closest-side, var(--color-amber-soft), transparent 70%);
+  mix-blend-mode: screen;
+  will-change: transform;
+  opacity: 1;
+  transition: opacity var(--motion-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-glow {
+    display: none;
+  }
+}

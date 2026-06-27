@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { fetchHealth } from '../api/health';
 import type { HealthResponse } from '../types/health';
+import styles from './HealthCheck.module.css';
 
 type Status = 'idle' | 'loading' | 'ok' | 'error';
 
@@ -38,26 +39,26 @@ export function HealthCheck() {
 
   const isLoading = status === 'loading';
 
+  const badgeClass =
+    status === 'ok'
+      ? `${styles.badge} ${styles['badge--ok']}`
+      : status === 'error'
+      ? `${styles.badge} ${styles['badge--error']}`
+      : styles.badge;
+
   return (
-    <section aria-labelledby="health-title" data-testid="health-check">
-      <h1 id="health-title">Backend Health</h1>
+    <section aria-labelledby="health-title" data-testid="health-check" className={styles.page}>
+      <h1 id="health-title" className={styles.title}>Backend Health</h1>
       <div>
         <span
           data-testid="status-badge"
           data-status={status}
-          style={{
-            display: 'inline-block',
-            padding: '0.25rem 0.75rem',
-            borderRadius: '999px',
-            color: 'white',
-            fontWeight: 600,
-            background: status === 'ok' ? '#16a34a' : status === 'error' ? '#dc2626' : '#6b7280',
-          }}
+          className={badgeClass}
         >
           {status === 'ok' ? 'Online' : status === 'error' ? 'Offline' : status === 'loading' ? 'Loading' : 'Idle'}
         </span>
       </div>
-      <dl>
+      <dl className={styles.meta}>
         <dt>Uptime</dt>
         <dd data-testid="uptime">{uptime != null ? formatUptime(uptime) : '—'}</dd>
         <dt>Last checked</dt>
@@ -65,11 +66,11 @@ export function HealthCheck() {
         {error && (
           <>
             <dt>Error</dt>
-            <dd data-testid="error" role="alert">{error}</dd>
+            <dd data-testid="error" role="alert" className={styles.error}>{error}</dd>
           </>
         )}
       </dl>
-      <button type="button" onClick={load} disabled={isLoading} data-testid="refresh">
+      <button type="button" onClick={load} disabled={isLoading} data-testid="refresh" className={styles.refresh}>
         {isLoading ? 'Refreshing…' : 'Refresh'}
       </button>
     </section>

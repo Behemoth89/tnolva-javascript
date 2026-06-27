@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import styles from './Register.module.css';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -38,11 +39,11 @@ export function Register() {
   }
 
   return (
-    <section aria-labelledby="register-title" data-testid="register-page">
-      <h1 id="register-title">Create account</h1>
-      <form onSubmit={onSubmit} noValidate>
-        <div>
-          <label htmlFor="register-email">Email</label>
+    <section aria-labelledby="register-title" data-testid="register-page" className={styles.page}>
+      <h1 id="register-title" className={styles.title}>Create account</h1>
+      <form onSubmit={onSubmit} noValidate className={styles.form}>
+        <div className={styles.field}>
+          <label htmlFor="register-email" className={styles.label}>Email</label>
           <input
             id="register-email"
             name="email"
@@ -52,10 +53,11 @@ export function Register() {
             required
             autoComplete="username"
             data-testid="register-email"
+            className={styles.input}
           />
         </div>
-        <div>
-          <label htmlFor="register-password">Password</label>
+        <div className={styles.field}>
+          <label htmlFor="register-password" className={styles.label}>Password</label>
           <input
             id="register-password"
             name="password"
@@ -66,10 +68,11 @@ export function Register() {
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
             data-testid="register-password"
+            className={styles.input}
           />
         </div>
-        <div>
-          <label htmlFor="register-confirm">Confirm password</label>
+        <div className={styles.field}>
+          <label htmlFor="register-confirm" className={styles.label}>Confirm password</label>
           <input
             id="register-confirm"
             name="confirm"
@@ -80,18 +83,19 @@ export function Register() {
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
             data-testid="register-confirm"
+            className={styles.input}
           />
         </div>
         {error && (
-          <p role="alert" data-testid="register-error" style={{ color: '#dc2626' }}>
+          <p role="alert" data-testid="register-error" className={styles.error}>
             {error}
           </p>
         )}
-        <button type="submit" disabled={pending} data-testid="register-submit">
+        <button type="submit" disabled={pending} data-testid="register-submit" className={styles.submit}>
           {pending ? 'Creating account…' : 'Create account'}
         </button>
       </form>
-      <p>
+      <p className={styles.alt}>
         Already have an account? <Link to="/login" data-testid="register-login-link">Sign in</Link>
       </p>
     </section>
