@@ -1,0 +1,11 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  tags:
+    - shared
+  script:
+    - cd chat-interface && docker compose -p chat-interface up --build --remove-orphans --detach

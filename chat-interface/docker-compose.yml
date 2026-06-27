@@ -24,7 +24,7 @@ services:
     image: chat-interface-frontend:dev
     container_name: chat-interface-frontend
     ports:
-      - "5173:80"
+      - "5173:90"
     depends_on:
       backend:
         condition: service_healthy
