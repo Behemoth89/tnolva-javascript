@@ -8,3 +8,4 @@ include:
   - local: 'vue-todo-express/.gitlab-ci.yml'
   - local: 'react-todo-express/.gitlab-ci.yml'
   - local: 'nutikas/.gitlab-ci.yml'
+  - local: 'chat-interface/.gitlab-ci.yml'
