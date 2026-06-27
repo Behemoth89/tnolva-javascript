@@ -1,6 +1,12 @@
 import 'dotenv/config';
 import { createApp } from './app';
-import { config } from './config';
+import { assertConfig, config } from './config';
+import { initDb } from './db';
+
+assertConfig();
+initDb(config.databasePath);
+// eslint-disable-next-line no-console
+console.log(`[backend] database initialized at ${config.databasePath}`);
 
 const app = createApp();
 

@@ -6,4 +6,5 @@ tests
 .git
 .gitignore
 README.md
+data
 *.md

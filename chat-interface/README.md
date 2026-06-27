@@ -136,6 +136,39 @@ the container.
 The Vite proxy is configured to forward `/api` to `http://localhost:3001`. If you started the frontend
 before the backend, the first health-check call will fail. Click **Refresh** once the backend is up.
 
+## Auth Quick Start
+
+The backend persists users in a SQLite file (`backend/data/chat.db` in local
+dev, `/data/chat.db` inside Docker). The first user to register against a
+fresh database is automatically promoted to `is_admin = 1`; every subsequent
+user is a regular user.
+
+### Environment variables
+
+| Variable           | Default                                 | Notes |
+| ------------------ | --------------------------------------- | ----- |
+| `PORT`             | `3001`                                  | Backend HTTP port |
+| `NODE_ENV`         | `development`                           | Set to `production` in deploys |
+| `DATABASE_PATH`    | `backend/data/chat.db`                  | SQLite file location |
+| `SESSION_SECRET`   | _(empty in test)_                       | **Required in production.** Long random string used to sign the session cookie |
+| `COOKIE_SECURE`    | `false`                                 | Set `true` in production (HTTPS only) |
+| `FRONTEND_ORIGIN`  | `http://localhost:5173,http://localhost` | Comma-separated list of allowed CORS origins |
+
+See `backend/.env.example` for the full template. When using Docker Compose,
+`chat-data` is a named volume mounted at `/data`, so the SQLite file persists
+across `docker compose down` / `up` cycles.
+
+### Production HTTPS required
+
+The session cookie is set with `Secure` whenever `COOKIE_SECURE=true` (the
+default inside the Docker stack). You **must** terminate TLS at your reverse
+proxy and serve the app over HTTPS in production; otherwise the browser will
+refuse to send the session cookie and every request will be unauthenticated.
+
+Local dev runs over plain HTTP, so the cookie is intentionally not `Secure`
+during development. A token-based CSRF middleware is the next hardening step
+documented in `openspec/changes/add-user-auth-sqlite-admin/design.md`.
+
 ## Next Steps
 
 This change ships the foundation. Subsequent changes will add:
