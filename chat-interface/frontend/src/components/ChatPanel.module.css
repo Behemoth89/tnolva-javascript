@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 100vh;
+  min-height: 0;
+  width: 100%;
   z-index: 2;
 }
 
@@ -23,6 +24,7 @@
 }
 
 .panel__header {
+  flex: 0 0 auto;
   padding: 1.5rem 1.25rem 0.5rem;
   display: flex;
   align-items: center;
@@ -36,6 +38,65 @@
   font-weight: 600;
   flex: 1 1 auto;
   min-width: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 0.25rem 0.5rem;
+  color: var(--color-text);
+  font-family: inherit;
+  line-height: 1.3;
+  transition: border-color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
+}
+
+.panel__title:hover:not(:disabled) {
+  border-color: var(--color-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.panel__title:focus {
+  outline: none;
+  border-color: var(--color-amber);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.panel__title:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.panel__titleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.panel__titleText {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.panel__titleEdit {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+.panel__titleEdit:hover,
+.panel__titleEdit:focus-visible {
+  color: var(--color-amber);
+  outline: none;
 }
 
 .panel__model {

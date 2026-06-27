@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styles from './ChatPanel.module.css';
 import Sidebar from './Sidebar';
 import MessageList from './MessageList';
@@ -15,6 +22,8 @@ import {
   type AvailableModel,
 } from '../api/chats';
 
+const TITLE_MAX_LENGTH = 200;
+
 export function ChatPanel() {
   const [chats, setChats] = useState<Chat[] | null>(null);
   const [activeChatId, setActiveChatId] = useState<number | null>(null);
@@ -26,6 +35,10 @@ export function ChatPanel() {
   const [newChatPending, setNewChatPending] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
+  const [titlePending, setTitlePending] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const refreshChats = useCallback(async (): Promise<Chat[]> => {
     const list = (await listChatsApi()) as Chat[];
@@ -89,6 +102,7 @@ export function ChatPanel() {
   const defaultModel = activeChat?.default_llm_provider_model ?? '';
 
   const handleSelectChat = useCallback((id: number) => {
+    setIsEditingTitle(false);
     setActiveChatId(id);
   }, []);
 
@@ -200,6 +214,82 @@ export function ChatPanel() {
     [activeChatId, refreshChats],
   );
 
+  const handleStartEditTitle = useCallback(() => {
+    if (!activeChat) return;
+    setTitleDraft(activeChat.title ?? '');
+    setIsEditingTitle(true);
+  }, [activeChat]);
+
+  const handleCancelEditTitle = useCallback(() => {
+    setIsEditingTitle(false);
+    setTitleDraft('');
+  }, []);
+
+  const handleSaveTitle = useCallback(
+    async (rawValue: string) => {
+      if (activeChatId === null || titlePending) return;
+      const trimmed = rawValue.trim();
+      const currentTitle = activeChat?.title ?? '';
+      if (trimmed === currentTitle) {
+        setIsEditingTitle(false);
+        setTitleDraft('');
+        return;
+      }
+      const next: string | null = trimmed.length === 0 ? null : trimmed;
+      setTitlePending(true);
+      const previous = activeChat;
+      setActiveChat((prev) => (prev ? { ...prev, title: next } : prev));
+      try {
+        const updated = await updateChatApi(activeChatId, { title: next });
+        setActiveChat(updated);
+        setChats((prev) =>
+          prev ? prev.map((c) => (c.id === updated.id ? updated : c)) : prev,
+        );
+        setIsEditingTitle(false);
+        setTitleDraft('');
+      } catch (err) {
+        setActiveChat(previous);
+        setSendError(err instanceof Error ? err.message : 'Failed to update title');
+        setIsEditingTitle(false);
+        setTitleDraft('');
+      } finally {
+        setTitlePending(false);
+      }
+    },
+    [activeChat, activeChatId, titlePending],
+  );
+
+  const handleTitleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        void handleSaveTitle(event.currentTarget.value);
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        handleCancelEditTitle();
+      }
+    },
+    [handleCancelEditTitle, handleSaveTitle],
+  );
+
+  useEffect(() => {
+    if (isEditingTitle) {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    }
+  }, [isEditingTitle]);
+
+  useEffect(() => {
+    if (isEditingTitle) {
+      setIsEditingTitle(false);
+      setTitleDraft('');
+    }
+  }, [activeChatId]);
+
+  const displayTitle = activeChat?.title && activeChat.title.length > 0
+    ? activeChat.title
+    : 'Untitled chat';
+
   return (
     <section
       data-testid="chat-panel"
@@ -218,9 +308,45 @@ export function ChatPanel() {
         />
         <div className={styles.panel__main}>
           <header className={styles.panel__header}>
-            <h1 className={styles.panel__title} data-testid="chat-title">
-              {activeChat?.title && activeChat.title.length > 0 ? activeChat.title : 'Chat'}
-            </h1>
+            {isEditingTitle ? (
+              <input
+                ref={titleInputRef}
+                type="text"
+                data-testid="chat-title-input"
+                aria-label="Chat title"
+                className={styles.panel__title}
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={(e) => {
+                  void handleSaveTitle(e.currentTarget.value);
+                }}
+                onKeyDown={handleTitleKeyDown}
+                maxLength={TITLE_MAX_LENGTH}
+                disabled={titlePending}
+                placeholder="Untitled chat"
+              />
+            ) : (
+              <button
+                type="button"
+                data-testid="chat-title"
+                className={`${styles.panel__title} ${styles.panel__titleButton}`}
+                onClick={handleStartEditTitle}
+                disabled={!activeChat}
+                aria-label={`Chat title: ${displayTitle}. Click to edit.`}
+                title="Click to rename"
+              >
+                <span className={styles.panel__titleText}>{displayTitle}</span>
+                {activeChat && (
+                  <span
+                    data-testid="chat-title-edit"
+                    className={styles.panel__titleEdit}
+                    aria-hidden="true"
+                  >
+                    Edit
+                  </span>
+                )}
+              </button>
+            )}
             <label className={styles.panel__model}>
               <span className={styles.panel__modelLabel}>Model</span>
               <select

@@ -84,7 +84,7 @@ function renderChatPanel(state: State, overrides: Partial<{
       return jsonResponse([...state.availableModels]);
     }
     const chatMatch = url.match(/^\/api\/chats\/(\d+)$/);
-    if (chatMatch) {
+    if (chatMatch && method === 'GET') {
       const id = Number(chatMatch[1]);
       const chat = state.chats.find((c) => c.id === id);
       if (!chat) {
@@ -141,12 +141,17 @@ function renderChatPanel(state: State, overrides: Partial<{
       }
       const body = JSON.parse((init as RequestInit).body as string) as {
         default_llm_provider_model?: string;
+        title?: string | null;
       };
       const updated: ChatFixture = {
         ...(existing as ChatFixture),
         default_llm_provider_model:
           body.default_llm_provider_model ??
           (existing as ChatFixture).default_llm_provider_model,
+        title:
+          body.title === undefined
+            ? (existing as ChatFixture).title
+            : body.title,
       };
       const idx = state.chats.findIndex((c) => c.id === id);
       state.chats[idx] = updated;
@@ -392,5 +397,216 @@ describe('ChatPanel page (component)', () => {
       );
       expect(post).toBeDefined();
     });
+  });
+
+  it('clicking the title enters edit mode and shows an input', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    const titleBtn = await screen.findByTestId('chat-title');
+    fireEvent.click(titleBtn);
+    const input = await screen.findByTestId('chat-title-input');
+    expect(input).toBeInTheDocument();
+    expect((input as HTMLInputElement).value).toBe('first');
+  });
+
+  it('pressing Enter on the title input saves via PATCH /api/chats/:id', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    fireEvent.click(await screen.findByTestId('chat-title'));
+    const input = await screen.findByTestId('chat-title-input');
+    fireEvent.change(input, { target: { value: 'renamed chat' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => {
+      const patch = fetchSpy.mock.calls.find(
+        ([u, init]) =>
+          u === '/api/chats/11' &&
+          (init as RequestInit | undefined)?.method === 'PATCH',
+      );
+      expect(patch).toBeDefined();
+      const body = JSON.parse(
+        (patch?.[1] as RequestInit).body as string,
+      ) as { title?: string | null };
+      expect(body.title).toBe('renamed chat');
+    });
+  });
+
+  it('pressing Escape on the title input cancels without calling PATCH', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    fireEvent.click(await screen.findByTestId('chat-title'));
+    const input = await screen.findByTestId('chat-title-input');
+    fireEvent.change(input, { target: { value: 'wont be saved' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+    const patchCall = fetchSpy.mock.calls.find(
+      ([u, init]) =>
+        u === '/api/chats/11' &&
+        (init as RequestInit | undefined)?.method === 'PATCH',
+    );
+    expect(patchCall).toBeUndefined();
+    expect(await screen.findByTestId('chat-title')).toBeInTheDocument();
+  });
+
+  it('clearing the title saves null and the placeholder is shown', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    fireEvent.click(await screen.findByTestId('chat-title'));
+    const input = await screen.findByTestId('chat-title-input');
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => {
+      const patch = fetchSpy.mock.calls.find(
+        ([u, init]) =>
+          u === '/api/chats/11' &&
+          (init as RequestInit | undefined)?.method === 'PATCH',
+      );
+      const body = JSON.parse(
+        (patch?.[1] as RequestInit).body as string,
+      ) as { title?: string | null };
+      expect(body.title).toBeNull();
+    });
+  });
+
+  it('a failed PATCH for the title reverts the displayed title', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy, patchResponse: 'fail' });
+    const titleBtn = await screen.findByTestId('chat-title');
+    await waitFor(() => {
+      expect(titleBtn).toHaveTextContent('first');
+      expect(titleBtn).not.toBeDisabled();
+    });
+    fireEvent.click(titleBtn);
+    const input = await screen.findByTestId('chat-title-input');
+    fireEvent.change(input, { target: { value: 'bad name' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => {
+      expect(screen.getByTestId('chat-error-banner')).toBeInTheDocument();
+    });
+    const revertedBtn = await screen.findByTestId('chat-title');
+    expect(revertedBtn).toHaveTextContent('first');
+  });
+
+  it('renders the chat panel, the message list, and the composer without forcing a min-height of 100vh on the panel', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          title: 'first',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map([[11, []]]),
+      availableModels: [
+        {
+          provider_model: 'openai:gpt-x',
+          provider_name: 'openai',
+          model_name: 'gpt-x',
+          type: 'openai_completions',
+        },
+      ],
+    };
+    renderChatPanel(state, { fetchSpy });
+    const panel = await screen.findByTestId('chat-panel');
+    const list = await screen.findByTestId('chat-message-list');
+    const composer = await screen.findByTestId('chat-composer');
+    expect(panel).toBeInTheDocument();
+    expect(list).toBeInTheDocument();
+    expect(composer).toBeInTheDocument();
   });
 });

@@ -131,6 +131,102 @@ SHALL show an empty state.
   empty state
 - **AND** no message bubbles are rendered
 
+### Requirement: chat title is editable inline in the chat header
+
+The chat header SHALL render the active chat's `title` as an
+inline-editable control. When the user clicks the title, the panel
+SHALL swap the title's `<h1>` for an `<input type="text">` that is
+auto-focused and pre-filled with the current `title` (or empty when
+`title` is null). Pressing **Enter** in the input SHALL call
+`updateChat(activeChatId, { title: trimmed })` with the trimmed
+value (or `{ title: null }` when the trimmed value is empty);
+pressing **Escape** SHALL cancel without calling `updateChat`; and
+blurring the input SHALL also save (same as Enter). On a 2xx
+response the panel SHALL replace the active chat with the returned
+chat, exit edit mode, and clear the draft. On a non-2xx response
+the panel SHALL revert the optimistic title update, exit edit mode,
+and surface the server's `error` string in the existing chat error
+banner. The title input SHALL cap length at the backend's limit
+(200 characters) via `maxLength` and SHALL be disabled while the
+save is in flight.
+
+#### Scenario: clicking the title enters edit mode
+
+- **WHEN** the active chat has `title = "Design review"` and the
+  user clicks the title
+- **THEN** the `<h1>` is replaced by an `<input type="text">`
+- **AND** the input's value is `"Design review"`
+- **AND** the input has focus
+
+#### Scenario: pressing Enter saves the new title
+
+- **WHEN** the user types `"New name"` in the title input and
+  presses **Enter**
+- **THEN** `updateChat` is called with
+  `{ title: "New name" }`
+- **AND** on 2xx the input is replaced by the `<h1>` showing
+  `"New name"`
+- **AND** the sidebar list also reflects the new title
+
+#### Scenario: pressing Escape cancels without saving
+
+- **WHEN** the user types `"draft"` in the title input and presses
+  **Escape**
+- **THEN** no `updateChat` request is issued
+- **AND** the `<h1>` is restored with the previous title
+
+#### Scenario: clearing the title saves null
+
+- **WHEN** the user clears the title input (empty / whitespace) and
+  presses **Enter**
+- **THEN** `updateChat` is called with `{ title: null }`
+- **AND** on 2xx the `<h1>` shows the empty-title placeholder
+  (`"Untitled chat"`)
+
+#### Scenario: failed PATCH reverts and shows the error
+
+- **WHEN** the user types `"x"` in the title input and presses
+  **Enter**
+- **AND** `updateChat` returns 400
+- **THEN** the displayed title reverts to the previous value
+- **AND** the chat error banner shows the server's `error` string
+- **AND** the input is replaced by the `<h1>` (the panel exits
+  edit mode)
+
+### Requirement: ChatPanel layout fills the viewport and only the message list scrolls
+
+The chat page SHALL be laid out so the entire chat experience fits
+inside the browser viewport: the top `NavBar` is rendered above the
+chat, the chat panel fills the remaining vertical space, the chat
+header stays pinned at the top of the panel, the message list
+scrolls independently inside the panel, and the composer stays
+pinned at the bottom. The chat panel SHALL NOT add a `min-height`
+of `100vh` (or any fixed pixel height larger than its available
+space) — doing so would force the page itself to scroll and hide
+the chat header. The root layout (`#root`, `main`, the chat
+panel's outer flex container) SHALL be a vertical flex column so
+the available height propagates down to the message list, and the
+message list SHALL keep its existing `overflow-y: auto` /
+`min-height: 0` so it scrolls inside the panel rather than
+expanding it.
+
+#### Scenario: header is visible without scrolling the page
+
+- **WHEN** the chat has more messages than fit in the visible
+  message-list area
+- **THEN** the page itself does not scroll
+- **AND** the message list scrolls inside the panel
+- **AND** the chat header (title, model selector, delete button)
+  remains visible
+
+#### Scenario: composer is reachable without scrolling the page
+
+- **WHEN** the chat has more messages than fit in the visible
+  message-list area
+- **THEN** the composer at the bottom of the panel is reachable
+  without scrolling the page
+- **AND** the page itself does not scroll
+
 ### Requirement: composer sends a message and reflects pending / success / error
 
 The composer SHALL call `sendMessage(activeChatId,
@@ -222,9 +318,13 @@ use the existing `ChatPanel.module.css`, the existing
 data-testids and props updated to match the real types), the
 existing design tokens (`tokens.css`, `glass.css`, `motion.css`),
 and the existing motion classes (`anim-panel-scale`, etc.). The
-`frontend/src/chat/mockData.ts` placeholder SHALL be removed and
-no `cannedReplies` / `pickCannedReply` code SHALL remain in the
-runtime bundle.
+title control in the chat header SHALL be a button-styled
+`<h1>` (or a `<button>` carrying the same `data-testid="chat-title"`)
+that is replaced by a text `<input>` in edit mode; the visual
+treatment of the title (font, weight, alignment) SHALL match the
+previous static-title look in both states. The `frontend/src/chat/mockData.ts`
+placeholder SHALL be removed and no `cannedReplies` /
+`pickCannedReply` code SHALL remain in the runtime bundle.
 
 #### Scenario: anonymous user is redirected
 
@@ -237,5 +337,7 @@ runtime bundle.
 - **WHEN** the user lands on `/chat` while authenticated
 - **THEN** the panel renders with the same glass, sidebar, and
   message-bubble styling as before the change
+- **AND** the title looks like a heading in both the static and
+  edit states
 - **AND** no `mockData` or `cannedReplies` symbols are imported
   by `ChatPanel`
