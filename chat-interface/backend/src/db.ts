@@ -116,9 +116,94 @@ export function initDb(databasePath: string): DbHandle {
     CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_id
       ON chat_messages(chat_id);
   `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS project_files (
+      id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id          INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      user_id             INTEGER NOT NULL REFERENCES users(id)    ON DELETE CASCADE,
+      filename            TEXT    NOT NULL,
+      mime_type           TEXT    NOT NULL,
+      size_bytes          INTEGER NOT NULL CHECK (size_bytes >= 0),
+      storage_path        TEXT    NOT NULL,
+      source              TEXT    NOT NULL CHECK (source IN ('project_upload','chat_upload','llm_generated')),
+      source_chat_id      INTEGER REFERENCES chats(id)         ON DELETE SET NULL,
+      source_message_id   INTEGER REFERENCES chat_messages(id) ON DELETE SET NULL,
+      created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_project_files_project_id
+      ON project_files(project_id);
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_project_files_project_source
+      ON project_files(project_id, source);
+  `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS chat_message_files (
+      chat_message_id  INTEGER NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
+      project_file_id  INTEGER NOT NULL REFERENCES project_files(id)  ON DELETE CASCADE,
+      position         INTEGER NOT NULL,
+      PRIMARY KEY (chat_message_id, project_file_id)
+    );
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_chat_message_files_file
+      ON chat_message_files(project_file_id);
+  `);
   migrateChatsAddProjectId(handle);
+  migrateChatMessagesAddFileId(handle);
+  migrateChatMessagesAddAttachments(handle);
   db = handle;
   return handle;
+}
+
+function hasChatMessagesFileIdColumn(handle: DbHandle): boolean {
+  const row = handle
+    .prepare("SELECT 1 AS present FROM pragma_table_info('chat_messages') WHERE name = 'file_id'")
+    .get() as { present: number } | undefined;
+  return row?.present === 1;
+}
+
+function hasChatMessagesAttachmentsColumn(handle: DbHandle): boolean {
+  const row = handle
+    .prepare("SELECT 1 AS present FROM pragma_table_info('chat_messages') WHERE name = 'attachments'")
+    .get() as { present: number } | undefined;
+  return row?.present === 1;
+}
+
+function migrateChatMessagesAddFileId(handle: DbHandle): void {
+  if (hasChatMessagesFileIdColumn(handle)) {
+    return;
+  }
+  try {
+    handle.exec(`
+      ALTER TABLE chat_messages ADD COLUMN file_id INTEGER
+        REFERENCES project_files(id) ON DELETE SET NULL;
+    `);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!/duplicate column name/i.test(message)) {
+      throw err;
+    }
+  }
+}
+
+function migrateChatMessagesAddAttachments(handle: DbHandle): void {
+  if (hasChatMessagesAttachmentsColumn(handle)) {
+    return;
+  }
+  try {
+    handle.exec(`
+      ALTER TABLE chat_messages ADD COLUMN attachments TEXT;
+    `);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!/duplicate column name/i.test(message)) {
+      throw err;
+    }
+  }
 }
 
 function hasChatsProjectIdColumn(handle: DbHandle): boolean {

@@ -6,12 +6,13 @@ import type { Message } from '../chat/types';
 interface MessageListProps {
   messages: Message[];
   pendingUserMessageId?: number | null;
+  projectId: number;
 }
 
 const CASCADE_BASE_DELAY_MS = 600;
 const CASCADE_STEP_MS = 60;
 
-export function MessageList({ messages, pendingUserMessageId = null }: MessageListProps) {
+export function MessageList({ messages, pendingUserMessageId = null, projectId }: MessageListProps) {
   const mountedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function MessageList({ messages, pendingUserMessageId = null }: MessageLi
             className="anim-message-cascade"
             style={{ animationDelay: delay, display: 'flex' }}
           >
-            <MessageBubble message={message} />
+            <MessageBubble message={message} projectId={projectId} />
             {isPending && (
               <span
                 data-testid="chat-thinking-indicator"

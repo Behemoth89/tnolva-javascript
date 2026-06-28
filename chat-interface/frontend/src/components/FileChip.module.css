@@ -1,0 +1,29 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--color-bg-muted, rgba(99, 102, 241, 0.12));
+  color: var(--color-text, #1f2937);
+  border: 1px solid var(--color-border, rgba(99, 102, 241, 0.3));
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.chip:hover {
+  background: var(--color-bg-muted-hover, rgba(99, 102, 241, 0.18));
+}
+
+.chip--user {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.label {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

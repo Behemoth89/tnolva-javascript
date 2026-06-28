@@ -8,12 +8,21 @@ export interface Chat {
   created_at: string;
 }
 
+export interface AssistantAttachment {
+  filename: string;
+  mime_type: string;
+  content_b64?: string;
+  content_text?: string;
+}
+
 export interface ChatMessage {
   id: number;
   chat_id: number;
   role: 'user' | 'assistant';
   content: string;
   provider_model: string;
+  file_ids: number[];
+  attachments: AssistantAttachment[];
   created_at: string;
 }
 
@@ -36,6 +45,7 @@ export interface UpdateChatInput {
 export interface SendMessageInput {
   content: string;
   provider_model?: string;
+  file_ids?: number[];
 }
 
 export interface LlmFailure {
@@ -129,15 +139,49 @@ export async function deleteChat(id: number): Promise<void> {
   }
 }
 
+function normalizeChatMessage(message: ChatMessage | undefined): ChatMessage {
+  if (!message) {
+    return {
+      id: 0,
+      chat_id: 0,
+      role: 'user',
+      content: '',
+      provider_model: '',
+      file_ids: [],
+      attachments: [],
+      created_at: '',
+    };
+  }
+  return {
+    ...message,
+    file_ids: Array.isArray(message.file_ids) ? message.file_ids : [],
+    attachments: Array.isArray(message.attachments) ? message.attachments : [],
+  };
+}
+
+function normalizeChatWithMessages(value: ChatWithMessages): ChatWithMessages {
+  return {
+    chat: value.chat,
+    messages: (value.messages ?? []).map(normalizeChatMessage),
+  };
+}
+
 export async function sendMessage(
   chatId: number,
   input: SendMessageInput,
 ): Promise<SendMessageResult> {
+  const body: Record<string, unknown> = { content: input.content };
+  if (input.provider_model) {
+    body.provider_model = input.provider_model;
+  }
+  if (input.file_ids && input.file_ids.length > 0) {
+    body.file_ids = input.file_ids;
+  }
   const res = await fetch(`/api/chats/${chatId}/messages`, {
     ...FETCH_OPTIONS,
     method: 'POST',
     headers: JSON_HEADERS,
-    body: JSON.stringify(input),
+    body: JSON.stringify(body),
   });
   if (res.status === 502) {
     const data = (await res.json()) as {
@@ -147,12 +191,12 @@ export async function sendMessage(
     return {
       ok: false,
       error: data.error ?? 'Upstream LLM failed',
-      chat: data.chat ?? { chat: {} as Chat, messages: [] },
+      chat: data.chat ? normalizeChatWithMessages(data.chat) : { chat: {} as Chat, messages: [] },
     };
   }
   if (!res.ok) {
     throw new Error(await parseError(res));
   }
-  const value = (await res.json()) as ChatWithMessages;
+  const value = normalizeChatWithMessages((await res.json()) as ChatWithMessages);
   return { ok: true, value };
 }

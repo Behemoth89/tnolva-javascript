@@ -27,6 +27,8 @@ export class AnthropicClient implements LlmClient {
       max_tokens: req.maxTokens ?? 1024,
       messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
     };
+    // req.projectFiles is intentionally NOT forwarded; the Anthropic client
+    // treats it as opaque context that lives in the chat service only.
     if (req.system) {
       body.system = req.system;
     }

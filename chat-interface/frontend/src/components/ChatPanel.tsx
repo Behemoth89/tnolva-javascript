@@ -154,7 +154,7 @@ export function ChatPanel({ project }: ChatPanelProps) {
   }, [activeChat, availableModels, chats, project.default_llm_provider_model, project.id, refreshChats]);
 
   const handleSend = useCallback(
-    async (text: string) => {
+    async (text: string, fileIds?: number[]) => {
       if (activeChatId === null) return;
       const optimisticId = -Date.now();
       const optimistic: Message = {
@@ -163,6 +163,8 @@ export function ChatPanel({ project }: ChatPanelProps) {
         role: 'user',
         content: text,
         provider_model: defaultModel,
+        file_ids: fileIds ?? [],
+        attachments: [],
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, optimistic]);
@@ -170,7 +172,7 @@ export function ChatPanel({ project }: ChatPanelProps) {
       setPendingUserMessageId(optimisticId);
       setSendError(null);
       try {
-        const result = await sendMessageApi(activeChatId, { content: text });
+        const result = await sendMessageApi(activeChatId, { content: text, file_ids: fileIds });
         if (result.ok) {
           setActiveChat(result.value.chat);
           setMessages(result.value.messages);
@@ -411,14 +413,19 @@ export function ChatPanel({ project }: ChatPanelProps) {
               {loadError}
             </p>
           )}
-          <MessageList messages={activeMessages} pendingUserMessageId={pendingUserMessageId} />
+          <MessageList
+            messages={activeMessages}
+            pendingUserMessageId={pendingUserMessageId}
+            projectId={project.id}
+          />
           <MessageInput
-            onSend={(t) => {
-              void handleSend(t);
+            onSend={(t, fileIds) => {
+              void handleSend(t, fileIds);
             }}
             disabled={pending || activeChatId === null}
             error={sendError}
             onDismissError={() => setSendError(null)}
+            projectId={project.id}
           />
         </div>
       </div>

@@ -11,6 +11,7 @@ out/
 backend/dist/
 backend/coverage/
 backend/data/
+backend/backend/data/
 frontend/dist/
 frontend/coverage/
 

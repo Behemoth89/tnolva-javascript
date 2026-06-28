@@ -26,6 +26,8 @@ function toOpenAIMessages(req: LlmRequest): Array<{ role: string; content: strin
   for (const m of req.messages) {
     out.push({ role: m.role, content: m.content });
   }
+  // req.projectFiles is intentionally NOT forwarded; the OpenAI completions
+  // client treats it as opaque context that lives in the chat service only.
   return out;
 }
 

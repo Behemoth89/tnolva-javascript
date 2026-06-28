@@ -12,6 +12,7 @@ import AdminLLMProviderModels from './pages/AdminLLMProviderModels';
 import ProjectGrid from './pages/ProjectGrid';
 import ProjectChat from './pages/ProjectChat';
 import ProjectsManage from './pages/ProjectsManage';
+import ProjectFilesPage from './pages/ProjectFilesPage';
 import AdminProjectTemplates from './pages/AdminProjectTemplates';
 
 function App() {
@@ -62,6 +63,14 @@ function App() {
               element={
                 <RouteGuard>
                   <ProjectChat />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/projects/:id/files"
+              element={
+                <RouteGuard>
+                  <ProjectFilesPage />
                 </RouteGuard>
               }
             />

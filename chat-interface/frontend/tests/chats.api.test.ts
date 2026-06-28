@@ -146,6 +146,55 @@ describe('chats API client (unit)', () => {
     );
   });
 
+  it('sendMessage forwards file_ids when present', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse({
+        chat: { id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
+        messages: [
+          { id: 1, chat_id: 1, role: 'user', content: 'hi', provider_model: 'openai:gpt-x', file_ids: [42, 43], attachments: [], created_at: 'c' },
+        ],
+      }),
+    );
+    await api.sendMessage(1, { content: 'See attached', file_ids: [42, 43] });
+    const [, init] = fetchSpy.mock.calls[0];
+    const body = JSON.parse((init as RequestInit).body as string) as {
+      file_ids?: number[];
+    };
+    expect(body.file_ids).toEqual([42, 43]);
+  });
+
+  it('sendMessage omits file_ids from the body when not provided', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse({
+        chat: { id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
+        messages: [
+          { id: 1, chat_id: 1, role: 'user', content: 'hi', provider_model: 'openai:gpt-x', file_ids: [], attachments: [], created_at: 'c' },
+        ],
+      }),
+    );
+    await api.sendMessage(1, { content: 'hi' });
+    const [, init] = fetchSpy.mock.calls[0];
+    const body = JSON.parse((init as RequestInit).body as string) as Record<string, unknown>;
+    expect('file_ids' in body).toBe(false);
+  });
+
+  it('sendMessage defaults file_ids and attachments to empty arrays', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse({
+        chat: { id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
+        messages: [
+          { id: 1, chat_id: 1, role: 'user', content: 'hi', provider_model: 'openai:gpt-x', created_at: 'c' },
+        ],
+      }),
+    );
+    const result = await api.sendMessage(1, { content: 'hi' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const userMsg = result.value.messages[0];
+    expect(userMsg?.file_ids).toEqual([]);
+    expect(userMsg?.attachments).toEqual([]);
+  });
+
   it('rejects with a generic message when the body has no error field', async () => {
     fetchSpy.mockResolvedValueOnce(new Response('oops', { status: 500 }));
     await expect(api.listChats()).rejects.toThrow('Request failed with status 500');

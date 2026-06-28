@@ -251,6 +251,16 @@ export function ProjectGrid() {
                     </span>
                   </div>
                 </button>
+                <div className={styles.cardLinks}>
+                  <Link
+                    to={`/projects/${p.id}/files`}
+                    data-testid="project-grid-card-files-link"
+                    data-project-id={p.id}
+                    className={styles.cardLink}
+                  >
+                    Files
+                  </Link>
+                </div>
               </li>
             );
           })}

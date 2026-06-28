@@ -187,9 +187,14 @@ router.post('/:id/messages', requireAuth, async (req: Request, res: Response) =>
   }
   const result = await sendMessage(userId, id, parsed.value.content, {
     providerModelOverride: parsed.value.provider_model,
+    fileIds: parsed.value.file_ids,
   });
   if (result.kind === 'not_found') {
     res.status(404).json({ error: 'Chat not found' });
+    return;
+  }
+  if (result.kind === 'file_not_found') {
+    res.status(404).json({ error: 'One or more file_ids do not belong to this chat' });
     return;
   }
   if (result.kind === 'llm_failed') {

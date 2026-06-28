@@ -32,6 +32,8 @@ export class OpenAIResponsesClient implements LlmClient {
       model: req.model,
       input: req.messages.map((m) => ({ role: m.role, content: m.content })),
     };
+    // req.projectFiles is intentionally NOT forwarded; the OpenAI responses
+    // client treats it as opaque context that lives in the chat service only.
     if (req.system) {
       body.instructions = req.system;
     }

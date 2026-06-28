@@ -12,8 +12,12 @@ import authRouter from './auth/router';
 import adminRouter from './admin/router';
 import chatsRouter from './chats/chatsRouter';
 import projectsRouter from './projects/projectsRouter';
+import filesRouter from './projects/filesRouter';
 import { config } from './config';
 import { authRateLimiter, createAuthRateLimiter } from './auth/rateLimit';
+import { ensureProjectFilesRoot } from './projects/tempSweep';
+import { setProjectFileAccess } from './projects/container';
+import { WholeFileProjectFileAccess } from './projects/wholeFileProjectFileAccess';
 
 function createSessionStoreDb(): Database.Database {
   const dir = path.join(process.cwd(), 'backend', 'data');
@@ -31,6 +35,7 @@ export interface CreateAppOptions {
 
 export function createApp(options: CreateAppOptions = {}): Express {
   const app = express();
+  setProjectFileAccess(new WholeFileProjectFileAccess());
 
   app.use(
     helmet({
@@ -106,7 +111,9 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/auth', authRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api/chats', chatsRouter);
+  ensureProjectFilesRoot();
   app.use('/api/projects', projectsRouter);
+  app.use('/api/projects', filesRouter);
 
   return app;
 }

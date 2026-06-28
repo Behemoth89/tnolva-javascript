@@ -180,6 +180,7 @@ export function parseUpdateChatBody(body: unknown): ValidationResult<UpdateChatI
 export interface SendMessageInputParsed {
   content: string;
   provider_model?: string;
+  file_ids?: number[];
 }
 
 export function parseSendMessageBody(body: unknown): ValidationResult<SendMessageInputParsed> {
@@ -206,6 +207,19 @@ export function parseSendMessageBody(body: unknown): ValidationResult<SendMessag
       return { ok: false, error: resolved.error };
     }
     out.provider_model = body.provider_model;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'file_ids')) {
+    if (!Array.isArray(body.file_ids)) {
+      return { ok: false, error: 'file_ids must be an array' };
+    }
+    const ids: number[] = [];
+    for (const id of body.file_ids) {
+      if (typeof id !== 'number' || !Number.isInteger(id) || id <= 0) {
+        return { ok: false, error: 'file_ids entries must be positive integers' };
+      }
+      ids.push(id);
+    }
+    out.file_ids = ids;
   }
   return { ok: true, value: out };
 }

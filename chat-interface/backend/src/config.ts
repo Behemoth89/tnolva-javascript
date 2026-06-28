@@ -2,6 +2,8 @@ export const config = {
   port: Number(process.env.PORT) || 3001,
   nodeEnv: process.env.NODE_ENV ?? 'development',
   databasePath: process.env.DATABASE_PATH ?? 'backend/data/chat.db',
+  projectFilesRoot:
+    process.env.PROJECT_FILES_ROOT ?? 'backend/data/project-files',
   sessionSecret: process.env.SESSION_SECRET ?? '',
   cookieSecure: (process.env.COOKIE_SECURE ?? 'false').toLowerCase() === 'true',
   frontendOrigin:

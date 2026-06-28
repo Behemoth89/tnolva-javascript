@@ -13,12 +13,23 @@ export interface LlmMessage {
   content: string;
 }
 
+export interface LlmRequestProjectFileRef {
+  fileId: number;
+  filename: string;
+  mimeType: string;
+  contentText: string;
+  dropped?: { reason: 'budget' };
+}
+
 export interface LlmRequest {
   model: string;
   system?: string | null;
   messages: ReadonlyArray<LlmMessage>;
   temperature?: number;
   maxTokens?: number;
+  // projectFiles is opaque to provider clients; it is never sent to the upstream
+  // wire. The chat service populates it from ProjectFileAccess.resolveForLlm().
+  projectFiles?: ReadonlyArray<LlmRequestProjectFileRef>;
 }
 
 export type LlmFinishReason =

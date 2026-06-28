@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -200,6 +200,7 @@ describe('ChatPanel page (component)', () => {
 
   afterEach(() => {
     fetchSpy.mockRestore();
+    cleanup();
   });
 
   it('fetches the chat list and the available models on mount', async () => {
