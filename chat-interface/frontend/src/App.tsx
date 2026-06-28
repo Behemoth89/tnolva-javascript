@@ -2,16 +2,16 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import NavBar from './components/NavBar';
 import RouteGuard from './components/RouteGuard';
-import HealthCheck from './components/HealthCheck';
 import BackdropMesh from './components/BackdropMesh';
 import CursorGlow from './components/CursorGlow';
-import ChatPanel from './components/ChatPanel';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
 import AdminLLMProviders from './pages/AdminLLMProviders';
 import AdminLLMProviderModels from './pages/AdminLLMProviderModels';
-import Projects from './pages/Projects';
+import ProjectGrid from './pages/ProjectGrid';
+import ProjectChat from './pages/ProjectChat';
+import ProjectsManage from './pages/ProjectsManage';
 import AdminProjectTemplates from './pages/AdminProjectTemplates';
 
 function App() {
@@ -26,18 +26,42 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
-              path="/chat"
+              path="/"
               element={
                 <RouteGuard>
-                  <ChatPanel />
+                  <Navigate to="/projects" replace />
                 </RouteGuard>
               }
             />
             <Route
-              path="/"
+              path="/chat"
               element={
                 <RouteGuard>
-                  <HealthCheck />
+                  <Navigate to="/projects" replace />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <RouteGuard>
+                  <ProjectGrid />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/projects/manage"
+              element={
+                <RouteGuard>
+                  <ProjectsManage />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/projects/:id"
+              element={
+                <RouteGuard>
+                  <ProjectChat />
                 </RouteGuard>
               }
             />
@@ -62,14 +86,6 @@ function App() {
               element={
                 <RouteGuard>
                   <AdminLLMProviderModels />
-                </RouteGuard>
-              }
-            />
-            <Route
-              path="/projects"
-              element={
-                <RouteGuard>
-                  <Projects />
                 </RouteGuard>
               }
             />

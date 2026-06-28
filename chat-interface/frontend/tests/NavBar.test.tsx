@@ -66,7 +66,7 @@ describe('NavBar admin links (component)', () => {
     renderNav();
 
     await waitFor(() =>
-      expect(screen.getByTestId('nav-chat-link')).toBeInTheDocument(),
+      expect(screen.getByTestId('nav-projects-link')).toBeInTheDocument(),
     );
     expect(screen.queryByTestId('nav-llm-providers-link')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nav-llm-provider-models-link')).not.toBeInTheDocument();

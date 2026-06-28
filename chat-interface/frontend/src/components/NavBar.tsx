@@ -32,19 +32,6 @@ export function NavBar() {
         {isAuthenticated && (
           <li>
             <NavLink
-              to="/chat"
-              data-testid="nav-chat-link"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles['link--active']}` : styles.link
-              }
-            >
-              Chat
-            </NavLink>
-          </li>
-        )}
-        {isAuthenticated && (
-          <li>
-            <NavLink
               to="/projects"
               data-testid="nav-projects-link"
               className={({ isActive }) =>

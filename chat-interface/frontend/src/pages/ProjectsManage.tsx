@@ -13,7 +13,7 @@ import {
   updateProject,
 } from '../api/projects';
 import { type AvailableModel, listAvailableModels } from '../api/chats';
-import styles from './Projects.module.css';
+import styles from './ProjectsManage.module.css';
 
 const NAME_MAX_LENGTH = 80;
 const PROMPT_MAX_LENGTH = 1000;
@@ -62,12 +62,12 @@ function ProjectRow(props: ProjectRowProps) {
   }
 
   return (
-    <tr data-testid="projects-row" data-project-id={project.id}>
+    <tr data-testid="projects-manage-row" data-project-id={project.id}>
       <td>
         {isEditing ? (
           <input
             type="text"
-            data-testid="projects-rename-input"
+            data-testid="projects-manage-rename-input"
             value={renameDraft}
             onChange={(e) => setRenameDraft(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -85,7 +85,7 @@ function ProjectRow(props: ProjectRowProps) {
         ) : (
           <button
             type="button"
-            data-testid="projects-name"
+            data-testid="projects-manage-name"
             onClick={() => onStartRename(project)}
             disabled={isDefault}
             title={isDefault ? 'Default project cannot be renamed' : 'Click to rename'}
@@ -94,7 +94,7 @@ function ProjectRow(props: ProjectRowProps) {
           </button>
         )}
         {isDefault && (
-          <span data-testid="projects-default-badge" className={styles.badge}>
+          <span data-testid="projects-manage-default-badge" className={styles.badge}>
             Default
           </span>
         )}
@@ -110,7 +110,7 @@ function ProjectRow(props: ProjectRowProps) {
           {!isDefault && (
             <button
               type="button"
-              data-testid="projects-set-default"
+              data-testid="projects-manage-set-default"
               onClick={() => void onSetDefault(project)}
               disabled={pendingDefaultId === project.id}
             >
@@ -120,7 +120,7 @@ function ProjectRow(props: ProjectRowProps) {
           {!isDefault && (
             <button
               type="button"
-              data-testid="projects-delete"
+              data-testid="projects-manage-delete"
               className={styles.danger}
               onClick={() => void onDelete(project)}
               disabled={pendingDeleteId === project.id}
@@ -265,21 +265,21 @@ export function Projects() {
   return (
     <section
       aria-labelledby="projects-title"
-      data-testid="projects-page"
+      data-testid="projects-manage-page"
       className={styles.page}
     >
       <h1 id="projects-title" className={styles.title}>Projects</h1>
 
       <form
         onSubmit={handleCreate}
-        data-testid="projects-create-form"
+        data-testid="projects-manage-create-form"
         className={styles.form}
       >
         <label>
           <span>Name</span>
           <input
             type="text"
-            data-testid="projects-create-name"
+            data-testid="projects-manage-create-name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             maxLength={NAME_MAX_LENGTH}
@@ -290,7 +290,7 @@ export function Projects() {
           <span>System prompt</span>
           <input
             type="text"
-            data-testid="projects-create-system-prompt"
+            data-testid="projects-manage-create-system-prompt"
             value={form.system_prompt}
             onChange={(e) => setForm({ ...form, system_prompt: e.target.value })}
             maxLength={PROMPT_MAX_LENGTH}
@@ -300,7 +300,7 @@ export function Projects() {
         <label>
           <span>Default model</span>
           <select
-            data-testid="projects-create-model"
+            data-testid="projects-manage-create-model"
             value={form.model}
             onChange={(e) => setForm({ ...form, model: e.target.value })}
             required
@@ -315,7 +315,7 @@ export function Projects() {
         </label>
         <button
           type="submit"
-          data-testid="projects-create-submit"
+          data-testid="projects-manage-create-submit"
           disabled={submitting || models.length === 0}
         >
           {submitting ? 'Creating…' : 'New project'}
@@ -324,18 +324,18 @@ export function Projects() {
 
       <h2 className={styles.subtitle}>Your projects</h2>
       {loading && (
-        <p data-testid="projects-loading" className={styles.loading}>Loading projects…</p>
+        <p data-testid="projects-manage-loading" className={styles.loading}>Loading projects…</p>
       )}
       {error && (
-        <p role="alert" data-testid="projects-error" className={styles.error}>
+        <p role="alert" data-testid="projects-manage-error" className={styles.error}>
           {error}
         </p>
       )}
       {projects && !loading && !error && projects.length === 0 && (
-        <p data-testid="projects-empty" className={styles.loading}>No projects yet.</p>
+        <p data-testid="projects-manage-empty" className={styles.loading}>No projects yet.</p>
       )}
       {projects && !loading && !error && projects.length > 0 && (
-        <table data-testid="projects-table" className={styles.table}>
+        <table data-testid="projects-manage-table" className={styles.table}>
           <thead>
             <tr>
               <th>Name</th>

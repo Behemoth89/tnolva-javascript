@@ -21,18 +21,20 @@ import {
   updateChat as updateChatApi,
   type AvailableModel,
 } from '../api/chats';
-import { type Project, listProjects } from '../api/projects';
+import type { Project } from '../api/projects';
 
 const TITLE_MAX_LENGTH = 200;
 
-export function ChatPanel() {
+export interface ChatPanelProps {
+  project: Project;
+}
+
+export function ChatPanel({ project }: ChatPanelProps) {
   const [chats, setChats] = useState<Chat[] | null>(null);
   const [activeChatId, setActiveChatId] = useState<number | null>(null);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [projectsLoading, setProjectsLoading] = useState(false);
   const [pending, setPending] = useState(false);
   const [pendingUserMessageId, setPendingUserMessageId] = useState<number | null>(null);
   const [newChatPending, setNewChatPending] = useState(false);
@@ -41,7 +43,6 @@ export function ChatPanel() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const [titlePending, setTitlePending] = useState(false);
-  const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const refreshChats = useCallback(async (): Promise<Chat[]> => {
@@ -51,38 +52,21 @@ export function ChatPanel() {
     return safeList;
   }, []);
 
-  const refreshProjects = useCallback(async (): Promise<Project[]> => {
-    setProjectsLoading(true);
-    try {
-      const list = await listProjects();
-      const safe = Array.isArray(list) ? list : [];
-      setProjects(safe);
-      return safe;
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : 'Failed to load projects');
-      return [];
-    } finally {
-      setProjectsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const [list, models, projectList] = await Promise.all([
+        const [list, models] = await Promise.all([
           refreshChats(),
           listAvailableModels().catch(() => [] as AvailableModel[]),
-          refreshProjects(),
         ]);
         if (cancelled) return;
         setAvailableModels(models);
-        if (list.length > 0 && list[0]) {
-          setActiveChatId(list[0].id);
-        }
-        const defaultProj = projectList.find((p) => p.is_user_default === 1);
-        if (defaultProj) {
-          setActiveProjectId((prev) => prev ?? defaultProj.id);
+        const projectChats = list.filter((c) => c.project_id === project.id);
+        if (projectChats.length > 0 && projectChats[0]) {
+          setActiveChatId(projectChats[0].id);
+        } else {
+          setActiveChatId(null);
         }
       } catch (err) {
         if (cancelled) return;
@@ -92,7 +76,7 @@ export function ChatPanel() {
     return () => {
       cancelled = true;
     };
-  }, [refreshChats, refreshProjects]);
+  }, [project.id, refreshChats]);
 
   useEffect(() => {
     if (activeChatId === null) {
@@ -105,12 +89,14 @@ export function ChatPanel() {
       try {
         const data = await getChatApi(activeChatId);
         if (cancelled) return;
+        if (data.chat && data.chat.project_id !== project.id) {
+          setActiveChat(null);
+          setMessages([]);
+          return;
+        }
         setActiveChat(data.chat);
         setMessages(data.messages);
         setSendError(null);
-        if (data.chat && data.chat.project_id) {
-          setActiveProjectId(data.chat.project_id);
-        }
       } catch (err) {
         if (cancelled) return;
         if (err instanceof Error && /not found/i.test(err.message)) {
@@ -125,10 +111,14 @@ export function ChatPanel() {
     return () => {
       cancelled = true;
     };
-  }, [activeChatId]);
+  }, [activeChatId, project.id]);
 
+  const projectChats = useMemo(
+    () => (chats ?? []).filter((c) => c.project_id === project.id),
+    [chats, project.id],
+  );
   const activeMessages = useMemo(() => messages, [messages]);
-  const defaultModel = activeChat?.default_llm_provider_model ?? '';
+  const defaultModel = activeChat?.default_llm_provider_model ?? project.default_llm_provider_model;
 
   const handleSelectChat = useCallback((id: number) => {
     setIsEditingTitle(false);
@@ -138,6 +128,7 @@ export function ChatPanel() {
   const handleNewChat = useCallback(async () => {
     const fallbackModel =
       activeChat?.default_llm_provider_model ??
+      project.default_llm_provider_model ??
       availableModels[0]?.provider_model ??
       '';
     if (!fallbackModel) {
@@ -146,7 +137,10 @@ export function ChatPanel() {
     }
     setNewChatPending(true);
     try {
-      const created = await createChat({ default_llm_provider_model: fallbackModel });
+      const created = await createChat({
+        default_llm_provider_model: fallbackModel,
+        project_id: project.id,
+      });
       const list = await refreshChats();
       setActiveChatId(created.id);
       if (!list.some((c) => c.id === created.id)) {
@@ -157,7 +151,7 @@ export function ChatPanel() {
     } finally {
       setNewChatPending(false);
     }
-  }, [activeChat, availableModels, chats, refreshChats]);
+  }, [activeChat, availableModels, chats, project.default_llm_provider_model, project.id, refreshChats]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -234,13 +228,14 @@ export function ChatPanel() {
         await deleteChatApi(id);
         const list = await refreshChats();
         if (activeChatId === id) {
-          setActiveChatId(list[0]?.id ?? null);
+          const remaining = list.filter((c) => c.project_id === project.id);
+          setActiveChatId(remaining[0]?.id ?? null);
         }
       } catch (err) {
         setSendError(err instanceof Error ? err.message : 'Failed to delete chat');
       }
     },
-    [activeChatId, refreshChats],
+    [activeChatId, project.id, refreshChats],
   );
 
   const handleStartEditTitle = useCallback(() => {
@@ -327,7 +322,7 @@ export function ChatPanel() {
     >
       <div className={styles.panel__inner}>
         <Sidebar
-          chats={chats ?? []}
+          chats={projectChats}
           activeChatId={activeChatId}
           onSelectChat={handleSelectChat}
           onNewChat={() => {
@@ -376,35 +371,6 @@ export function ChatPanel() {
                 )}
               </button>
             )}
-            {activeChat && (
-              <span
-                data-testid="chat-project-name"
-                className={styles.panel__projectName}
-                aria-label={`Project: ${activeChat.project_name}`}
-              >
-                {activeChat.project_name}
-              </span>
-            )}
-            <label className={styles.panel__model}>
-              <span className={styles.panel__modelLabel}>Project</span>
-              <select
-                data-testid="chat-project-select"
-                value={activeProjectId ?? ''}
-                onChange={(e) => {
-                  setActiveProjectId(Number(e.target.value));
-                }}
-                disabled={projectsLoading || projects.length === 0}
-              >
-                {projectsLoading && <option value="">Loading…</option>}
-                {!projectsLoading && projects.length === 0 && <option value="">(no projects)</option>}
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                    {p.is_user_default === 1 ? ' (default)' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
             <label className={styles.panel__model}>
               <span className={styles.panel__modelLabel}>Model</span>
               <select

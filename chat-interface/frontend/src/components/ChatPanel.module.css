@@ -153,13 +153,3 @@
   color: #ffe7e7;
   font-size: 0.85rem;
 }
-
-.panel__projectName {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.6rem;
-  letter-spacing: 0.02em;
-}

@@ -4,6 +4,7 @@ import type { MockInstance } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '../src/auth/AuthContext';
 import ChatPanel from '../src/components/ChatPanel';
+import type { Project } from '../src/api/projects';
 
 function jsonResponse(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
@@ -42,17 +43,19 @@ interface State {
     model_name: string;
     type: string;
   }>;
-  projects: Array<{
-    id: number;
-    user_id: number;
-    name: string;
-    system_prompt: string | null;
-    default_llm_provider_model: string;
-    is_user_default: number;
-    created_at: string;
-    updated_at: string;
-  }>;
+  project: Project;
 }
+
+const DEFAULT_PROJECT: Project = {
+  id: 1,
+  user_id: 1,
+  name: 'Default',
+  system_prompt: null,
+  default_llm_provider_model: 'openai:gpt-x',
+  is_user_default: 1,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
+};
 
 function renderChatPanel(state: State, overrides: Partial<{
   user: { id: number; email: string; is_admin: number };
@@ -60,12 +63,14 @@ function renderChatPanel(state: State, overrides: Partial<{
   sendResponse: 'ok' | 'fail';
   patchResponse: 'ok' | 'fail';
   initialModel?: string;
+  project?: Project;
 }> = {}) {
   const fetchSpy =
     overrides.fetchSpy ?? vi.spyOn(globalThis, 'fetch') as unknown as FetchSpy;
   const user = overrides.user ?? { id: 1, email: 'a@example.com', is_admin: 0 };
   const sendResponse = overrides.sendResponse ?? 'ok';
   const patchResponse = overrides.patchResponse ?? 'ok';
+  const project = overrides.project ?? state.project;
 
   fetchSpy.mockImplementation(async (input, init) => {
     const url = typeof input === 'string' ? input : (input as URL).toString();
@@ -78,13 +83,14 @@ function renderChatPanel(state: State, overrides: Partial<{
         const body = JSON.parse((init as RequestInit).body as string) as {
           title?: string;
           default_llm_provider_model: string;
+          project_id?: number;
         };
         const newId = 100 + (state.chats.length % 100);
         const newChat: ChatFixture = {
           id: newId,
           user_id: user.id,
-          project_id: 1,
-          project_name: 'Default',
+          project_id: body.project_id ?? project.id,
+          project_name: project.name,
           title: body.title ?? null,
           default_llm_provider_model: body.default_llm_provider_model,
           created_at: new Date().toISOString(),
@@ -96,9 +102,6 @@ function renderChatPanel(state: State, overrides: Partial<{
     }
     if (url === '/api/chats/models') {
       return jsonResponse([...state.availableModels]);
-    }
-    if (url === '/api/projects') {
-      return jsonResponse([...state.projects]);
     }
     const chatMatch = url.match(/^\/api\/chats\/(\d+)$/);
     if (chatMatch && method === 'GET') {
@@ -178,10 +181,10 @@ function renderChatPanel(state: State, overrides: Partial<{
   });
 
   return render(
-    <MemoryRouter initialEntries={['/chat']}>
+    <MemoryRouter initialEntries={[`/projects/${project.id}`]}>
       <AuthProvider>
         <Routes>
-          <Route path="/chat" element={<ChatPanel />} />
+          <Route path="/projects/:id" element={<ChatPanel project={project} />} />
         </Routes>
       </AuthProvider>
     </MemoryRouter>,
@@ -221,18 +224,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     await waitFor(() =>
@@ -247,26 +239,72 @@ describe('ChatPanel page (component)', () => {
     expect(calls).toContain('/api/chats/11');
   });
 
-  it('shows the sidebar empty state when the user has no chats', async () => {
+  it('shows the sidebar empty state when the project has no chats', async () => {
     const state: State = {
       chats: [],
       byChat: new Map(),
       availableModels: [],
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     expect(await screen.findByTestId('chat-sidebar-empty')).toBeInTheDocument();
+  });
+
+  it('only displays chats belonging to the project (filters out chats from other projects)', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 11,
+          user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
+          title: 'mine',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+        {
+          id: 22,
+          user_id: 1,
+          project_id: 99,
+          project_name: 'Other',
+          title: 'other-project-chat',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-02T00:00:00Z',
+        },
+      ],
+      byChat: new Map(),
+      availableModels: [],
+      project: DEFAULT_PROJECT,
+    };
+    renderChatPanel(state, { fetchSpy });
+    const items = await screen.findAllByTestId('sidebar-chat-item');
+    expect(items).toHaveLength(1);
+    expect(items[0]).toHaveTextContent('mine');
+  });
+
+  it('does not auto-select a chat from a different project', async () => {
+    const state: State = {
+      chats: [
+        {
+          id: 22,
+          user_id: 1,
+          project_id: 99,
+          project_name: 'Other',
+          title: 'foreign',
+          default_llm_provider_model: 'openai:gpt-x',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      byChat: new Map(),
+      availableModels: [],
+      project: DEFAULT_PROJECT,
+    };
+    renderChatPanel(state, { fetchSpy });
+    await screen.findByTestId('chat-sidebar-empty');
+    const titleBtn = screen.queryByTestId('chat-title');
+    expect(titleBtn).toBeInTheDocument();
+    expect(titleBtn).toBeDisabled();
+    expect(titleBtn).toHaveTextContent('Untitled chat');
   });
 
   it('shows the message-area empty state for an active chat with no messages', async () => {
@@ -283,18 +321,6 @@ describe('ChatPanel page (component)', () => {
         },
       ],
       byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -303,6 +329,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     expect(await screen.findByTestId('chat-empty-state')).toBeInTheDocument();
@@ -322,18 +349,6 @@ describe('ChatPanel page (component)', () => {
         },
       ],
       byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -342,6 +357,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy, sendResponse: 'ok' });
     await waitFor(() =>
@@ -373,18 +389,6 @@ describe('ChatPanel page (component)', () => {
         },
       ],
       byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -393,6 +397,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy, sendResponse: 'fail' });
     await waitFor(() =>
@@ -424,18 +429,6 @@ describe('ChatPanel page (component)', () => {
         },
       ],
       byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -450,6 +443,7 @@ describe('ChatPanel page (component)', () => {
           type: 'anthropic',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy, patchResponse: 'ok' });
     const select = await screen.findByTestId('chat-model-select');
@@ -464,7 +458,7 @@ describe('ChatPanel page (component)', () => {
     });
   });
 
-  it('create-chat button calls POST /api/chats and switches to the new chat', async () => {
+  it('create-chat button calls POST /api/chats with project_id and switches to the new chat', async () => {
     const state: State = {
       chats: [
         {
@@ -478,18 +472,6 @@ describe('ChatPanel page (component)', () => {
         },
       ],
       byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -498,6 +480,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     const newBtn = await screen.findByTestId('chat-new');
@@ -509,6 +492,10 @@ describe('ChatPanel page (component)', () => {
           (init as RequestInit | undefined)?.method === 'POST',
       );
       expect(post).toBeDefined();
+      const body = JSON.parse((post?.[1] as RequestInit).body as string) as {
+        project_id?: number;
+      };
+      expect(body.project_id).toBe(DEFAULT_PROJECT.id);
     });
   });
 
@@ -525,19 +512,7 @@ describe('ChatPanel page (component)', () => {
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
-      byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      byChat: new Map(),
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -546,6 +521,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     const titleBtn = await screen.findByTestId('chat-title');
@@ -568,19 +544,7 @@ describe('ChatPanel page (component)', () => {
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
-      byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      byChat: new Map(),
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -589,6 +553,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     fireEvent.click(await screen.findByTestId('chat-title'));
@@ -622,19 +587,7 @@ describe('ChatPanel page (component)', () => {
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
-      byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      byChat: new Map(),
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -643,6 +596,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     fireEvent.click(await screen.findByTestId('chat-title'));
@@ -671,19 +625,7 @@ describe('ChatPanel page (component)', () => {
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
-      byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      byChat: new Map(),
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -692,6 +634,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     fireEvent.click(await screen.findByTestId('chat-title'));
@@ -724,19 +667,7 @@ describe('ChatPanel page (component)', () => {
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
-      byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      byChat: new Map(),
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -745,6 +676,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy, patchResponse: 'fail' });
     const titleBtn = await screen.findByTestId('chat-title');
@@ -776,19 +708,7 @@ describe('ChatPanel page (component)', () => {
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
-      byChat: new Map([[11, []]]),
-      projects: [
-        {
-          id: 1,
-          user_id: 1,
-          name: 'Default',
-          system_prompt: null,
-          default_llm_provider_model: 'openai:gpt-x',
-          is_user_default: 1,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-        },
-      ],
+      byChat: new Map(),
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -797,6 +717,7 @@ describe('ChatPanel page (component)', () => {
           type: 'openai_completions',
         },
       ],
+      project: DEFAULT_PROJECT,
     };
     renderChatPanel(state, { fetchSpy });
     const panel = await screen.findByTestId('chat-panel');
