@@ -8,6 +8,7 @@ import {
 import { resolveProviderModel, type ResolvedProvider } from './validation';
 import {
   getChatByIdForUser,
+  getSystemPromptForChat,
   type PublicChat,
 } from './chatsRepo';
 import {
@@ -103,12 +104,14 @@ export async function sendMessage(
 
   const history = listMessagesForChat(chatId);
   const llmMessages = history.map((m) => ({ role: m.role, content: m.content }));
+  const systemPrompt = getSystemPromptForChat(chatId);
 
   try {
     const response = await client.complete(
       {
         model: resolved.modelName,
         messages: llmMessages,
+        system: systemPrompt,
       },
       context,
     );

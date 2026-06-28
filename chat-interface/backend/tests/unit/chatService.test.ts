@@ -17,6 +17,8 @@ import {
   type LlmClient,
   type LLMProviderType,
 } from '../../src/llm/client';
+import { ensureDefaultProject } from '../../src/projects/projectsService';
+import { updateProject } from '../../src/projects/projectsRepo';
 
 const TEST_DB_PATH = ':memory:';
 
@@ -49,8 +51,10 @@ function seedUser() {
 }
 
 function seedChat(userId: number, providerModel: string) {
+  const project = ensureDefaultProject(userId);
   const created = createChat({
     user_id: userId,
+    project_id: project.id,
     title: 'svc',
     default_llm_provider_model: providerModel,
   });
@@ -224,5 +228,65 @@ describe('getChatWithMessagesForUser', () => {
     if (!result) return;
     expect(result.chat.id).toBe(chatId);
     expect(result.messages).toEqual([]);
+  });
+});
+
+describe('chatService.sendMessage system_prompt (unit)', () => {
+  beforeEach(() => {
+    closeDb();
+    initDb(TEST_DB_PATH);
+    seedCatalog();
+  });
+
+  afterAll(() => {
+    closeDb();
+  });
+
+  it('passes the project system_prompt to LlmRequest.system', async () => {
+    const userId = seedUser();
+    const project = ensureDefaultProject(userId);
+    updateProject(project.id, userId, { system_prompt: 'You are concise.' });
+    const chatId = seedChat(userId, 'openai:gpt-x');
+    let capturedSystem: string | null | undefined = '__unset__';
+    const client: LlmClient = {
+      async complete(req) {
+        capturedSystem = req.system;
+        return {
+          text: 'ok',
+          usage: { inputTokens: 0, outputTokens: 0 },
+          finishReason: 'stop',
+          raw: {},
+        };
+      },
+    };
+    const result = await sendMessage(userId, chatId, 'hi', {
+      clientFactory: () => client,
+    });
+    expect(result.kind).toBe('ok');
+    expect(capturedSystem).toBe('You are concise.');
+  });
+
+  it('passes null when the project has no system_prompt', async () => {
+    const userId = seedUser();
+    const project = ensureDefaultProject(userId);
+    updateProject(project.id, userId, { system_prompt: null });
+    const chatId = seedChat(userId, 'openai:gpt-x');
+    let capturedSystem: string | null | undefined = '__unset__';
+    const client: LlmClient = {
+      async complete(req) {
+        capturedSystem = req.system;
+        return {
+          text: 'ok',
+          usage: { inputTokens: 0, outputTokens: 0 },
+          finishReason: 'stop',
+          raw: {},
+        };
+      },
+    };
+    const result = await sendMessage(userId, chatId, 'hi', {
+      clientFactory: () => client,
+    });
+    expect(result.kind).toBe('ok');
+    expect(capturedSystem).toBeNull();
   });
 });

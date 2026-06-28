@@ -42,6 +42,19 @@ export function NavBar() {
             </NavLink>
           </li>
         )}
+        {isAuthenticated && (
+          <li>
+            <NavLink
+              to="/projects"
+              data-testid="nav-projects-link"
+              className={({ isActive }) =>
+                isActive ? `${styles.link} ${styles['link--active']}` : styles.link
+              }
+            >
+              Projects
+            </NavLink>
+          </li>
+        )}
         {isAdmin && (
           <>
             <li>
@@ -75,6 +88,17 @@ export function NavBar() {
                 }
               >
                 LLM models
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin/project-templates"
+                data-testid="nav-project-templates-link"
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles['link--active']}` : styles.link
+                }
+              >
+                Project templates
               </NavLink>
             </li>
           </>

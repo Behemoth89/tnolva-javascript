@@ -17,6 +17,8 @@ type FetchSpy = MockInstance<typeof fetch>;
 interface ChatFixture {
   id: number;
   user_id: number;
+  project_id: number;
+  project_name: string;
   title: string | null;
   default_llm_provider_model: string;
   created_at: string;
@@ -39,6 +41,16 @@ interface State {
     provider_name: string;
     model_name: string;
     type: string;
+  }>;
+  projects: Array<{
+    id: number;
+    user_id: number;
+    name: string;
+    system_prompt: string | null;
+    default_llm_provider_model: string;
+    is_user_default: number;
+    created_at: string;
+    updated_at: string;
   }>;
 }
 
@@ -71,6 +83,8 @@ function renderChatPanel(state: State, overrides: Partial<{
         const newChat: ChatFixture = {
           id: newId,
           user_id: user.id,
+          project_id: 1,
+          project_name: 'Default',
           title: body.title ?? null,
           default_llm_provider_model: body.default_llm_provider_model,
           created_at: new Date().toISOString(),
@@ -82,6 +96,9 @@ function renderChatPanel(state: State, overrides: Partial<{
     }
     if (url === '/api/chats/models') {
       return jsonResponse([...state.availableModels]);
+    }
+    if (url === '/api/projects') {
+      return jsonResponse([...state.projects]);
     }
     const chatMatch = url.match(/^\/api\/chats\/(\d+)$/);
     if (chatMatch && method === 'GET') {
@@ -188,6 +205,8 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
@@ -200,6 +219,18 @@ describe('ChatPanel page (component)', () => {
           provider_name: 'openai',
           model_name: 'gpt-x',
           type: 'openai_completions',
+        },
+      ],
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
         },
       ],
     };
@@ -221,6 +252,18 @@ describe('ChatPanel page (component)', () => {
       chats: [],
       byChat: new Map(),
       availableModels: [],
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
     };
     renderChatPanel(state, { fetchSpy });
     expect(await screen.findByTestId('chat-sidebar-empty')).toBeInTheDocument();
@@ -232,12 +275,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -257,12 +314,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -294,12 +365,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -331,12 +416,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -371,12 +470,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -405,12 +518,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -434,12 +561,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -474,12 +615,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -509,12 +664,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -548,12 +717,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',
@@ -586,12 +769,26 @@ describe('ChatPanel page (component)', () => {
         {
           id: 11,
           user_id: 1,
+          project_id: 1,
+          project_name: 'Default',
           title: 'first',
           default_llm_provider_model: 'openai:gpt-x',
           created_at: '2024-01-01T00:00:00Z',
         },
       ],
       byChat: new Map([[11, []]]),
+      projects: [
+        {
+          id: 1,
+          user_id: 1,
+          name: 'Default',
+          system_prompt: null,
+          default_llm_provider_model: 'openai:gpt-x',
+          is_user_default: 1,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
       availableModels: [
         {
           provider_model: 'openai:gpt-x',

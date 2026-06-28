@@ -58,6 +58,8 @@ describe('chats API client (unit)', () => {
       jsonResponse({
         id: 1,
         user_id: 1,
+        project_id: 9,
+        project_name: 'Default',
         title: 't',
         default_llm_provider_model: 'openai:gpt-x',
         created_at: 'c',
@@ -74,7 +76,7 @@ describe('chats API client (unit)', () => {
 
   it('getChat hits the per-id URL', async () => {
     fetchSpy.mockResolvedValueOnce(
-      jsonResponse({ chat: { id: 1, user_id: 1, title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' }, messages: [] }),
+      jsonResponse({ chat: { id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' }, messages: [] }),
     );
     await api.getChat(1);
     const [url] = fetchSpy.mock.calls[0];
@@ -83,7 +85,7 @@ describe('chats API client (unit)', () => {
 
   it('updateChat PATCHes JSON body', async () => {
     fetchSpy.mockResolvedValueOnce(
-      jsonResponse({ id: 1, user_id: 1, title: 'new', default_llm_provider_model: 'openai:gpt-x', created_at: 'c' }),
+      jsonResponse({ id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: 'new', default_llm_provider_model: 'openai:gpt-x', created_at: 'c' }),
     );
     await api.updateChat(1, { title: 'new' });
     const [url, init] = fetchSpy.mock.calls[0];
@@ -103,7 +105,7 @@ describe('chats API client (unit)', () => {
   it('sendMessage returns the discriminated union on success', async () => {
     fetchSpy.mockResolvedValueOnce(
       jsonResponse({
-        chat: { id: 1, user_id: 1, title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
+        chat: { id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
         messages: [
           { id: 1, chat_id: 1, role: 'user', content: 'hi', provider_model: 'openai:gpt-x', created_at: 'c' },
         ],
@@ -121,7 +123,7 @@ describe('chats API client (unit)', () => {
         {
           error: 'Upstream LLM failed: http',
           chat: {
-            chat: { id: 1, user_id: 1, title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
+            chat: { id: 1, user_id: 1, project_id: 9, project_name: 'Default', title: null, default_llm_provider_model: 'openai:gpt-x', created_at: 'c' },
             messages: [
               { id: 1, chat_id: 1, role: 'user', content: 'hi', provider_model: 'openai:gpt-x', created_at: 'c' },
             ],

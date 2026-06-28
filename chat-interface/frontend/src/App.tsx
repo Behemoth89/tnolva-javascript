@@ -11,6 +11,8 @@ import Register from './pages/Register';
 import Admin from './pages/Admin';
 import AdminLLMProviders from './pages/AdminLLMProviders';
 import AdminLLMProviderModels from './pages/AdminLLMProviderModels';
+import Projects from './pages/Projects';
+import AdminProjectTemplates from './pages/AdminProjectTemplates';
 
 function App() {
   return (
@@ -60,6 +62,22 @@ function App() {
               element={
                 <RouteGuard>
                   <AdminLLMProviderModels />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <RouteGuard>
+                  <Projects />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/admin/project-templates"
+              element={
+                <RouteGuard>
+                  <AdminProjectTemplates />
                 </RouteGuard>
               }
             />

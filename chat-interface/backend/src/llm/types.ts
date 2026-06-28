@@ -15,7 +15,7 @@ export interface LlmMessage {
 
 export interface LlmRequest {
   model: string;
-  system?: string;
+  system?: string | null;
   messages: ReadonlyArray<LlmMessage>;
   temperature?: number;
   maxTokens?: number;

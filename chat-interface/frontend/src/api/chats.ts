@@ -1,6 +1,8 @@
 export interface Chat {
   id: number;
   user_id: number;
+  project_id: number;
+  project_name: string;
   title: string | null;
   default_llm_provider_model: string;
   created_at: string;
@@ -23,6 +25,7 @@ export interface ChatWithMessages {
 export interface CreateChatInput {
   title?: string;
   default_llm_provider_model: string;
+  project_id?: number;
 }
 
 export interface UpdateChatInput {

@@ -57,6 +57,40 @@ export function initDb(databasePath: string): DbHandle {
       ON llm_provider_models(llm_provider_id);
   `);
   handle.exec(`
+    CREATE TABLE IF NOT EXISTS project_templates (
+      id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name                        TEXT    NOT NULL,
+      system_prompt               TEXT,
+      default_llm_provider_model  TEXT    NOT NULL,
+      is_default                  INTEGER NOT NULL DEFAULT 0 CHECK (is_default IN (0,1)),
+      created_at                  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at                  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  handle.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_project_templates_is_default
+      ON project_templates(is_default) WHERE is_default = 1;
+  `);
+  handle.exec(`
+    CREATE TABLE IF NOT EXISTS projects (
+      id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id                     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name                        TEXT    NOT NULL,
+      system_prompt               TEXT,
+      default_llm_provider_model  TEXT    NOT NULL,
+      is_user_default             INTEGER NOT NULL DEFAULT 0 CHECK (is_user_default IN (0,1)),
+      created_at                  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at                  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  handle.exec(`
+    CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+  `);
+  handle.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_user_default
+      ON projects(user_id) WHERE is_user_default = 1;
+  `);
+  handle.exec(`
     CREATE TABLE IF NOT EXISTS chats (
       id                          INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id                     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -82,8 +116,126 @@ export function initDb(databasePath: string): DbHandle {
     CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_id
       ON chat_messages(chat_id);
   `);
+  migrateChatsAddProjectId(handle);
   db = handle;
   return handle;
+}
+
+function hasChatsProjectIdColumn(handle: DbHandle): boolean {
+  const row = handle
+    .prepare("SELECT 1 AS present FROM pragma_table_info('chats') WHERE name = 'project_id'")
+    .get() as { present: number } | undefined;
+  return row?.present === 1;
+}
+
+function hasChatsProjectIdNotNull(handle: DbHandle): boolean {
+  const row = handle
+    .prepare(
+      "SELECT 1 AS present FROM pragma_table_info('chats') WHERE name = 'project_id' AND \"notnull\" = 1",
+    )
+    .get() as { present: number } | undefined;
+  return row?.present === 1;
+}
+
+interface SystemFallbackSource {
+  name: string;
+  default_llm_provider_model: string | null;
+  system_prompt: string | null;
+}
+
+function loadDefaultProjectTemplate(handle: DbHandle): SystemFallbackSource {
+  const row = handle
+    .prepare(
+      'SELECT name, system_prompt, default_llm_provider_model FROM project_templates WHERE is_default = 1 ORDER BY id ASC LIMIT 1',
+    )
+    .get() as
+    | {
+        name: string;
+        system_prompt: string | null;
+        default_llm_provider_model: string;
+      }
+    | undefined;
+  if (row) {
+    return {
+      name: row.name,
+      system_prompt: row.system_prompt,
+      default_llm_provider_model: row.default_llm_provider_model,
+    };
+  }
+  return { name: 'Default', system_prompt: null, default_llm_provider_model: null };
+}
+
+function migrateChatsAddProjectId(handle: DbHandle): void {
+  if (hasChatsProjectIdNotNull(handle)) {
+    handle.exec(`
+      CREATE INDEX IF NOT EXISTS idx_chats_project_id ON chats(project_id);
+    `);
+    return;
+  }
+  if (!hasChatsProjectIdColumn(handle)) {
+    handle.exec(`
+      ALTER TABLE chats ADD COLUMN project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE;
+    `);
+  }
+  const tx = handle.transaction(() => {
+    const template = loadDefaultProjectTemplate(handle);
+    const templateModel = template.default_llm_provider_model ?? '__unresolved__:__unresolved__';
+    const userRows = handle
+      .prepare('SELECT id FROM users')
+      .all() as Array<{ id: number }>;
+    for (const u of userRows) {
+      const existing = handle
+        .prepare(
+          'SELECT id FROM projects WHERE user_id = ? AND is_user_default = 1',
+        )
+        .get(u.id) as { id: number } | undefined;
+      if (!existing) {
+        handle
+          .prepare(
+            `INSERT INTO projects (user_id, name, system_prompt, default_llm_provider_model, is_user_default)
+             VALUES (?, ?, ?, ?, 1)`,
+          )
+          .run(u.id, template.name, template.system_prompt, templateModel);
+      }
+    }
+    handle.exec(`
+      UPDATE chats
+        SET project_id = (
+          SELECT id FROM projects
+           WHERE projects.user_id = chats.user_id
+             AND projects.is_user_default = 1
+        )
+        WHERE project_id IS NULL;
+    `);
+    handle.exec(`
+      CREATE TABLE chats_new (
+        id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id                     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        project_id                  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+        title                       TEXT,
+        default_llm_provider_model  TEXT    NOT NULL,
+        created_at                  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    handle.exec(`
+      INSERT INTO chats_new (id, user_id, project_id, title, default_llm_provider_model, created_at)
+        SELECT id, user_id, project_id, title, default_llm_provider_model, created_at FROM chats;
+    `);
+    handle.exec(`DROP TABLE chats;`);
+    handle.exec(`ALTER TABLE chats_new RENAME TO chats;`);
+    handle.exec(`
+      CREATE INDEX IF NOT EXISTS idx_chats_user_id ON chats(user_id);
+    `);
+    handle.exec(`
+      CREATE INDEX IF NOT EXISTS idx_chats_project_id ON chats(project_id);
+    `);
+  });
+  tx();
+  const violations = handle.pragma('foreign_key_check') as Array<unknown>;
+  if (Array.isArray(violations) && violations.length > 0) {
+    console.error('foreign_key_check violations after migration:', violations);
+    throw new Error('Foreign key violations detected after chats.project_id migration');
+  }
 }
 
 export function getDb(): DbHandle {

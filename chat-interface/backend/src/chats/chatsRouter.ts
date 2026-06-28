@@ -16,6 +16,8 @@ import {
   getChatWithMessagesForUser,
   sendMessage,
 } from './chatService';
+import { getProjectForUser } from '../projects/projectsRepo';
+import { ensureDefaultProject } from '../projects/projectsService';
 
 const router = Router();
 
@@ -80,8 +82,21 @@ router.post('/', requireAuth, (req: Request, res: Response) => {
     res.status(400).json({ error: parsed.error });
     return;
   }
+  let projectId: number;
+  if (typeof parsed.value.project_id === 'number') {
+    const owned = getProjectForUser(parsed.value.project_id, userId);
+    if (!owned) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+    projectId = owned.id;
+  } else {
+    const def = ensureDefaultProject(userId);
+    projectId = def.id;
+  }
   const result = createChat({
     user_id: userId,
+    project_id: projectId,
     title: parsed.value.title,
     default_llm_provider_model: parsed.value.default_llm_provider_model,
   });

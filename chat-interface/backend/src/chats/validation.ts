@@ -80,6 +80,7 @@ export function resolveProviderModel(
 export interface CreateChatInputParsed {
   title: string | null;
   default_llm_provider_model: string;
+  project_id?: number;
 }
 
 export function parseCreateChatBody(body: unknown): ValidationResult<CreateChatInputParsed> {
@@ -110,12 +111,19 @@ export function parseCreateChatBody(body: unknown): ValidationResult<CreateChatI
   if (!resolved.ok) {
     return { ok: false, error: resolved.error };
   }
+  const out: CreateChatInputParsed = {
+    title: typeof title === 'string' ? title.trim() : null,
+    default_llm_provider_model: providerModel,
+  };
+  if (Object.prototype.hasOwnProperty.call(body, 'project_id') && body.project_id !== undefined && body.project_id !== null) {
+    if (typeof body.project_id !== 'number' || !Number.isInteger(body.project_id) || body.project_id <= 0) {
+      return { ok: false, error: 'project_id must be a positive integer' };
+    }
+    out.project_id = body.project_id;
+  }
   return {
     ok: true,
-    value: {
-      title: typeof title === 'string' ? title.trim() : null,
-      default_llm_provider_model: providerModel,
-    },
+    value: out,
   };
 }
 
